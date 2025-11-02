@@ -5,12 +5,12 @@ namespace ShoesShop.Domain.Modules.Users.Enums
     public enum UserGender
     {
         [Description("Male")]
-        Male = 1,
+        Male = 10,
 
         [Description("Female")]
-        Female = 2,
+        Female = 20,
 
         [Description("Others")]
-        Others = 3
+        Others = 30
     }
 }

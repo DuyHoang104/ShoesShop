@@ -1,0 +1,50 @@
+@using Microsoft.Extensions.Options
+@using ShoesShop.Domain.Modules.Products.Dtos
+@model IEnumerable<ProductDto>
+@inject IOptions<CloudinarySettings> CloudinaryConfig
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    var cloudBase = CloudinaryConfig.Value.BaseUrl;
+}
+
+<section class="product_list best_seller">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <div class="section_tittle text-center">
+                    <h2>Best Sellers <span>shop</span></h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row align-items-center justify-content-between">
+            <div class="col-lg-12">
+                <div class="best_product_slider owl-carousel">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            var firstImage = item.Images?.FirstOrDefault()?.Url;
+                            var fullUrl = !string.IsNullOrEmpty(firstImage)
+                                ? firstImage.ToCloudinaryUrl(cloudBase)
+                                : "/images/default.png";
+
+                            <div class="single_product_item">
+                                <img src="@fullUrl" alt="@item.Name" class="img-fluid" style="cursor: pointer;" onclick="window.location='@Url.Action(action: "Detail", "Product", new { id = item.Id })'" />
+                            <div class="single_product_text">
+                                <h4>@item.Name</h4>
+                                <h3>@item.Price.ToString("C0")</h3>
+                            </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-center">No best sellers found.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

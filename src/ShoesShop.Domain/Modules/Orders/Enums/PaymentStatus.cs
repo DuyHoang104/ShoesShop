@@ -5,11 +5,11 @@ namespace ShoesShop.Domain.Modules.Orders.Enums;
 public enum PaymentStatus
 {
     [Description("Unpaid")]
-    Unpaid = 0,
+    Unpaid = 10,
 
     [Description("Paid")]
-    Paid = 1,
+    Paid = 20,
 
     [Description("Failed")]
-    Failed = 2
+    Failed = 30
 }

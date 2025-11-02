@@ -1,0 +1,230 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model ShoesShop.Web.Modules.Order.Dtos.Commands.OrderModalDto
+
+@{
+    ViewData["Title"] = "Order Index";
+    Layout = "~/Modules/Shares/Views/_Layout.cshtml";
+    <script src="https://www.paypal.com/sdk/js?client-id=@ViewBag.PayPalClientId"></script>
+}
+
+<link rel="icon" href="~/assets/product/img/favicon.png">
+<link rel="stylesheet" href="~/assets/product/css/bootstrap.min.css">
+<link rel="stylesheet" href="~/assets/product/css/animate.css">
+<link rel="stylesheet" href="~/assets/product/css/owl.carousel.min.css">
+<link rel="stylesheet" href="~/assets/product/css/nice-select.css">
+<link rel="stylesheet" href="~/assets/product/css/all.css">
+<link rel="stylesheet" href="~/assets/product/css/flaticon.css">
+<link rel="stylesheet" href="~/assets/product/css/themify-icons.css">
+<link rel="stylesheet" href="~/assets/product/css/magnific-popup.css">
+<link rel="stylesheet" href="~/assets/product/css/slick.css">
+<link rel="stylesheet" href="~/assets/product/css/price_rangs.css">
+<link rel="stylesheet" href="~/assets/product/css/style.css">
+<link rel="stylesheet" href="~/assets/css/share.css" asp-append-version="true" />
+
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>Product Checkout</h2>
+                        <p>Home <span>-</span> Shop Single</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="checkout_area padding_top">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <h3>Billing Details</h3>
+
+                <form id="orderForm" asp-action="Checkout" asp-controller="Order" method="post" class="billing_details">
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-check mb-3">
+                        <input asp-for="SameAddress" class="form-check-input" />
+                        <label asp-for="SameAddress" class="form-check-label">Same Your Address?</label>
+                    </div>
+
+                    <div id="shipping-fields" class="row contact_form" novalidate="novalidate">
+                        <div class="col-md-6 form-group p_star">
+                            <input asp-for="ReceiverName" class="form-control" placeholder="Receiver Name" />
+                        </div>
+                        <div class="col-md-6 form-group p_star">
+                            <input asp-for="ReceiverPhone" class="form-control" placeholder="Receiver Number Phone" />
+                        </div>
+
+                        <div class="col-md-12 form-group p_star">
+                            <select asp-for="ReceiverCountry" class="country_select">
+                                <option value="" disabled selected hidden>Select country</option>
+                                <option value="vn">Vietnam</option>
+                                <option value="us">United States</option>
+                                <option value="uk">United Kingdom</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12 form-group p_star">
+                            <input asp-for="ReceiverAddress" class="form-control" placeholder="Address line" />
+                        </div>
+
+                        <div class="col-md-12 form-group p_star">
+                            <input asp-for="ReceiverCity" class="form-control" placeholder="Town / City" />
+                        </div>
+
+                        <div class="col-md-12 form-group">
+                            <textarea asp-for="Note" class="form-control" rows="1" placeholder="Order notes"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 form-group p_star">
+                        <button type="submit" class="cod-btn">
+                            <img src="~/assets/images/cod.png" alt="Cash on Delivery">
+                        </button>
+
+                        <div id="paypal-button-container"></div>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Order summary -->
+            <div class="col-lg-4">
+                <div class="order_box">
+                    @await Html.PartialAsync(partialViewName: "Shared/CartOrder.cshtml", Model.CartItems)
+                    <div class="creat_account form-check">
+                        <input class="form-check-input-order" type="checkbox" id="acceptTerms" name="AcceptTerms" required />
+                        <label for="acceptTerms">I’ve read and accept the </label>
+                        <a style="display: inline;">terms & conditions*</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="~/assets/product/js/popper.min.js"></script>
+<script src="~/assets/product/js/jquery.magnific-popup.js"></script>
+<script src="~/assets/product/js/swiper.min.js"></script>
+<script src="~/assets/product/js/masonry.pkgd.js"></script>
+<script src="~/assets/product/js/owl.carousel.min.js"></script>
+<script src="~/assets/product/js/jquery.nice-select.min.js"></script>
+<script src="~/assets/product/js/slick.min.js"></script>
+<script src="~/assets/product/js/jquery.counterup.min.js"></script>
+<script src="~/assets/product/js/waypoints.min.js"></script>
+<script src="~/assets/product/js/contact.js"></script>
+<script src="~/assets/product/js/jquery.ajaxchimp.min.js"></script>
+<script src="~/assets/product/js/jquery.form.js"></script>
+<script src="~/assets/product/js/jquery.validate.min.js"></script>
+<script src="~/assets/product/js/mail-script.js"></script>
+<script src="~/assets/product/js/stellar.js"></script>
+<script src="~/assets/product/js/price_rangs.js"></script>
+<script src="~/assets/product/js/custom.js"></script>
+<script src="~/assets/js/share.js" asp-append-version="true"></script>
+
+<style>
+.form-check { display: flex; align-items: center; gap: 8px; margin-top: 35px; }
+.form-check-input { width: 12px; height: 12px; cursor: pointer; }
+.form-check-input-order { width: 12px; height: 12px; cursor: pointer; font-size: 16px; }
+.form-check-label { margin-left: 5px; color: #fff; font-size: 14px; cursor: pointer; }
+.cod-btn { background-color: #ffc439; border: 2px solid #ffc439; border-radius: 4px; padding: 6px; width: 100%; height: 53px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .25s ease; }
+.cod-btn img { width: 180px; object-fit: contain; }
+.cod-btn:hover { background-color: #f4b926; box-shadow: 0 3px 6px rgba(0,0,0,.15); }
+#paypal-button-container { width: 100%; margin-top: 15px; }
+.col-lg-8 h3 { color: #fff; }
+keyframes bounce { 0%,100% { transform: translateY(0); } 25% { transform: translateY(-8px); } 50% { transform: translateY(4px); } 75% { transform: translateY(-4px); } }
+.bounce { animation: bounce .5s ease; }
+</style>
+
+<script>
+$(document).ready(function () {
+    const $form = $('#orderForm');
+    const $sameAddress = $('#SameAddress');
+    const $shippingFields = $('#shipping-fields');
+
+    // 🔹 Khi submit (COD hoặc PayPal đều dùng)
+    function appendFormData() {
+        $form.find('input[name="ShippingCost"], input[name="DiscountValue"]').remove();
+        const shippingCost = parseFloat($('#shippingSelect').val()) || 0;
+        const discountValue = parseFloat($('#discountRatio').val()) || 0;
+        $form.append(`<input type="hidden" name="ShippingCost" value="${shippingCost}" />`);
+        $form.append(`<input type="hidden" name="DiscountValue" value="${discountValue}" />`);
+    }
+
+    // 🔸 Submit COD
+    $('.cod-btn').on('click', function (e) {
+        const checkbox = $('#acceptTerms')[0];
+        if (!checkbox.checked) {
+            e.preventDefault();
+            $(checkbox).addClass('bounce');
+            setTimeout(() => $(checkbox).removeClass('bounce'), 600);
+            return;
+        }
+        appendFormData();
+    });
+
+    // 🔸 PayPal Buttons
+    paypal.Buttons({
+        style: {
+            layout: 'vertical',
+            color: 'gold',
+            tagline: false
+        },
+        createOrder: (data, actions) => {
+            const checkbox = $('#acceptTerms')[0];
+            if (!checkbox.checked) {
+                $(checkbox).addClass('bounce');
+                setTimeout(() => $(checkbox).removeClass('bounce'), 600);
+                return;
+            }
+
+            appendFormData();
+
+            return fetch("/Order/create-paypal-order", {
+                method: "POST",
+                body: new FormData($form[0])
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(error => { throw error; });
+                }
+                return response.json();
+            })
+            .then(order => order.id)
+            .catch(error => alert(error.message));
+        },
+        onApprove: (data, actions) => {
+            appendFormData();
+            const formData = new FormData($form[0]);
+
+            return fetch(`/Order/capture-paypal-order?orderId=${data.orderID}`, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(error => { throw error; });
+                }
+                window.location.href = "/Order/PaymentSuccess";
+            })
+            .catch(error => alert(error.message));
+        }
+    }).render('#paypal-button-container');
+
+    // 🔹 Toggle địa chỉ giao hàng
+    function toggleShippingFields() {
+        const $fields = $shippingFields.find('input, select').closest('.form-group');
+        if ($sameAddress.is(':checked')) {
+            $fields.slideUp();
+        } else {
+            $fields.slideDown();
+        }
+    }
+
+    toggleShippingFields();
+    $sameAddress.change(toggleShippingFields);
+});
+</script>

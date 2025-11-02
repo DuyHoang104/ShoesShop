@@ -1,0 +1,626 @@
+@using Microsoft.Extensions.Options
+@using ShoesShop.Domain.Modules.Products.Dtos
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model ProductDto
+@inject IOptions<CloudinarySettings> CloudinaryConfig
+
+@{
+    Layout = "~/Modules/Shares/Views/_Layout.cshtml";
+    ViewData["Title"] = "Detail";
+}
+<link rel="icon" href="~/assets/product/img/favicon.png">
+<link rel="stylesheet" href="~/assets/product/css/bootstrap.min.css">
+<link rel="stylesheet" href="~/assets/product/css/animate.css">
+<link rel="stylesheet" href="~/assets/product/css/owl.carousel.min.css">
+<link rel="stylesheet" href="~/assets/product/css/lightslider.min.css">
+<link rel="stylesheet" href="~/assets/product/css/all.css">
+<link rel="stylesheet" href="~/assets/product/css/flaticon.css">
+<link rel="stylesheet" href="~/assets/product/css/themify-icons.css">
+<link rel="stylesheet" href="~/assets/product/css/magnific-popup.css">
+<link rel="stylesheet" href="~/assets/product/css/style.css">
+<link rel="stylesheet" href="~/assets/css/share.css" asp-append-version="true" />
+
+ <section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="breadcrumb_iner">
+            <div class="breadcrumb_iner_item">
+              <h2>Shop Single</h2>
+              <p>Home <span>-</span> Shop Single</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!--================Single Product Area =================-->
+<div class="product_image_area section_padding">
+    <div class="container">
+      <div class="row s_product_inner justify-content-between">
+        <div class="col-lg-7 col-xl-7">
+          <div class="product_slider_img">
+            <div id="vertical">
+                @if (Model.Images != null && Model.Images.Any())
+                {
+                    foreach (ShoesShop.Domain.Modules.Shares.Dtos.ImageUploadDto img in Model.Images)
+                    { 
+                        var fullUrl = img.Url.ToCloudinaryUrl(CloudinaryConfig.Value.BaseUrl);
+
+                        <div data-thumb="@fullUrl">
+                            <img src="@fullUrl"
+                                alt="@Model.Name"
+                                style="width:500px; height:425px; object-fit:cover; border-radius:10px;" />
+                        </div>
+                    }
+                }
+            </div>
+          </div>
+        </div>
+            <div class="col-lg-5 col-xl-4">
+        <div class="s_product_text">
+            <h3>@Model.Name</h3>
+            <h2>$@Model.Price</h2>
+
+            <ul class="list">
+                <li>
+                    <a class="active">
+                        <span>Categories</span> :
+                        @string.Join(", ", Model.Categories.Select(c => c.Name))
+                    </a>
+                </li>
+
+                <li>
+                    <a> <span>Availability</span> : @Model.Status.ToString()</a>
+                    <a> <span>Brand</span> : @Model.Brand</a>
+                    <a> <span>Color</span> : @Model.Color</a>
+                </li>
+            </ul>
+
+            <p class="card_area">@Model.Description</p>
+
+            <form method="post" asp-controller="Cart" asp-action="AddToCart" id="addToCartForm" data-id="@Model.Id">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <!-- ✅ Size options -->
+            <div class="mb-4 mt-4">
+            <h5 class="fw-bold mb-3" style="color: #ffb300;">Available Sizes:</h5>
+            <div class="d-flex flex-wrap justify-content-start gap-4">
+            @{
+                var allSizes = new[] { "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47"};
+                List<string>? availableSizes = (Model.Sizes ?? "")
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim())
+                    .ToList();
+            }
+
+            @foreach (var size in allSizes)
+            {
+                bool isAvailable = availableSizes.Contains(size);
+                <div class="position-relative size-box @(isAvailable ? "available" : "unavailable")" data-size="@size">
+                    <span>@size</span>
+                    @if (!isAvailable)
+                    {
+                        <span class="size-x">×</span>
+                    }
+                </div>
+            }
+            </div>
+
+                <input type="hidden" name="size" id="selectedSize" />
+                <div class="card_area d-flex justify-content-between align-items-center">
+                    <div class="product_count">
+                        <span class="inumber-decrement"> <i class="ti-minus"></i></span>
+                        <input class="input-number" type="number"  name="quantity" value="1" min="1" max="10" required>
+                        <span class="number-increment"> <i class="ti-plus"></i></span>
+                    </div>
+                    <button type="submit" class="btn_3">Add to cart</button>
+                    <a href="#" class="like_us"><i class="ti-heart"></i></a>
+                </div>
+
+                <div id="sizeError" class="text-danger mt-2" style="display:none; font-weight:600;">
+                    Please select a size before adding to cart!
+                </div>
+            </div>
+            </form>
+        </div>
+    </div>
+  </div>
+<!--================End Single Product Area =================-->
+
+<!--================Product Description Area =================-->
+<section class="product_description_area">
+<div class="container">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+        aria-selected="true">Description</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile"
+        aria-selected="false">Specification</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact"
+        aria-selected="false">Comments</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" id="review-tab" data-toggle="tab" href="#review" role="tab" aria-controls="review"
+        aria-selected="false">Reviews</a>
+    </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <p>
+            @Model.Description
+        </p>
+    </div>
+    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+        <div class="table-responsive">
+        <table class="table">
+            <tbody>
+            <tr>
+                <td>
+                <h5>Width</h5>
+                </td>
+                <td>
+                <h5>128mm</h5>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                <h5>Height</h5>
+                </td>
+                <td>
+                <h5>508mm</h5>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                <h5>Depth</h5>
+                </td>
+                <td>
+                <h5>85mm</h5>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                <h5>Weight</h5>
+                </td>
+                <td>
+                <h5>52gm</h5>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                <h5>Quality checking</h5>
+                </td>
+                <td>
+                <h5>yes</h5>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                <h5>Freshness Duration</h5>
+                </td>
+                <td>
+                <h5>03days</h5>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                <h5>When packeting</h5>
+                </td>
+                <td>
+                <h5>Without touch of hand</h5>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                <h5>Each Box contains</h5>
+                </td>
+                <td>
+                <h5>60pcs</h5>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+        <div class="row">
+        <div class="col-lg-6">
+            <div class="comment_list">
+            <div class="review_item">
+                <div class="media">
+                <div class="d-flex">
+                    <img src="~/assets/product/img/comment/comment_1.png" alt="" />
+                </div>
+                <div class="media-body">
+                    <h4>Blake Ruiz</h4>
+                    <h5>12th Feb, 2017 at 05:56 pm</h5>
+                    <a class="reply_btn" href="#">Reply</a>
+                </div>
+                </div>
+                <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                sed do eiusmod tempor incididunt ut labore et dolore magna
+                aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                ullamco laboris nisi ut aliquip ex ea commodo
+                </p>
+            </div>
+            <div class="review_item">
+                <div class="media">
+                <div class="d-flex">
+                    <img src="~/assets/product/img/comment/comment_3.png" alt="" />
+                </div>
+                <div class="media-body">
+                    <h4>Blake Ruiz</h4>
+                    <h5>12th Feb, 2017 at 05:56 pm</h5>
+                    <a class="reply_btn" href="#">Reply</a>
+                </div>
+                </div>
+                <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                sed do eiusmod tempor incididunt ut labore et dolore magna
+                aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                ullamco laboris nisi ut aliquip ex ea commodo
+                </p>
+            </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="review_box">
+            <h4>Post a comment</h4>
+            <form class="row contact_form" action="contact_process.php" method="post" id="contactForm"
+                novalidate="novalidate">
+                <div class="col-md-12">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Your Full name" />
+                </div>
+                </div>
+                <div class="col-md-12">
+                <div class="form-group">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" />
+                </div>
+                </div>
+                <div class="col-md-12">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="number" name="number" placeholder="Phone Number" />
+                </div>
+                </div>
+                <div class="col-md-12">
+                <div class="form-group">
+                    <textarea class="form-control" name="message" id="message" rows="1"
+                    placeholder="Message"></textarea>
+                </div>
+                </div>
+                <div class="col-md-12 text-right">
+                <button type="submit" value="submit" class="btn_3">
+                    Submit Now
+                </button>
+                </div>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+    <div class="tab-pane fade show active" id="review" role="tabpanel" aria-labelledby="review-tab">
+        <div class="row">
+        <div class="col-lg-6">
+            <div class="row total_rate">
+            <div class="col-6">
+                <div class="box_total">
+                <h5>Overall</h5>
+                <h4>4.0</h4>
+                <h6>(03 Reviews)</h6>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="rating_list">
+                <h3>Based on 3 Reviews</h3>
+                <ul class="list">
+                    <li>
+                    <a href="#">5 Star
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i> 01</a>
+                    </li>
+                    <li>
+                    <a href="#">4 Star
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i> 01</a>
+                    </li>
+                    <li>
+                    <a href="#">3 Star
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i> 01</a>
+                    </li>
+                    <li>
+                    <a href="#">2 Star
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i> 01</a>
+                    </li>
+                    <li>
+                    <a href="#">1 Star
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i> 01</a>
+                    </li>
+                </ul>
+                </div>
+            </div>
+            </div>
+            <div class="review_list">
+            <div class="review_item">
+                <div class="media">
+                <div class="d-flex">
+                    <img src="~/assets/product/img/comment/comment_1.png" alt="" />
+                </div>
+                <div class="media-body">
+                    <h4>Blake Ruiz</h4>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                </div>
+                </div>
+                <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                sed do eiusmod tempor incididunt ut labore et dolore magna
+                aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                ullamco laboris nisi ut aliquip ex ea commodo
+                </p>
+            </div>
+            <div class="review_item">
+                <div class="media">
+                <div class="d-flex">
+                    <img src="~/assets/product/img/comment/comment_2.png" alt="" />
+                </div>
+                <div class="media-body">
+                    <h4>Blake Ruiz</h4>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                </div>
+                </div>
+                <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                sed do eiusmod tempor incididunt ut labore et dolore magna
+                aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                ullamco laboris nisi ut aliquip ex ea commodo
+                </p>
+            </div>
+            <div class="review_item">
+                <div class="media">
+                <div class="d-flex">
+                    <img src="~/assets/product/img/comment/comment_3.png" alt="" />
+                </div>
+                <div class="media-body">
+                    <h4>Blake Ruiz</h4>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                </div>
+                </div>
+                <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                sed do eiusmod tempor incididunt ut labore et dolore magna
+                aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                ullamco laboris nisi ut aliquip ex ea commodo
+                </p>
+            </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="review_box">
+            <h4>Add a Review</h4>
+            <p>Your Rating:</p>
+            <ul class="list">
+                <li>
+                <a href="#">
+                    <i class="fa fa-star"></i>
+                </a>
+                </li>
+                <li>
+                <a href="#">
+                    <i class="fa fa-star"></i>
+                </a>
+                </li>
+                <li>
+                <a href="#">
+                    <i class="fa fa-star"></i>
+                </a>
+                </li>
+                <li>
+                <a href="#">
+                    <i class="fa fa-star"></i>
+                </a>
+                </li>
+                <li>
+                <a href="#">
+                    <i class="fa fa-star"></i>
+                </a>
+                </li>
+            </ul>
+            <p>Outstanding</p>
+            <form class="row contact_form" action="contact_process.php" method="post" novalidate="novalidate">
+                <div class="col-md-12">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="name" placeholder="Your Full name" />
+                </div>
+                </div>
+                <div class="col-md-12">
+                <div class="form-group">
+                    <input type="email" class="form-control" name="email" placeholder="Email Address" />
+                </div>
+                </div>
+                <div class="col-md-12">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="number" placeholder="Phone Number" />
+                </div>
+                </div>
+                <div class="col-md-12">
+                <div class="form-group">
+                    <textarea class="form-control" name="message" rows="1" placeholder="Review"></textarea>
+                </div>
+                </div>
+                <div class="col-md-12 text-right">
+                <button type="submit" value="submit" class="btn_3">
+                    Submit Now
+                </button>
+                </div>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
+</section>
+
+<!--================End Product Description Area =================-->
+
+@* <!-- product_list part start-->
+@await Html.PartialAsync(partialViewName: "~/Modules/Product/Views/Shared/BestSellers.cshtml", ViewBag.BestSellers as IEnumerable<ShoesShop.Domain.Modules.Products.Dtos.ProductDto>)
+<!-- product_list part end--> *@
+
+
+
+<script src="~/assets/product/js/jquery-1.12.1.min.js"></script>
+<script src="~/assets/product/js/popper.min.js"></script>
+<script src="~/assets/product/js/bootstrap.min.js"></script>
+<script src="~/assets/product/js/jquery.magnific-popup.js"></script>
+<script src="~/assets/product/js/lightslider.min.js"></script>
+<script src="~/assets/product/js/masonry.pkgd.js"></script>
+<script src="~/assets/product/js/owl.carousel.min.js"></script>
+<script src="~/assets/product/js/jquery.nice-select.min.js"></script>
+<script src="~/assets/product/js/slick.min.js"></script>
+<script src="~/assets/product/js/swiper.jquery.js"></script>
+<script src="~/assets/product/js/jquery.counterup.min.js"></script>
+<script src="~/assets/product/js/waypoints.min.js"></script>
+<script src="~/assets/product/js/contact.js"></script>
+<script src="~/assets/product/js/jquery.ajaxchimp.min.js"></script>
+<script src="~/assets/product/js/jquery.form.js"></script>
+<script src="~/assets/product/js/jquery.validate.min.js"></script>
+<script src="~/assets/product/js/mail-script.js"></script>
+<script src="~/assets/product/js/stellar.js"></script>
+<script src="~/assets/product/js/theme.js"></script>
+<script src="~/assets/product/js/custom.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+const isLoggedIn = @(User.Identity?.IsAuthenticated.ToString().ToLower() ?? "false");
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("addToCartForm");
+        const selectedSizeInput = document.getElementById("selectedSize");
+        const sizeBoxes = document.querySelectorAll(".size-box");
+
+        // 🧩 Restore previously chosen size (after login)
+        const savedSize = sessionStorage.getItem("selectedSize");
+        if (savedSize) {
+            const box = [...sizeBoxes].find(b => b.dataset.size === savedSize);
+            if (box) {
+                box.classList.add("selected");
+                selectedSizeInput.value = savedSize;
+            }
+            sessionStorage.removeItem("selectedSize");
+        }
+
+        // 🟡 Size selection
+        sizeBoxes.forEach(box => {
+            box.addEventListener("click", () => {
+                if (!box.classList.contains("available")) return;
+
+                // Nếu đang được chọn -> bỏ chọn
+                if (box.classList.contains("selected")) {
+                    box.classList.remove("selected");
+                    selectedSizeInput.value = "";
+                    return;
+                }
+
+                // Nếu chọn size khác -> bỏ chọn size cũ, chọn size mới
+                sizeBoxes.forEach(b => b.classList.remove("selected"));
+                box.classList.add("selected");
+                selectedSizeInput.value = box.dataset.size;
+            });
+        });
+
+
+        // 🧩 Submit event
+        form.addEventListener("submit", async (e) => {
+        const size = selectedSizeInput.value;
+
+        // 1️⃣ Check size
+        if (!size) {
+            e.preventDefault();
+            await Swal.fire({
+                icon: 'info',
+                title: '<span style="font-size: 22px;">Select your size</span>',
+                html: '<div style="font-size: 18px;">Please choose a shoe size before adding to cart!</div>',
+                confirmButtonColor: '#ffb300',
+                confirmButtonText: '<span style="font-size:16px;">OK</span>'
+            });
+            return;
+        }
+
+        // 2️⃣ Check login
+        if (!isLoggedIn) {
+            e.preventDefault();
+            const result = await Swal.fire({
+                icon: 'warning',
+                title: '<span style="font-size: 22px;">You need to log in</span>',
+                html: '<div style="font-size: 18px;">Please log in to continue shopping.</div>',
+                confirmButtonColor: '#ffb300',
+                confirmButtonText: '<span style="font-size:16px;">Go to Login</span>'
+            });
+
+            if (result.isConfirmed) {
+                sessionStorage.setItem("selectedSize", size);
+                const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                window.location.href = `/User/Login?returnUrl=${currentUrl}`;
+            }
+            return;
+        }
+
+        // 3️⃣ Confirm Add to Cart
+        e.preventDefault();
+        const confirmResult = await Swal.fire({
+            icon: 'question',
+            title: '<span style="font-size: 22px;">Add to cart?</span>',
+            html: '<div style="font-size: 18px;">Are you sure you want to add this item to your cart?</div>',
+            showCancelButton: true,
+            confirmButtonText: '<span style="font-size:16px;">Yes, add it!</span>',
+            cancelButtonText: '<span style="font-size:16px;">Cancel</span>',
+            confirmButtonColor: '#ffb300',
+            cancelButtonColor: '#d33'
+        });
+
+        if (confirmResult.isConfirmed) {
+            form.removeEventListener("submit", arguments.callee);
+            form.submit();
+        }
+    });
+});
+</script>
+
+
+    

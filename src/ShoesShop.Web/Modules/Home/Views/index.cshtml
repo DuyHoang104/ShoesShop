@@ -1,0 +1,698 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model IEnumerable<ProductDto>
+@using Microsoft.Extensions.Options
+@using ShoesShop.Domain.Modules.Products.Dtos
+@inject IOptions<CloudinarySettings> CloudinaryConfig
+
+@{
+    ViewData["Title"] = "Home";
+    Layout = "~/Modules/Shares/Views/_Layout.cshtml";
+    var descriptions = new[]
+    {
+        "Engineered for comfort and flexibility all day long. Ideal for both workouts and casual outings.",
+        "Lightweight design meets premium materials. Built for movement, crafted for confidence.",
+        "Classic aesthetics combined with innovative cushioning for smooth, effortless strides.",
+        "From gym sessions to city walks, these sneakers deliver unmatched comfort and grip.",
+        "Minimalist look with maximum performance. Perfect balance between fashion and function.",
+        "Precision-crafted to support every step you take. Durable, breathable, and ready for anything."
+    };
+
+
+    var tags = new[] { "New", "Popular", "Trending", "Limited", "Exclusive" };
+
+    var random = new Random();
+}
+
+<main>
+  <article>
+    <!-- 
+      - #HERO
+    -->
+    <section class="hero cw-text-center" aria-label="home" id="home">
+
+      <ul class="hero-slider" data-hero-slider>
+
+        <li class="slider-item active" data-hero-slider-item>
+
+          <div class="slider-bg">
+            <img src="~/assets/images/background.png" width="1880" height="950" alt="" class="img-cover">
+          </div>
+
+          <p class="label-2 section-subtitle slider-reveal">Tradational & Incredible</p>
+
+          <h1 class="display-1 hero-title slider-reveal">
+            For The Love Of <br>
+            Amazing Shoes
+          </h1>
+
+          <p class="body-2 hero-text slider-reveal">
+            Come with family & feel the joy of Amazing Shoes
+          </p>
+
+          <a asp-action="index" asp-controller="Product" class="cw-btn btn-primary slider-reveal">
+            <span class="text text-1">View Our Shop</span>
+
+            <span class="text text-2" aria-hidden="true">View Our Shop</span>
+          </a>
+
+        </li>
+
+        <li class="slider-item" data-hero-slider-item>
+
+          <div class="slider-bg">
+            <img src="~/assets/images/background1.png" width="1880" height="950" alt="" class="img-cover">
+          </div>
+
+          <p class="label-2 section-subtitle slider-reveal">delightful experience</p>
+
+          <h1 class="display-1 hero-title slider-reveal">
+            Materials Inspired by <br>
+            the Seasons
+          </h1>
+
+          <p class="body-2 hero-text slider-reveal">
+            Experience the joy of quality shoes together.
+          </p>
+
+          <a asp-action="index" asp-controller="Product" class="cw-btn btn-primary slider-reveal">
+            <span class="text text-1">View Our Shop</span>
+
+            <span class="text text-2" aria-hidden="true">View Our Shop</span>
+          </a>
+
+        </li>
+
+        <li class="slider-item" data-hero-slider-item>
+
+          <div class="slider-bg">
+            <img src="~/assets/images/background2.png" width="1880" height="950" alt="" class="img-cover">
+          </div>
+
+          <p class="label-2 section-subtitle slider-reveal">amazing & iconic</p>
+
+          <h1 class="display-1 hero-title slider-reveal">
+            Where every pair <br> tells a story
+          </h1>
+
+          <p class="body-2 hero-text slider-reveal">
+            Share the joy of quality shoes with your family.
+          </p>
+
+          <a asp-action="index" asp-controller="Product" class="cw-btn btn-primary slider-reveal">
+            <span class="text text-1">View Our Shop</span>
+
+            <span class="text text-2" aria-hidden="true">View Our Shop</span>
+          </a>
+
+        </li>
+
+      </ul>
+
+      <button class="slider-btn prev" aria-label="slide to previous" data-prev-btn>
+        <ion-icon name="chevron-back"></ion-icon>
+      </button>
+
+      <button class="slider-btn next" aria-label="slide to next" data-next-btn>
+        <ion-icon name="chevron-forward"></ion-icon>
+      </button>
+
+      <a asp-action="Index" asp-controller="Product" class="hero-btn has-after">
+        <img src="./assets/images/hero-icon.png" width="48" height="48" alt="booking icon">
+
+        <span class="label-2 cw-text-center span">Explore Shop Now</span>
+      </a>
+
+    </section>
+
+    <!-- 
+      - #SERVICE
+    -->
+
+    <section class="section service bg-black-10 cw-text-center" aria-label="service">
+      <div class="cw-container">
+
+        <p class="section-subtitle label-2">Flavors For Royalty</p>
+
+        <h2 class="headline-1 section-title">We Offer Top Notch</h2>
+
+        <p class="section-text">
+          Our shoes combine comfort, durability, and style.
+          From sneakers to formal and sports footwear, each pair is crafted with premium materials to support every step and keep you ahead in fashion. 
+          Perfect for every occasion, they’re made to match your lifestyle.
+        </p>
+
+        <ul class="grid-list">
+
+          <li>
+            <div class="service-card">
+
+              <a href="#" class="has-before hover:shine">
+                <figure class="card-banner img-holder" style="--width: 285; --height: 336;">
+                  <img src="~/assets/images/service-1.jpg" width="285" height="336" loading="lazy" alt="Breakfast"
+                    class="img-cover">
+                </figure>
+              </a>
+
+              <div class="card-content">
+
+                <h3 class="title-4 card-title">
+                  <a href="#">Sneaker</a>
+                </h3>
+
+                <a asp-action="Index" asp-controller="Product" class="btn-text hover-underline label-2">Shop Now</a>
+
+              </div>
+
+            </div>
+          </li>
+
+          <li>
+            <div class="service-card">
+
+              <a href="#" class="has-before hover:shine">
+                <figure class="card-banner img-holder" style="--width: 285; --height: 336;">
+                  <img src="~/assets/images/service-2.jpg" width="285" height="336" loading="lazy" alt="Appetizers"
+                    class="img-cover">
+                </figure>
+              </a>
+
+              <div class="card-content">
+
+                <h3 class="title-4 card-title">
+                  <a href="#">Sandal</a>
+                </h3>
+
+                <a asp-action="Index" asp-controller="Product" class="btn-text hover-underline label-2">Shop Now</a>
+
+              </div>
+
+            </div>
+          </li>
+
+          <li>
+            <div class="service-card">
+
+              <a href="#" class="has-before hover:shine">
+                <figure class="card-banner img-holder" style="--width: 285; --height: 336;">
+                  <img src="~/assets/images/service-3.jpg" width="285" height="336" loading="lazy" alt="Drinks"
+                    class="img-cover">
+                </figure>
+              </a>
+
+              <div class="card-content">
+
+                <h3 class="title-4 card-title">
+                  <a href="#">Derby</a>
+                </h3>
+
+                <a asp-action="Index" asp-controller="Product" class="btn-text hover-underline label-2">Shop Now</a>
+
+              </div>
+
+            </div>
+          </li>
+
+        </ul>
+
+        <img src="~/assets/images/shape-1-removebg-preview.png" width="246" height="412" loading="lazy" alt="shape"
+          class="shape shape-1 move-anim">
+        <img src="~/assets/images/shape-2.png" width="343" height="345" loading="lazy" alt="shape"
+          class="shape shape-2 move-anim">
+
+      </div>
+    </section>
+
+    <!-- 
+      - #ABOUT
+    -->
+
+    <section class="section about cw-text-center" aria-labelledby="about-label" id="about">
+      <div class="cw-container">
+
+        <div class="about-content">
+
+          <p class="label-2 section-subtitle" id="about-label">Our Story</p>
+
+          <h2 class="headline-1 section-title">Every Pair Of Shoes Tells a Story</h2>
+
+          <p class="section-text">
+            Each pair of shoes tells a story—from premium materials to expert craftsmanship. 
+            More than footwear, they reflect your style, capture memories, and turn every step into part of your journey.
+          </p>
+
+          <div class="contact-label">Book Through Call</div>
+
+          <a href="tel:+804001234567" class="body-1 contact-number hover-underline">+80 (400) 123 4567</a>
+
+          <a href="#" class="cw-btn btn-primary">
+            <span class="text text-1">Read More</span>
+
+            <span class="text text-2" aria-hidden="true">Read More</span>
+          </a>
+
+        </div>
+
+        <figure class="about-banner">
+
+          <img src="~/assets/images/about-banner.jpg" width="570" height="570" loading="lazy" alt="about banner"
+            class="w-100" data-parallax-item data-parallax-speed="1">
+
+          <div class="abs-img abs-img-1 has-before" data-parallax-item data-parallax-speed="1.75">
+            <img src="~/assets/images/about-abs-image.jpg" width="285" height="285" loading="lazy" alt=""
+              class="w-100">
+          </div>
+
+          <div class="abs-img abs-img-2 has-before">
+            <img src="~/assets/images/badge-2.png" width="133" height="134" loading="lazy" alt="">
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 
+      - #SPECIAL DISH
+    -->
+
+    <section class="special-dish cw-text-center" aria-labelledby="dish-label">
+
+      <div class="special-dish-banner">
+        <img src="~/assets/images/special-dish-banner.jpg" width="940" height="900" loading="lazy" alt="special Product"
+          class="img-cover">
+      </div>
+
+      <div class="special-dish-content bg-black-10">
+        <div class="cw-container">
+
+          <img src="~/assets/images/badge-1.png" width="28" height="41" loading="lazy" alt="badge" class="abs-img">
+
+          <p class="section-subtitle label-2">Special Product</p>
+
+          <h2 class="headline-1 section-title">New Balance 530</h2>
+
+          <p class="section-text">
+          The New Balance 530 combines classic running heritage with modern style, offering lightweight cushioning and breathable comfort. 
+          Versatile and retro-inspired, it’s a timeless sneaker that delivers performance and fashion for everyday wear.
+          </p>
+
+          <div class="wrapper">
+            <del class="del body-3">$400.00</del>
+
+            <span class="span body-1">$200.00</span>
+          </div>
+
+          <a asp-action="Index" asp-controller="Product" class="cw-btn btn-primary">
+            <span class="text text-1">View All Shop</span>
+
+            <span class="text text-2" aria-hidden="true">View All Menu</span>
+          </a>
+
+        </div>
+      </div>
+        <img src="./assets/images/shape-9.png" width="351" height="462" loading="lazy" alt="" class="shape shape-2">
+
+    </section>
+    <!-- 
+      - #MENU
+    -->
+
+    <section class="section menu" aria-label="menu-label" id="menu">
+      <div class="cw-container">
+
+        <p class="section-subtitle cw-text-center label-2">Special Selection</p>
+
+        <h2 class="headline-1 section-title cw-text-center">Best Products</h2>
+
+        <ul class="grid-list">
+          @foreach (var item in Model.Take(6))
+          {
+              var desc = descriptions[random.Next(descriptions.Length)];
+
+              // ✅ Lấy ảnh đầu tiên, nếu không có thì dùng ảnh mặc định
+              var firstImage = item.Images?.FirstOrDefault()?.Url ?? "/images/default.png";
+
+              // ✅ Nếu ảnh không bắt đầu bằng http thì ghép base Cloudinary
+              var displayImage = !string.IsNullOrEmpty(firstImage) && !firstImage.StartsWith("http")
+                  ? firstImage.ToCloudinaryUrl(CloudinaryConfig.Value.BaseUrl)
+                  : firstImage;
+
+              <li>
+                  <div class="menu-card hover:card">
+
+                      <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
+                          <img src="@displayImage" width="100" height="100" loading="lazy"
+                              alt="@item.Name" class="img">
+                      </figure>
+
+                      <div>
+                          <div class="title-wrapper">
+                              <h3 class="title-3">
+                                  <a class="card-title"
+                                    asp-action="Detail"
+                                    asp-controller="Product"
+                                    asp-route-id="@item.Id">
+                                      @item.Name
+                                  </a>
+                              </h3>
+
+                              <span class="span title-2">$@item.Price</span>
+                          </div>
+
+                          <p class="card-text label-1">@desc</p>
+                      </div>
+
+                  </div>
+              </li>
+          }
+
+        </ul>
+
+        <p class="menu-text cw-text-center">
+          During winter daily from <span class="span">7:00 pm</span> to <span class="span">9:00 pm</span>
+        </p>
+
+        <a asp-action="Index" asp-controller="Product" class="cw-btn btn-primary">
+          <span class="text text-1">View All Shop</span>
+
+          <span class="text text-2" aria-hidden="true">View All Shop</span>
+        </a>
+
+        <img src="~/assets/images/shape-5.png" width="921" height="1036" loading="lazy" alt="shape"
+          class="shape shape-2 move-anim">
+        <img src="~/assets/images/shape-6.png" width="343" height="345" loading="lazy" alt="shape"
+          class="shape shape-3 move-anim">
+
+      </div>
+    </section>
+
+    <!-- 
+      - #TESTIMONIALS
+    -->
+
+    <section class="section testi cw-text-center has-bg-image"
+      style="background-image: url('./assets/images/testimonial-bg.png')" aria-label="testimonials">
+      <div class="cw-container">
+
+        <div class="quote">”</div>
+
+        <p class="headline-2 testi-text">
+          Super comfortable and lightweight perfect for all-day wear. The design is stylish too!
+        </p>
+
+        <div class="wrapper">
+          <div class="separator"></div>
+          <div class="separator"></div>
+          <div class="separator"></div>
+        </div>
+
+        <div class="profile">
+          <img src="~/assets/images/testi-avatar.jpg" width="100" height="100" loading="lazy" alt="Sam Jhonson"
+            class="img">
+
+          <p class="label-2 profile-name">Sam Jhonson</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 
+      - #RESERVATION
+    -->
+    
+    <section class="reservation" aria-labelledby="order-label" id="reservation">
+      <div class="cw-container">
+
+        <div class="form reservation-form bg-black-10" aria-labelledby="order-label" id="order">
+
+          <form action="" class="form-left">
+
+            <h2 class="headline-1 cw-text-center">Order Your Shoes</h2>
+
+            <p class="form-text cw-text-center">
+              Need help? Call us at <a href="tel:+88123123456" class="link">+88-123-123456</a>
+              or fill out the order form below
+            </p>
+
+            <div class="input-wrapper">
+              <input type="text" name="name" placeholder="Full Name" autocomplete="off" class="input-field">
+
+              <input type="tel" name="phone" placeholder="Phone Number" autocomplete="off" class="input-field">
+            </div>
+
+            <input type="email" name="email" placeholder="Email Address" autocomplete="off" class="input-field">
+
+            <div class="input-wrapper">
+
+              <div class="icon-wrapper">
+                <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
+                <select name="product" class="input-field">
+                  <option value="">Select Shoe Model</option>
+                  <option value="nike">Nike Air Max</option>
+                  <option value="adidas">Adidas Ultraboost</option>
+                  <option value="puma">Puma RS-X</option>
+                  <option value="vans">Vans Old Skool</option>
+                  <option value="converse">Converse Chuck 70</option>
+                </select>
+                <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
+              </div>
+
+              <div class="icon-wrapper">
+                <ion-icon name="color-palette-outline" aria-hidden="true"></ion-icon>
+                <select name="color" class="input-field">
+                  <option value="">Select Color</option>
+                  <option value="black">Black</option>
+                  <option value="white">White</option>
+                  <option value="red">Red</option>
+                  <option value="blue">Blue</option>
+                  <option value="gray">Gray</option>
+                </select>
+                <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
+              </div>
+
+              <div class="icon-wrapper">
+                <ion-icon name="resize-outline" aria-hidden="true"></ion-icon>
+                <select name="size" class="input-field">
+                  <option value="">Select Size</option>
+                  <option value="38">38</option>
+                  <option value="39">39</option>
+                  <option value="40">40</option>
+                  <option value="41">41</option>
+                  <option value="42">42</option>
+                  <option value="43">43</option>
+                  <option value="44">44</option>
+                </select>
+                <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
+              </div>
+            <select name="quantity" class="input-field" required>
+              <option value="" selected disabled>Select Quantity</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+          </select>
+
+
+            </div>
+          
+            <textarea name="address" placeholder="Shipping Address" autocomplete="off" class="input-field"></textarea>
+
+            <button type="submit" class="cw-btn btn-secondary">
+              <span class="text text-1">Place Order</span>
+              <span class="text text-2" aria-hidden="true">Place Order</span>
+            </button>
+
+          </form>
+
+          <div class="form-right cw-text-center" style="background-image: url('./assets/images/form-pattern.png')">
+
+            <h2 class="headline-1 cw-text-center">Contact Us</h2>
+
+            <p class="contact-label">Order Support</p>
+            <a href="tel:+88123123456" class="body-1 contact-number hover-underline">+88-123-123456</a>
+
+            <div class="separator"></div>
+
+            <p class="contact-label">Our Store</p>
+            <address class="body-4">
+              123 Ngo Quyen St, Da Nang City <br>
+              Viet Nam
+            </address>
+
+            <p class="contact-label">Opening Hours</p>
+            <p class="body-4">
+              Monday - Sunday <br>
+              8:00 am - 9:00 pm
+            </p>
+
+            <p class="contact-label">Email</p>
+            <p class="body-4">
+              order@arrisd.com
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- 
+      - #FEATURES
+    -->
+
+    <section class="section features cw-text-center" aria-label="features">
+      <div class="cw-container">
+
+        <p class="section-subtitle label-2">Why Choose Us</p>
+
+        <h2 class="headline-1 section-title">Our Strength</h2>
+
+        <ul class="grid-list">
+
+          <li class="feature-item">
+            <div class="feature-card">
+
+              <div class="card-icon">
+                <img src="~/assets/images/features-icon-1.png" width="100" height="80" loading="lazy" alt="icon">
+              </div>
+
+              <h3 class="title-2 card-title">Good Cooperation</h3>
+
+              <p class="label-1 card-text">Good cooperation builds trust—just like our shoes build comfort with every step.</p>
+
+            </div>
+          </li>
+
+          <li class="feature-item">
+            <div class="feature-card">
+
+              <div class="card-icon">
+                <img src="~/assets/images/features-icon-2.png" width="100" height="80" loading="lazy" alt="icon">
+              </div>
+
+              <h3 class="title-2 card-title">Fresh Environment</h3>
+
+              <p class="label-1 card-text">We prioritize a fresh and clean environment, ensuring a pleasant experience for all our customers.</p>
+
+            </div>
+          </li>
+
+          <li class="feature-item">
+            <div class="feature-card">
+
+              <div class="card-icon">
+                <img src="~/assets/images/features-icon-3.png" width="100" height="80" loading="lazy" alt="icon">
+              </div>
+
+              <h3 class="title-2 card-title">Skilled Shoemaker</h3>
+
+              <p class="label-1 card-text">Our shoemakers blend tradition and modern techniques to craft quality footwear.</p>
+
+            </div>
+          </li>
+
+          <li class="feature-item">
+            <div class="feature-card">
+
+              <div class="card-icon">
+                <img src="~/assets/images/features-icon-4.png" width="100" height="80" loading="lazy" alt="icon">
+              </div>
+
+              <h3 class="title-2 card-title">Event & Party</h3>
+
+              <p class="label-1 card-text">Good cooperation builds trust—just like our shoes build comfort with every step.</p>
+
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+    <!-- 
+      - #EVENT
+    -->
+    <section class="section event bg-black-10" aria-label="event">
+      <div class="cw-container">
+
+        <p class="section-subtitle label-2 cw-text-center">Recent Updates</p>
+
+        <h2 class="section-title headline-1 cw-text-center">Upcoming Event</h2>
+
+        <ul class="grid-list">
+
+          <li>
+            <div class="event-card has-before hover:shine">
+
+              <div class="card-banner img-holder" style="--width: 350; --height: 450;">
+                <img src="~/assets/images/event-1.jpg" width="350" height="450" loading="lazy"
+                  alt="Flavour so good you’ll try to eat with your eyes." class="img-cover">
+
+                <time class="publish-date label-2" datetime="2025-09-15">15/09/2025</time>
+              </div>
+
+              <div class="card-content">
+                <p class="card-subtitle label-2 cw-text-center">Adidas Event</p>
+
+                <h3 class="card-title title-2 cw-text-center">
+                  Style so fresh you’ll feel unstoppable with every step.                  
+                </h3>
+              </div>
+
+            </div>
+          </li>
+
+          <li>
+            <div class="event-card has-before hover:shine">
+
+              <div class="card-banner img-holder" style="--width: 350; --height: 450;">
+                <img src="~/assets/images/event-2.jpg" width="350" height="450" loading="lazy"
+                  alt="Flavour so good you’ll try to eat with your eyes." class="img-cover">
+
+                <time class="publish-date label-2" datetime="2025-09-08">08/09/2025</time>
+              </div>
+
+              <div class="card-content">
+                <p class="card-subtitle label-2 cw-text-center">Nike Event</p>
+
+                <h3 class="card-title title-2 cw-text-center">
+                  Comfort so smooth it feels like walking on air.                  
+                </h3>
+              </div>
+
+            </div>
+          </li>
+
+          <li>
+            <div class="event-card has-before hover:shine">
+
+              <div class="card-banner img-holder" style="--width: 350; --height: 450;">
+                <img src="~/assets/images/event-3.jpg" width="350" height="450" loading="lazy"
+                  alt="Flavour so good you’ll try to eat with your eyes." class="img-cover">
+
+                <time class="publish-date label-2" datetime="2025-09-03">03/09/2025</time>
+              </div>
+
+              <div class="card-content">
+                <p class="card-subtitle label-2 cw-text-center">New Balance Event</p>
+
+                <h3 class="card-title title-2 cw-text-center">
+                  Design so bold it turns every street into your runway.
+                </h3>
+              </div>
+
+            </div>
+          </li>
+
+        </ul>
+
+        <a href="#" class="cw-btn btn-primary">
+          <span class="text text-1">View Our Blog</span>
+
+          <span class="text text-2" aria-hidden="true">View Our Blog</span>
+        </a>
+
+      </div>
+    </section>
+
+  </article>
+</main>

@@ -15,9 +15,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(e => e.DateOfBirth).HasField("_dateOfBirth").IsRequired();
         builder.Property(e => e.Email).HasField("_email").HasMaxLength(100).IsRequired();
         builder.Property(e => e.Phone).HasField("_phone").HasMaxLength(20);
-        builder.Property(e => e.Status).HasField("_status");
-        builder.Property(e => e.Gender).HasField("_gender");
-
+        builder.Property(e => e.Role).HasField("_role").HasConversion<string>().HasMaxLength(20).IsRequired();
+        builder.Property(e => e.Gender).HasField("_gender").HasConversion<string>().HasMaxLength(20).IsRequired();
+        builder.Property(e => e.Status).HasField("_status").HasConversion<string>().HasMaxLength(20).IsRequired();
+        builder.Property(e => e.AvatarUrl).HasField("_avatarUrl").HasMaxLength(2048);
+        
         builder.HasMany(e => e.Addresses).WithOne(e => e.User).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(e => e.Orders).WithOne(e => e.User).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(e => e.CartItems).WithOne(e => e.User).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);

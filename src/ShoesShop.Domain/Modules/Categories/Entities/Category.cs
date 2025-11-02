@@ -15,9 +15,9 @@ public class Category : EntityAuditLog<int>
             {
                 throw new ArgumentException("Name cannot be empty or whitespace.", nameof(Name));
             }
-                if (value.Length > 100)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(Name), "Name cannot exceed 100 characters.");
+            if (value.Length > 100)
+            {
+                throw new ArgumentOutOfRangeException(nameof(Name), "Name cannot exceed 100 characters.");
             }
 
             _name = value;

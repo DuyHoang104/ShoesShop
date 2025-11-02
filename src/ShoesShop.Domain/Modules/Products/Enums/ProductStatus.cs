@@ -2,8 +2,8 @@ namespace ShoesShop.Domain.Modules.Products.Enums;
 
 public enum ProductStatus
 {
-    Active = 0,
-    Inactive = 1,
-    OutOfStock = 2,
-    Discontinued = 3
-} 
+    Active = 10,
+    Inactive = 20,
+    OutOfStock = 30,
+    Discontinued = 40
+}

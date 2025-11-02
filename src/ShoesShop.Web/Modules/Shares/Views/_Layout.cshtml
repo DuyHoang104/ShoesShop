@@ -1,0 +1,379 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using System.Security.Claims
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+  var currentPath = Context.Request.Path.Value?.ToLower() ?? "";
+  var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arrisd - Amazing & Incredible Shoes</title>
+  <meta name="title" content="Arrisd - Amazing & Incredible Shoes">
+  <meta name="description" content="This is a Shoes html template made by codewithsadee">
+  <link rel="shortcut icon" href="~/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Forum&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="~/assets/css/styles.css">
+
+  <!-- 
+    - preload images
+  -->
+  <link rel="preload" as="image" href="~/assets/images/hero-slider-1.jpg">
+  <link rel="preload" as="image" href="~/assets/images/hero-slider-2.jpg">
+  <link rel="preload" as="image" href="~/assets/images/hero-slider-3.jpg">
+
+</head>
+
+<body id="top">
+
+  <!-- 
+    - #PRELOADER
+  -->
+
+  <div class="preload" data-preaload>
+    <div class="circle"></div>
+    <p class="text">Arrisd</p>
+  </div>
+
+  <!-- 
+    - #TOP BAR
+  -->
+
+  <div class="topbar">
+    <div class="cw-container">
+
+      <address class="topbar-item">
+        <div class="cw-icon">
+          <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+        </div>
+
+        <span class="span">
+          Ngo Quyen St, Da Nang City, Vietnam
+        </span>
+      </address>
+
+      <div class="separator"></div>
+
+      <div class="topbar-item item-2">
+        <div class="cw-icon">
+          <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+        </div>
+
+        <span class="span">Daily : 8.00 am to 10.00 pm</span>
+      </div>
+
+      <a href="tel:+11234567890" class="topbar-item link">
+        <div class="cw-icon">
+          <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
+        </div>
+
+        <span class="span">+1 123 456 7890</span>
+      </a>
+
+      <div class="separator"></div>
+
+      <a href="mailto:Order@arrisd.com" class="topbar-item link">
+        <div class="cw-icon">
+          <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
+        </div>
+
+        <span class="span">Order@arrisd.com</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- 
+    - #HEADER
+  -->
+
+  <header class="cw-header" data-header>
+    <div class="cw-container">
+      <a class="logo" asp-action="Index" asp-controller="Home">
+        <img src="~/assets/images/logo.png" width="160" height="50" alt="Arrisd - Home">
+      </a>
+
+      <nav class="cw-navbar" data-navbar>
+
+        <button class="close-btn" aria-label="close menu" data-nav-toggler>
+          <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+        </button>
+
+        <a href="#" class="logo">
+          <img src="~/assets/images/logo.png" width="160" height="50" alt="Arrisd - Home">
+        </a>
+
+        <ul class="navbar-list">
+          <li class="navbar-item">
+            @if (currentPath.Contains("/home") || currentPath == "/")
+            {
+                <a href="#home" class="navbar-link hover-underline active">
+                    <div class="separator"></div>
+                    <span class="span">Home</span>
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Home" asp-action="Index" class="navbar-link hover-underline">
+                    <div class="separator"></div>
+                    <span class="span">Home</span>
+                </a>
+            }
+        </li>
+
+        <!-- SHOP -->
+        <li class="navbar-item">
+            @if (currentPath.Contains("/home") || currentPath == "/")
+            {
+                <a href="#menu" class="navbar-link hover-underline">
+                    <div class="separator"></div>
+                    <span class="span">Shop</span>
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Product" asp-action="Index" class="navbar-link hover-underline">
+                    <div class="separator"></div>
+                    <span class="span">Shop</span>
+                </a>
+            }
+        </li>
+
+        <!-- ABOUT US -->
+        <li class="navbar-item">
+            @if (currentPath.Contains("/home") || currentPath == "/")
+            {
+                <a href="#about" class="navbar-link hover-underline">
+                    <div class="separator"></div>
+                    <span class="span">About Us</span>
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Home" asp-action="Index" asp-fragment="about" class="navbar-link hover-underline">
+                    <div class="separator"></div>
+                    <span class="span">About Us</span>
+                </a>
+            }
+        </li>
+
+        <!-- CONTACT -->
+        <li class="navbar-item">
+            @if (currentPath.Contains("/home") || currentPath == "/")
+            {
+                <a href="#reservation" class="navbar-link hover-underline">
+                    <div class="separator"></div>
+                    <span class="span">Contact</span>
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Home" asp-action="Index" asp-fragment="reservation" class="navbar-link hover-underline">
+                    <div class="separator"></div>
+                    <span class="span">Contact</span>
+                </a>
+            }
+        </li>
+
+        <!-- CART -->
+        <li class="navbar-item">
+            <a asp-controller="Cart" asp-action="Index" class="navbar-link hover-underline">
+                <div class="separator"></div>
+                <span class="span">Cart</span>
+            </a>
+        </li>
+
+         <!-- Order -->
+        <li class="navbar-item">
+            <a asp-controller="Order" asp-action="Checkout" class="navbar-link hover-underline">
+                <div class="separator"></div>
+                <span class="span">Order</span>
+            </a>
+        </li>
+
+        </ul>
+
+        <div class="cw-text-center">
+          <p class="headline-1 navbar-title">Visit Us</p>
+
+          <address class="body-4">
+            Da Nang City, <br>
+            Vietnam
+          </address>
+
+          <p class="body-4 navbar-text">Open: 9.30 am - 2.30pm</p>
+
+          <a href="mailto:Order@arrisd.com" class="body-4 sidebar-link">Order@arrisd.com</a>
+
+          <div class="separator"></div>
+
+          <p class="contact-label">Order Request</p>
+
+          <a href="tel:+88123123456" class="body-1 contact-number hover-underline">
+            +88-123-123456
+          </a>
+        </div>
+
+      </nav>
+        @if (string.IsNullOrEmpty(userId))
+        {
+          <a class="cw-btn btn-secondary" asp-action="Index" asp-controller="User">
+              <span class="text text-1">Login Now</span>
+            <span class="text text-2" aria-hidden="true" data-text="Login Now">Login Now</span>
+          </a>
+        }
+        else
+        {
+          <a class="cw-btn btn-secondary" asp-action="Logout" asp-controller="User">
+            <span class="text text-1">Logout</span>
+
+            <span class="text text-2" aria-hidden="true" data-text="Logout">Logout</span>
+          </a>
+        }
+      <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
+        <span class="line line-1"></span>
+        <span class="line line-2"></span>
+        <span class="line line-3"></span>
+      </button>
+
+      <div class="overlay" data-nav-toggler data-overlay></div>
+
+    </div>
+  </header>
+    @RenderBody()
+
+
+
+  <footer class="footer section has-bg-image cw-text-center"
+    style="background-image: url('./assets/images/footer-bg.png')">
+    <div class="cw-container">
+
+      <div class="footer-top grid-list">
+
+        <div class="footer-brand has-before has-after">
+
+          <a href="#" class="logo">
+            <img src="~/assets/images/logo.png" width="160" height="50" loading="lazy" alt="Shoes Shop">
+          </a>
+
+          <address class="body-4">
+            Ngo Quyen St, Da Nang City, Vietnam
+          </address>
+
+          <a href="mailto:booking@arrisd.com" class="body-4 contact-link">booking@arrisd.com</a>
+
+          <a href="tel:+88123123456" class="body-4 contact-link">Booking Request : +88-123-123456</a>
+
+          <p class="body-4">
+            Open : 09:00 am - 01:00 pm
+          </p>
+
+          <div class="wrapper">
+            <div class="separator"></div>
+            <div class="separator"></div>
+            <div class="separator"></div>
+          </div>
+
+          <p class="title-1">Get News & Offers</p>
+
+          <p class="label-1">
+            Subscribe us & Get <span class="span">25% Off.</span>
+          </p>
+
+          <form action="" class="input-wrapper">
+            <div class="icon-wrapper">
+              <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
+
+              <input type="email" name="email_address" placeholder="Your email" autocomplete="off" class="input-field" style="display: block;">
+            </div>
+
+            <button type="submit" class="cw-btn btn-secondary">
+              <span class="text text-1">Subscribe</span>
+
+              <span class="text text-2" aria-hidden="true">Subscribe</span>
+            </button>
+          </form>
+
+        </div>
+
+        <ul class="footer-list">
+
+          <li>
+            <a href="#" class="label-2 footer-link hover-underline">Home</a>
+          </li>
+
+          <li>
+            <a href="#" class="label-2 footer-link hover-underline">Shop</a>
+          </li>
+
+          <li>
+            <a href="#" class="label-2 footer-link hover-underline">About Us</a>
+          </li>
+
+          <li>
+            <a href="#" class="label-2 footer-link hover-underline">Contact</a>
+          </li>
+
+           <li>
+            <a href="#" class="label-2 footer-link hover-underline">Cart</a>
+          </li>
+
+        </ul>
+
+        <ul class="footer-list">
+
+          <li>
+            <a href="#" class="label-2 footer-link hover-underline">Facebook</a>
+          </li>
+
+          <li>
+            <a href="#" class="label-2 footer-link hover-underline">Instagram</a>
+          </li>
+
+          <li>
+            <a href="#" class="label-2 footer-link hover-underline">Twitter</a>
+          </li>
+
+          <li>
+            <a href="#" class="label-2 footer-link hover-underline">Youtube</a>
+          </li>
+
+          <li>
+            <a href="#" class="label-2 footer-link hover-underline">Google Map</a>
+          </li>
+
+        </ul>
+
+      </div>
+
+      <div class="footer-bottom">
+
+        <p class="copyright">
+          &copy; 2025 Arrisd. All Rights Reserved | Crafted by <a href="https://github.com/DuyHoang104"
+            target="_blank" class="link">DuyHoang</a>
+        </p>
+
+      </div>
+
+    </div>
+  </footer>
+
+  <a href="#top" class="back-top-btn active" aria-label="back to top" data-back-top-btn>
+    <ion-icon name="chevron-up" aria-hidden="true"></ion-icon>
+  </a>
+  
+  <script src="~/assets/js/main.js"></script>
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  @RenderSection("Scripts", required: false)
+</body>
+</html>

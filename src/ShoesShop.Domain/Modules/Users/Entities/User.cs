@@ -7,7 +7,7 @@ using ShoesShop.Domain.Modules.Users.Enums;
 
 namespace ShoesShop.Domain.Modules.Users.Entities
 {
-    public class User : BaseEntity<int>
+    public partial class User : BaseEntity<int>
     {
         private string _userName = string.Empty;
         public string UserName 
@@ -54,8 +54,8 @@ namespace ShoesShop.Domain.Modules.Users.Entities
             set
             {
                 var today = DateOnly.FromDateTime(DateTime.Now);
-                var minimumAgeDate = today.AddYears(-18); 
-                var maximumAgeDate = today.AddYears(-90); 
+                var minimumAgeDate = today.AddYears(-18);
+                var maximumAgeDate = today.AddYears(-90);
 
                 if (value > minimumAgeDate)
                 {
@@ -71,6 +71,7 @@ namespace ShoesShop.Domain.Modules.Users.Entities
             }
         }
 
+        
         private string _email = string.Empty;
         public string Email
         {
@@ -82,10 +83,7 @@ namespace ShoesShop.Domain.Modules.Users.Entities
                     throw new ArgumentOutOfRangeException(nameof(Email), "Email must be less than 100 characters.");
                 }
 
-                if (!Regex.IsMatch(
-                        value,
-                        @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
-                        RegexOptions.IgnoreCase))
+                if (!MyRegex3().IsMatch(value))
                 {
                     throw new FormatException("Invalid email format.");
                 }
@@ -109,9 +107,9 @@ namespace ShoesShop.Domain.Modules.Users.Entities
 
                     value = FormatPhoneNumber(value);
 
-                    if (!Regex.IsMatch(value, @"^\+\d{1,3}-\d{3,4}-\d{3}-\d{3}$"))
+                    if (!MyRegex2().IsMatch(value))
                     {
-                        throw new FormatException("Invalid phone number format. Please use +(country_code)-xxx-xxx-xxx.");
+                        throw new FormatException("Invalid phone number format. Please use `0xxxxxxxxxx`.");
                     }
                 }
 
@@ -119,28 +117,17 @@ namespace ShoesShop.Domain.Modules.Users.Entities
             }
         }
 
-        private static string FormatPhoneNumber(string phone)
+        private static string FormatPhoneNumber(string rawPhone)
         {
-            phone = Regex.Replace(phone, @"\s|-", "");
+            if (string.IsNullOrWhiteSpace(rawPhone))
+                throw new FormatException("Phone number is empty.");
 
-            string countryCode = "+84"; 
+            string phone = MyRegex().Replace(rawPhone, "");
 
-            var match = Regex.Match(phone, @"^\+(\d{1,3})(\d+)$");
-            if (match.Success)
-            {
-                countryCode = "+" + match.Groups[1].Value;
-                phone = match.Groups[2].Value;
-            }
-            else if (phone.StartsWith("0"))
-            {
-                phone = phone.Substring(1);
-            }
-            else
-            {
-                throw new FormatException("Invalid phone number. Please include a valid country code or start with 0.");
-            }
+            if (!MyRegex1().IsMatch(phone))
+                throw new FormatException("Invalid Vietnamese phone number format.");
 
-            return Regex.Replace(countryCode + phone, @"(\+\d{1,3})(\d{3,4})(\d{3})(\d{3})", "$1-$2-$3-$4");
+            return phone;
         }
 
         private UserStatus _status;
@@ -158,23 +145,73 @@ namespace ShoesShop.Domain.Modules.Users.Entities
             }
         }
 
-        private UserGender _gender; 
-        public UserGender Gender 
-        { 
-            get => _gender;
-            set 
+        private UserAccountRole _role;
+        public UserAccountRole Role
+        {
+            get => _role;
+            set
             {
-                if (!Enum.IsDefined(typeof(UserGender), value))
+                if (!Enum.IsDefined(value))
                 {
-                    throw new ArgumentException("Invalid gender value.", nameof(value));
+                    throw new ArgumentException("Invalid role value.", nameof(value));
                 }
 
-                _gender = value;
+                _role = value;
             }
         }
+
+        private string? _avatarUrl;
+        public string? AvatarUrl
+        {
+            get => _avatarUrl;
+            set
+            {
+                if (value != null)
+                {
+                    if (string.IsNullOrWhiteSpace(value))
+                    {
+                        throw new ArgumentException("Image cannot be empty or whitespace.", nameof(AvatarUrl));
+                        }
+
+                    if (value.Length > 2048)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(AvatarUrl), "Image cannot exceed 2048 characters.");
+                        }
+                    }
+
+                _avatarUrl = value;
+            }
+        }   
+
+        private UserGender _gender;
+        public UserGender Gender
+        {
+                get => _gender;
+                set 
+                {
+                    if (!Enum.IsDefined(value))
+                    {
+                        throw new ArgumentException("Invalid gender value.", nameof(value));
+                    }
+
+                    _gender = value;
+                }
+            }
         
         private readonly HashSet<Address> _addresses = [];
         public IReadOnlyCollection<Address> Addresses => _addresses;
+
+        public void AddAddress(Address address)
+        {
+            ArgumentNullException.ThrowIfNull(address);
+            _addresses.Add(address);
+        }
+
+        public void RemoveAddress(Address address)
+        {
+            ArgumentNullException.ThrowIfNull(address);
+            _addresses.Remove(address);
+        }
 
         private readonly HashSet<Order> _orders = [];
         public IReadOnlyCollection<Order> Orders => _orders;
@@ -182,17 +219,27 @@ namespace ShoesShop.Domain.Modules.Users.Entities
         private readonly HashSet<CartItem> _cartItems = [];
         public IReadOnlyCollection<CartItem> CartItems => _cartItems;
 
-        public User(string userName, string password, DateOnly dateOfBirth, string email, string? phone, UserStatus status, UserGender gender)
+        public User(string userName, string password, DateOnly dateOfBirth, string email, string? phone, string? avatarUrl, UserAccountRole role, UserStatus status, UserGender gender)
         {
             UserName = userName;
             Password = password;
             DateOfBirth = dateOfBirth;
             Email = email;
+            AvatarUrl = avatarUrl;
             Phone = phone;
-            Status = status;
+            Role = role;
             Gender = gender;
         }
 
         public User() { }
+
+        [GeneratedRegex(@"\s|-")]
+        private static partial Regex MyRegex();
+        [GeneratedRegex(@"^0\d{9,10}$")]
+        private static partial Regex MyRegex1();
+        [GeneratedRegex(@"^0\d{9,10}$")]
+        private static partial Regex MyRegex2();
+        [GeneratedRegex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex MyRegex3();
     }
 }

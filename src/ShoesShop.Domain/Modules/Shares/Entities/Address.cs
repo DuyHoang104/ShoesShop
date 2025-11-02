@@ -69,6 +69,8 @@ namespace ShoesShop.Domain.Modules.Shares.Entities
             }
         }
 
+        public bool IsDefault { get; set; } = false;
+        
         private int _userId;
         public int UserId
         {
@@ -90,15 +92,18 @@ namespace ShoesShop.Domain.Modules.Shares.Entities
                 _user = value;
             }
         }
+        
     
         private readonly HashSet<Order> _orders = [];
         public IReadOnlyCollection<Order> Orders => _orders;
 
-        public Address(string addressLine1, string? city, string? country)
+        public Address(User user,string addressLine1, string? city, string? country, bool isDefault)
         {
+            User = user;
             AddressLine1 = addressLine1;
             City = city;
             Country = country;
+            IsDefault = isDefault;
         }
 
         public Address() { }

@@ -1,0 +1,30 @@
+@model IEnumerable<ProductDto>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Options
+@using ShoesShop.Domain.Modules.Products.Dtos
+@inject IOptions<CloudinarySettings> CloudinaryConfig
+@{
+    var cloudBase = CloudinaryConfig.Value.BaseUrl;
+}
+
+@foreach (ProductDto item in Model)
+{
+    if(item.Images != null)
+    {
+        string? firstImagePath = item.Images?.FirstOrDefault()?.Url;
+        var firstImage = !string.IsNullOrEmpty(firstImagePath)
+            ? $"{cloudBase}{firstImagePath.TrimStart('/')}"
+            : "/images/default.png";
+
+        <div class="col-lg-4 col-sm-6">
+            <div class="single_product_item" style="cursor: pointer;" onclick="window.location='@Url.Action(action: "Detail", "Product", new { id = item.Id })'">
+                <img src="@firstImage"
+                    alt="@item.Name"/>
+                <div class="single_product_text">
+                    <h4>@item.Name</h4>
+                    <h3>@item.Price.ToString("C")</h3>
+                </div>
+            </div>
+         </div>
+    }
+}

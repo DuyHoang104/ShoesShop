@@ -10,7 +10,7 @@ namespace ShoesShop.Domain.Modules.Users.Enums
         [Description("Manager")]
         Manager = 1,
 
-        [Description("Employee")]
-        Employee = 2
+        [Description("Customer")]
+        Customer = 2
     }
 }

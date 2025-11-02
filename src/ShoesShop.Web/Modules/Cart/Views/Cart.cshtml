@@ -1,0 +1,199 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model List<ShoesShop.Domain.Modules.Carts.Dtos.CartItemDto>
+@inject Microsoft.Extensions.Options.IOptions<CloudinarySettings> CloudinaryConfig
+
+@{
+    ViewData["Title"] = "Cart";
+    Layout = "~/Modules/Shares/Views/_Layout.cshtml";
+}
+<link rel="icon" href="~/assets/product/img/favicon.png">
+<link rel="stylesheet" href="~/assets/product/css/bootstrap.min.css">
+<link rel="stylesheet" href="~/assets/product/css/animate.css">
+<link rel="stylesheet" href="~/assets/product/css/owl.carousel.min.css">
+<link rel="stylesheet" href="~/assets/product/css/nice-select.css">
+<link rel="stylesheet" href="~/assets/product/css/all.css">
+<link rel="stylesheet" href="~/assets/product/css/flaticon.css">
+<link rel="stylesheet" href="~/assets/product/css/themify-icons.css">
+<link rel="stylesheet" href="~/assets/product/css/magnific-popup.css">
+<link rel="stylesheet" href="~/assets/product/css/slick.css">
+<link rel="stylesheet" href="~/assets/product/css/price_rangs.css">
+<link rel="stylesheet" href="~/assets/product/css/style.css">
+<link rel="stylesheet" href="~/assets/css/share.css" asp-append-version="true" />
+
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="breadcrumb_iner">
+                    <div class="breadcrumb_iner_item">
+                        <h2>Cart Products</h2>
+                        <p>Home <span>-</span> Cart Products</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cart_area padding_top">
+    <div class="container">
+        <div class="cart_inner">
+            <div class="table-responsive">
+                <form asp-action="UpdateCart" asp-controller="Cart" method="post">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Size</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                var index = 0;
+                                foreach (var item in Model)
+                                {
+                                    var firstImageUrl = "/images/default.png";
+                                    if (item.Product?.Images != null && item.Product.Images.Any())
+                                    {
+                                        var firstImage = item.Product.Images.FirstOrDefault()?.Url;
+                                        firstImageUrl = !string.IsNullOrEmpty(firstImage) && !firstImage.StartsWith("http")
+                                            ? $"{CloudinaryConfig.Value.BaseUrl}{firstImage}"
+                                            : firstImage;
+                                    }
+
+                                    <tr data-product-id="@item.ProductId">
+                                        <td>
+                                            <div class="media">
+                                                <div class="d-flex">
+                                                    <img src="@firstImageUrl"
+                                                         alt="@item.Product?.Name"
+                                                         style="width:130px; height:130px; object-fit:cover; border-radius:8px;" />
+                                                </div>
+                                                <div class="media-body">
+                                                    <p>@item.Product?.Name</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- ✅ Sửa tên input -->
+                                            <input type="hidden" name="items[@index].ProductId" value="@item.ProductId" />
+                                            <input type="hidden" name="items[@index].Size" value="@item.Size" />
+                                        </td>
+
+                                        <td><h5 class="product-price">@item.Product?.Price</h5></td>
+
+                                        <td>
+                                            <div class="product_count">
+                                                <span class="input-number-decrement"><i class="ti-angle-down"></i></span>
+                                                <input class="input-number"
+                                                       type="number"
+                                                       name="items[@index].Quantity"
+                                                       value="@item.Quantity"
+                                                       min="1" max="10">
+                                                <span class="input-number-increment"><i class="ti-angle-up"></i></span>
+                                            </div>
+                                        </td>
+
+                                        <td><h5 class="product-total">@item.TotalPrice</h5></td>
+                                        <td><h5>@item.Size</h5></td>
+
+                                        <td>
+                                            <a class="btn_1 btn_remove"
+                                               href="@Url.Action("RemoveFromCart", "Cart", new { productId = item.ProductId, size = item.Size })">
+                                                Remove
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    index++;
+                                }
+
+                                <tr>
+                                    <td colspan="5"></td>
+                                    <td>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span style="color: red; font-size: 18px;">Subtotal:</span>
+                                            <h5 id="subtotal" style="margin: 0;font-size: 18px;">@ViewBag.Total</h5>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr class="bottom_button">
+                                    <td colspan="5" class="text-left">
+                                        <button type="submit" class="btn_1">Update Cart</button>
+                                    </td>
+                                    <td class="text-center" style="vertical-align: middle;">
+                                        <a href="#" class="btn_1 btn_no_wrap" id="btnClearCart">Clear Cart</a>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center">Your cart is empty.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </form>
+                <!-- ✅ Đóng form ở đây -->
+
+                <div class="checkout_btn_inner float-right">
+                    <a class="btn_1" href="/product">Continue Shopping</a>
+                    @if (Model != null && Model.Any())
+                    {
+                        <a class="btn_1 checkout_btn_1" asp-action="Checkout" asp-controller="Order">Proceed to checkout</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="~/assets/product/js/jquery-1.12.1.min.js"></script>
+<script src="~/assets/product/js/popper.min.js"></script>
+<script src="~/assets/product/js/bootstrap.min.js"></script>
+<script src="~/assets/product/js/jquery.magnific-popup.js"></script>
+<script src="~/assets/product/js/swiper.min.js"></script>
+<script src="~/assets/product/js/masonry.pkgd.js"></script>
+<script src="~/assets/product/js/owl.carousel.min.js"></script>
+<script src="~/assets/product/js/jquery.nice-select.min.js"></script>
+<script src="~/assets/product/js/slick.min.js"></script>
+<script src="~/assets/product/js/jquery.counterup.min.js"></script>
+<script src="~/assets/product/js/waypoints.min.js"></script>
+<script src="~/assets/product/js/contact.js"></script>
+<script src="~/assets/product/js/jquery.ajaxchimp.min.js"></script>
+<script src="~/assets/product/js/jquery.form.js"></script>
+<script src="~/assets/product/js/jquery.validate.min.js"></script>
+<script src="~/assets/product/js/mail-script.js"></script>
+<script src="~/assets/product/js/stellar.js"></script>
+<script src="~/assets/product/js/price_rangs.js"></script>
+<script src="~/assets/js/share.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            $('#btnClearCart').on('click', function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: '<span style="font-size: 22px;">Are you sure?</span>',
+                    html: '<span style="font-size: 18px;">All items in your cart will be removed!</span>',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: '<span style="font-size: 16px;">Yes, clear it!</span>',
+                    cancelButtonText: '<span style="font-size: 16px;">Cancel</span>',
+                    reverseButtons: true, // Nút Cancel nằm bên trái
+                    focusCancel: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("ClearCart", "Cart")';
+                    }
+                });
+            });
+        });
+    </script>

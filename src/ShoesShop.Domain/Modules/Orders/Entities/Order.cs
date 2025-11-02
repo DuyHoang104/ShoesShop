@@ -13,16 +13,11 @@ public class Order : BaseEntity<int>
         get => _orderDate;
         set
         {
-            if (value < DateTime.UtcNow)
-            {
-                throw new ArgumentException("Order date cannot be in the past.", nameof(value));
-            }
-            
             _orderDate = value;
         }
     }
 
-    private OrderStatus _status;
+    private OrderStatus _status = OrderStatus.Pending;
     public OrderStatus Status
     {
         get => _status;
@@ -37,20 +32,10 @@ public class Order : BaseEntity<int>
         }
     }
 
-    private decimal _totalAmount;
-    public decimal TotalAmount
-    {
-        get => _totalAmount;
-        private set
-        {
-            if (value < 0)  
-            {
-                throw new ArgumentOutOfRangeException(nameof(TotalAmount), "Total amount cannot be negative.");
-            }
-
-            _totalAmount = value;
-        }
-    }
+    public decimal TotalAmount =>
+    OrderDetails.Sum(d => d.UnitPrice * d.Quantity)
+    + ShippingFee.GetValueOrDefault()
+    - Discount.GetValueOrDefault();
 
     private PaymentMethod _paymentMethod;
     public PaymentMethod PaymentMethod
@@ -100,6 +85,84 @@ public class Order : BaseEntity<int>
         }
     }
 
+    private string? _receiverName = null!;
+    public string? ReceiverName
+    {
+        get => _receiverName;
+        set
+        {
+            if (value != null)
+            {
+                if (value.Length > 100)
+                {
+                    throw new ArgumentException("Receiver's name cannot be longer than 100 characters.", nameof(value));
+                }
+            }
+
+            _receiverName = value;
+        }
+    }
+
+    private string? _receiverPhone = null!;
+    public string? ReceiverPhone
+    {
+        get => _receiverPhone;
+        set
+        {
+            if (value != null)
+            {
+                if (value.Length > 15)
+                {
+                    throw new ArgumentException("Receiver's phone number cannot be longer than 15 characters.", nameof(value));
+                }
+            }
+
+            _receiverPhone = value;
+        }
+    }
+
+    private string? _receiverAddress;
+    public string? ReceiverAddress
+    {
+        get => _receiverAddress;
+        set
+        {
+            if (value != null && value.Length > 255)
+                throw new ArgumentException("Receiver's address cannot be longer than 255 characters.", nameof(value));
+            _receiverAddress = value;
+        }
+    }
+    
+    private decimal? _shippingFee;
+    public decimal? ShippingFee
+    {
+        get => _shippingFee;
+        set
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(ShippingFee), "Shipping fee cannot be negative.");
+            }
+
+            _shippingFee = value;
+        }
+    }
+
+    private decimal? _discount;
+    public decimal? Discount
+    {
+        get => _discount;
+        set
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(Discount), "Discount cannot be negative.");
+            }
+
+            _discount = value;
+        }
+    }
+
     private int _addressId;
     public int AddressId
     {
@@ -143,17 +206,34 @@ public class Order : BaseEntity<int>
         }
     }
 
-    private readonly HashSet<OrderDetail> _orderDetails = [];
+    private readonly HashSet<OrderDetail> _orderDetails = new();
     public IReadOnlyCollection<OrderDetail> OrderDetails => _orderDetails;
+    public void AddOrderDetail(OrderDetail orderDetail)
+    {
+        if (orderDetail == null)
+        {
+            throw new ArgumentNullException(nameof(orderDetail), "Order detail cannot be null.");
+        }
 
-    public Order(User user, Address address, decimal totalAmount, PaymentMethod paymentMethod, PaymentStatus paymentStatus, string? note)
+        _orderDetails.Add(orderDetail);
+    }
+
+    public Order(User user, Address address, PaymentMethod paymentMethod, PaymentStatus paymentStatus, string? receiverName,
+        string? receiverPhone, string? receiverAddress, string? note = null, decimal? shippingFee = null, decimal? discount = null)
     {
         User = user;
-        TotalAmount = totalAmount;
+        Address = address;
+        ReceiverName = receiverName;
+        ReceiverPhone = receiverPhone;
+        ReceiverAddress = receiverAddress;
         PaymentMethod = paymentMethod;
         PaymentStatus = paymentStatus;
-        Address = address;
+        ShippingFee = shippingFee;
+        Discount = discount;
         Note = note;
+        Status = OrderStatus.Pending;
+        OrderDate = DateTime.UtcNow;
+        
     }
 
     public Order() { }

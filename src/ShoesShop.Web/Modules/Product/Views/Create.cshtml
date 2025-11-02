@@ -1,0 +1,346 @@
+@model ShoesShop.Web.Modules.Product.Dtos.CreateModalDto
+@using ShoesShop.Domain.Modules.Products.Enums
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Create Product";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card shadow-lg p-4 rounded-3" style="width: 650px;">
+        <h2 class="text-center mb-4">Create New Product</h2>
+
+        <form asp-action="Create" asp-controller="Product" method="post" enctype="multipart/form-data">
+            <!-- Name -->
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label fw-bold"></label>
+                <input asp-for="Name" class="form-control" placeholder="Enter product name" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <!-- Price -->
+            <div class="mb-3">
+                <label asp-for="Price" class="form-label fw-bold"></label>
+                <input asp-for="Price" class="form-control" placeholder="Enter product price" />
+                <span asp-validation-for="Price" class="text-danger small"></span>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label fw-bold"></label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Enter product description"></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+
+            <!-- Brand -->
+            <div class="mb-3">
+                <label asp-for="Brand" class="form-label fw-bold"></label>
+                <input asp-for="Brand" class="form-control" placeholder="Enter brand name" />
+                <span asp-validation-for="Brand" class="text-danger small"></span>
+            </div>
+
+            <!-- Color -->
+            <div class="mb-3">
+                <label asp-for="Color" class="form-label fw-bold"></label>
+                <input asp-for="Color" class="form-control" placeholder="Enter color" />
+                <span asp-validation-for="Color" class="text-danger small"></span>
+            </div>
+
+            <!-- Quantity -->
+            <div class="mb-3">
+                <label asp-for="Quantity" class="form-label fw-bold"></label>
+                <input asp-for="Quantity" type="number" class="form-control" placeholder="Enter quantity" />
+                <span asp-validation-for="Quantity" class="text-danger small"></span>
+            </div>
+
+            <!-- SaleOff -->
+            <div class="mb-3">
+                <label asp-for="SaleOff" class="form-label fw-bold">Discount (%)</label>
+                <input asp-for="SaleOff" type="number" min="0" max="100" class="form-control" placeholder="Enter discount" />
+                <span asp-validation-for="SaleOff" class="text-danger small"></span>
+            </div>
+
+            <!-- ImageFiles -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Product Images</label>
+                <input asp-for="ImageFiles" type="file" class="form-control" multiple id="imageInput" />
+                <small class="text-muted">You can select multiple images at once.</small>
+                <span asp-validation-for="ImageFiles" class="text-danger small"></span>
+
+                <div id="imagePreview" class="d-flex flex-wrap mt-3 gap-3"></div>
+            </div>
+
+            <!-- Status -->
+            <div class="mb-3">
+                <label asp-for="Status" class="form-label fw-bold">Status</label>
+                <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ProductStatus>()">
+                    <option value="" selected disabled>-- Select Status --</option>
+                </select>
+                <span asp-validation-for="Status" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Available Sizes</label>
+                <div class="d-flex flex-wrap gap-3">
+                    @{
+                        var sizes = new[] { "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47" };
+                    }
+                    @foreach (var size in sizes)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input size-checkbox"
+                                type="checkbox"
+                                value="@size"
+                                id="size_@size"
+                                name="SizeOptions" />
+                            <label class="form-check-label" for="size_@size">@size</label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Categories</label>
+                <div class="input-group">
+                    <select id="categorySelect" class="form-select select2" multiple="multiple">
+                        @foreach (var c in Model.Categories)
+                        {
+                            <option value="@c.Id" data-name="@c.Name" data-desc="@c.Description">
+                                @c.Name
+                            </option>
+                        }
+                    </select>
+                    <button type="button" class="btn btn-outline-primary btn-down" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                        <i class="bi bi-plus-circle"></i> More
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hidden container -->
+            <div id="categoriesHidden"></div>
+
+            <!-- Modal Add Category -->
+            <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add New Category</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Category Name</label>
+                                <input type="text" class="form-control" id="newCategoryName" placeholder="Enter category name">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" id="newCategoryDesc" rows="2" placeholder="Enter description"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="saveCategoryBtn">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex justify-content-between mt-3">
+                <button type="submit" class="btn btn-primary px-4">Create</button>
+                <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+// Preview images
+let selectedFiles = [];
+
+document.getElementById('imageInput').addEventListener('change', function (event) {
+    const newFiles = Array.from(event.target.files);
+    selectedFiles = [...selectedFiles, ...newFiles];
+    renderPreviews();
+});
+
+function renderPreviews() {
+    const previewContainer = document.getElementById('imagePreview');
+    previewContainer.innerHTML = '';
+
+    selectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const wrapper = document.createElement('div');
+            wrapper.style.position = 'relative';
+            wrapper.style.display = 'inline-block';
+
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.width = '100px';
+            img.style.height = '100px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '8px';
+            img.style.border = '1px solid #ccc';
+
+            // ✅ Nút xoá ảnh nằm giữa ảnh
+            const removeBtn = document.createElement('button');
+            removeBtn.innerHTML = '×';
+            removeBtn.style.position = 'absolute';
+            removeBtn.style.top = '50%';
+            removeBtn.style.left = '50%';
+            removeBtn.style.transform = 'translate(-50%, -50%)';
+            removeBtn.style.background = 'rgba(0,0,0,0.6)';
+            removeBtn.style.color = 'white';
+            removeBtn.style.border = 'none';
+            removeBtn.style.borderRadius = '50%';
+            removeBtn.style.width = '35px';
+            removeBtn.style.height = '35px';
+            removeBtn.style.fontSize = '20px';
+            removeBtn.style.cursor = 'pointer';
+            removeBtn.style.opacity = '0';
+            removeBtn.style.transition = 'opacity 0.2s';
+            removeBtn.title = 'Remove image';
+
+            // ✅ Hiện nút X khi hover ảnh
+            wrapper.addEventListener('mouseenter', () => { removeBtn.style.opacity = '1'; });
+            wrapper.addEventListener('mouseleave', () => { removeBtn.style.opacity = '0'; });
+
+            removeBtn.addEventListener('click', () => {
+                selectedFiles.splice(index, 1);
+                renderPreviews();
+            });
+
+            wrapper.appendChild(img);
+            wrapper.appendChild(removeBtn);
+            previewContainer.appendChild(wrapper);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+document.querySelector('form').addEventListener('submit', function (e) {
+    const input = document.getElementById('imageInput');
+    const dataTransfer = new DataTransfer();
+    selectedFiles.forEach(file => dataTransfer.items.add(file));
+    input.files = dataTransfer.files;
+});
+
+// Categories with Select2
+$(function () {
+    var $select = $('#categorySelect').select2({
+        placeholder: "-- Select categories --",
+        allowClear: true,
+        width: '100%'
+    });
+
+    var newCategories = [];
+
+    function renderHiddenInputs() {
+        $("#categoriesHidden").empty();
+        var categoryIndex = 0;
+        var ids = $select.val() || [];
+
+        ids.forEach(function (id) {
+            var $opt = $("#categorySelect option[value='" + id + "']");
+            var name = $opt.data("name");
+            var desc = $opt.data("desc");
+
+            if (id && !id.startsWith("new_")) {
+                // cate cũ (DB)
+                $("#categoriesHidden").append(`
+                    <input type="hidden" name="Categories[${categoryIndex}].Id" value="${id}" />
+                    <input type="hidden" name="Categories[${categoryIndex}].Name" value="${name}" />
+                    <input type="hidden" name="Categories[${categoryIndex}].Description" value="${desc}" />
+                `);
+                categoryIndex++;
+            }
+
+            if (id.startsWith("new_")) {
+                // cate mới (ảo)
+                var cat = newCategories.find(c => c.id === id);
+                if (cat) {
+                    $("#categoriesHidden").append(`
+                        <input type="hidden" name="Categories[${categoryIndex}].Name" value="${cat.name}" />
+                        <input type="hidden" name="Categories[${categoryIndex}].Description" value="${cat.desc}" />
+                    `);
+                    categoryIndex++;
+                }
+            }
+        });
+    }
+
+    $select.on('change', function () {
+        renderHiddenInputs();
+    });
+
+    $("#saveCategoryBtn").on("click", function () {
+        var name = $("#newCategoryName").val().trim();
+        var desc = $("#newCategoryDesc").val().trim();
+        if (!name) {
+            alert("Please enter category name");
+            return;
+        }
+
+        // check trùng theo Name (không phân biệt hoa/thường)
+        var exists = false;
+        $("#categorySelect option").each(function () {
+            var optName = $(this).data("name");
+            if (optName && optName.toLowerCase() === name.toLowerCase()) {
+                exists = true;
+                return false; // break loop
+            }
+        });
+
+        if (exists) {
+            alert("Category '" + name + "' already exists in the list!");
+            $("#newCategoryName").addClass("is-invalid"); // highlight đỏ
+            return;
+        } else {
+            $("#newCategoryName").removeClass("is-invalid");
+        }
+
+        var newId = "new_" + Date.now();
+
+        // lưu ảo
+        newCategories.push({ id: newId, name: name, desc: desc });
+
+        // add option vào select và chọn ngay
+        var newOption = new Option(name, newId, true, true);
+        $(newOption).attr("data-name", name).attr("data-desc", desc);
+        $select.append(newOption).trigger('change');
+
+        // clear modal
+        $("#newCategoryName").val("");
+        $("#newCategoryDesc").val("");
+        $("#addCategoryModal").modal("hide");
+    });
+});
+
+// Sizes
+// ✅ Gộp các size được chọn thành chuỗi "36,37,39"
+document.querySelector('form').addEventListener('submit', function () {
+    const selectedSizes = Array.from(document.querySelectorAll('.size-checkbox:checked'))
+        .map(cb => cb.value)
+        .join(',');
+
+    // Xóa input cũ nếu có
+    document.querySelectorAll('input[name="Sizes"]').forEach(e => e.remove());
+
+    // Tạo input hidden để gửi về controller
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'Sizes';
+    hiddenInput.value = selectedSizes;
+    this.appendChild(hiddenInput);
+});
+
+</script>

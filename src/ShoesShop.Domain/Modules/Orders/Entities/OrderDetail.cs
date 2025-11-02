@@ -94,13 +94,13 @@ public class OrderDetail : BaseEntity<int>
         }
     }
 
-    public OrderDetail(Order order, Product product, int quantity)
+    public OrderDetail(Order order, Product product, int quantity, decimal subtotal)
     {
         Order = order;
         Product = product;
         Quantity = quantity;
         UnitPrice = product.Price;
-        Subtotal = quantity * product.Price;
+        Subtotal = subtotal;
     }
 
     public OrderDetail() { }

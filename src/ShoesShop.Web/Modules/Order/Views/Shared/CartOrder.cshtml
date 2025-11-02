@@ -1,0 +1,161 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using ShoesShop.Domain.Modules.Carts.Dtos
+@model  List<CartItemDto>
+@inject Microsoft.Extensions.Options.IOptions<CloudinarySettings> CloudinaryConfig
+
+<link rel="icon" href="~/assets/product/img/favicon.png">
+<link rel="stylesheet" href="~/assets/product/css/bootstrap.min.css">
+<link rel="stylesheet" href="~/assets/product/css/animate.css">
+<link rel="stylesheet" href="~/assets/product/css/owl.carousel.min.css">
+<link rel="stylesheet" href="~/assets/product/css/nice-select.css">
+<link rel="stylesheet" href="~/assets/product/css/all.css">
+<link rel="stylesheet" href="~/assets/product/css/flaticon.css">
+<link rel="stylesheet" href="~/assets/product/css/themify-icons.css">
+<link rel="stylesheet" href="~/assets/product/css/magnific-popup.css">
+<link rel="stylesheet" href="~/assets/product/css/slick.css">
+<link rel="stylesheet" href="~/assets/product/css/price_rangs.css">
+<link rel="stylesheet" href="~/assets/product/css/style.css">
+<link rel="stylesheet" href="~/assets/css/share.css" asp-append-version="true" />
+
+<style>
+h2 { color: #fff; font-weight: 700; margin-bottom: 20px; }
+.order-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 8px; background: #1e1e1e; border-radius: 8px; cursor: pointer; transition: background .2s ease; }
+.order-item:hover { background: #2b2b2b; }
+.order-item-img { width: 55px; height: 55px; flex-shrink: 0; overflow: hidden; border-radius: 6px; background: #fff; }
+.order-item-img img { width: 100%; height: 100%; object-fit: cover; }
+.order-item-info { display: flex; align-items: center; justify-content: space-between; flex: 1; margin-left: 12px; gap: 12px; color: #fff; }
+.product-name { flex: 1; font-weight: 600; }
+.product-qty { font-size: 14px; color: #ccc; min-width: 40px; text-align: center; }
+.product-total { color: #ffc439; font-weight: 700; white-space: nowrap; }
+.list, .list_2 { list-style: none; padding: 0; margin: 0; }
+.line-item { padding: 12px 0; border-bottom: 1px solid #333; }
+.line-item:last-child { border-bottom: none; }
+.list_2 a { display: flex; justify-content: space-between; align-items: center; color: #fff; font-weight: 500; text-decoration: none; font-size: 15px; gap: 10px; }
+.list_2 select { background: #1e1e1e; border: 1px solid #555; color: #fff; border-radius: 6px; padding: 8px 10px; min-width: 200px; text-align: center; cursor: pointer; transition: all .2s ease; }
+.list_2 select:hover, .list_2 select:focus { border-color: #ffc439; outline: none; box-shadow: 0 0 5px #ffc43966; }
+.section-title { font-weight: 600; color: #fff; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+.discount-input-group { display: flex; gap: 8px; margin-top: 6px; }
+.discount-input-group input { flex: 1; background: #1e1e1e; border: 1px solid #555; color: #fff; padding: 8px; border-radius: 6px; }
+.discount-input-group button { background: #ffc439; color: #000; border: none; border-radius: 6px; padding: 0 16px; font-weight: 600; transition: background .2s ease; }
+.discount-input-group button:hover { background: #e6b822; }
+.discount-message { margin-top: 8px; color: #ffc439; font-size: 14px; }
+.total-section span { color: #ffc439; font-weight: 700; }
+</style>
+
+<div class="order-container">
+    <h2>Your Order</h2>
+    <ul class="list">
+        <li><a>Product <span>Total</span></a></li>
+        @foreach (var item in Model)
+        {
+            var firstImageUrl = "/images/default.png";
+            if (item.Product?.Images != null && item.Product.Images.Any())
+            {
+                var firstImage = item.Product.Images.FirstOrDefault()?.Url;
+                firstImageUrl = !string.IsNullOrEmpty(firstImage) && !firstImage.StartsWith("http")
+                    ? $"{CloudinaryConfig.Value.BaseUrl}{firstImage}"
+                    : firstImage;
+            }
+            <li class="order-item">
+                <div class="order-item-img">
+                    <img src="@firstImageUrl" alt="@item.Product.Name">
+                </div>
+                <div class="order-item-info" onclick="window.location='@Url.Action("Detail", "Product", new { id = item.Product.Id })'">
+                    <span class="product-name">@item.Product.Name</span>
+                    <span class="product-qty">x @item.Quantity</span>
+                    <span class="product-total">$@(item.Product.Price * item.Quantity)</span>
+                </div>
+            </li>
+        }
+    </ul>
+
+    <ul class="list_2">
+        <li class="line-item">
+            <a><span>Subtotal</span><span id="subtotal">$@ViewBag.Total</span></a>
+        </li>
+
+        <li class="line-item">
+            <a>
+                <span>Shipping</span>
+                <select id="shippingSelect">
+                    <option value="0">Select shipping method</option>
+                    <option value="35">Standard Shipping – $35.00</option>
+                    <option value="50">Express Shipping – $50.00</option>
+                    <option value="80">Overnight Shipping – $80.00</option>
+                </select>
+            </a>
+        </li>
+
+        <li class="line-item discount-section">
+            <div class="section-title">Discount Code</div>
+            <div class="discount-input-group">
+                <input type="text" id="discountCode" placeholder="Enter code" />
+                <button type="button" id="applyDiscount">Apply</button>
+            </div>
+
+            <!-- ✅ Giữ nguyên 3 thẻ p như mày muốn -->
+            <p id="discountMessageDefault" class="discount-message">Enter SALE10 for 10% off, or SALE20 for 20% off</p>
+            <p id="discountMessageSuccess" class="discount-message" style="display:none;"></p>
+            <p id="discountMessageError" class="discount-message" style="display:none; color:#ff4444;"></p>
+
+            <input type="hidden" id="discountRatio" value="0" />
+        </li>
+
+        <li class="line-item total-section">
+            <a><span>Total</span><span id="totalPrice">$@(Convert.ToDecimal(ViewBag.Total) + 35)</span></a>
+        </li>
+    </ul>
+</div>
+
+<!-- Scripts -->
+<script src="~/assets/product/js/jquery-1.12.1.min.js"></script>
+<script src="~/assets/product/js/bootstrap.min.js"></script>
+<script>
+$(document).ready(function () {
+    const subtotal = parseFloat("@ViewBag.Total");
+    let shippingCost = 0;
+    let discountValue = 0;
+
+    function updateTotal() {
+        const total = subtotal + shippingCost - discountValue;
+        $("#totalPrice").text(`$${total.toFixed(2)}`);
+    }
+
+    $("#shippingSelect").on("change", function () {
+        shippingCost = parseFloat($(this).val()) || 0;
+        updateTotal();
+    });
+
+    $("#applyDiscount").on("click", function () {
+        const code = $("#discountCode").val().trim().toUpperCase();
+        const msgDefault = $("#discountMessageDefault");
+        const msgSuccess = $("#discountMessageSuccess");
+        const msgError = $("#discountMessageError");
+        msgDefault.hide();
+        msgSuccess.hide();
+        msgError.hide();
+
+        if (code === "SALE10") {
+            discountValue = subtotal * 0.10;
+            $("#discountRatio").val(0.1);
+            msgSuccess.text(`Discount applied: -$${discountValue.toFixed(2)}`).show();
+        } else if (code === "SALE20") {
+            discountValue = subtotal * 0.20;
+            $("#discountRatio").val(0.2);
+            msgSuccess.text(`Discount applied: -$${discountValue.toFixed(2)}`).show();
+        } else if (code === "") {
+            msgDefault.show();
+            discountValue = 0;
+            $("#discountRatio").val(0);
+        } else {
+            discountValue = 0;
+            $("#discountRatio").val(0);
+            msgError.text("Invalid code").show();
+        }
+
+        updateTotal();
+    });
+
+    updateTotal();
+});
+</script>

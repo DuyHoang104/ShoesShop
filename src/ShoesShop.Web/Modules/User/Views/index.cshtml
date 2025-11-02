@@ -1,0 +1,170 @@
+@model ShoesShop.Web.Modules.User.Dtos.Commands.RegisterModalDto
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "User";
+    Layout = "~/Modules/Shares/Views/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/assets/css/identificate.css">
+
+<section class="section service bg-black-10 text-center" aria-label="service">
+    <div class="container-login">
+        <div class="form-container">
+            <div class="col col-1-login">
+                <div class="image-layer">
+                    <img src="~/assets/images/white-outline.png" class="form-image-main" alt="white-outline">
+                    <img src="~/assets/images/dots.png" class="form-image dots" alt="dots">
+                    <img src="~/assets/images/coin.png" class="form-image coin" alt="coin">
+                    <img src="~/assets/images/spring.png" class="form-image spring" alt="spring">
+                    <img src="~/assets/images/sneaker-3.png" class="form-image rocket" alt="rocket">
+                    <img src="~/assets/images/cloud.png" class="form-image cloud" alt="cloud">
+                    <img src="~/assets/images/stars.png" class="form-image stars" alt="stars">
+                </div>
+
+            </div>
+            <div class="col col-2-login">
+                <div class="btn-box">
+                    <a class="cw-btn btn-secondary">
+                        <span class="text text-1" id="login">Sign in</span>
+
+                        <span class="text text-2" aria-hidden="true" data-text="Sign in">Sign in</span>
+                    </a>
+
+                    <a class="cw-btn btn-secondary">
+                        <span class="text text-1" id="register">Sign Up</span>
+
+                        <span class="text text-2" aria-hidden="true" data-text="Sign Up">Sign Up</span>
+                    </a>
+                </div>
+                <!-- Login form Container -->
+                <div class="login-form">
+                    <div class="form-title">
+                        <span>Sign In</span>
+                    </div>
+                    <form class="form-inputs" asp-action="Login" asp-controller="User" method="post">
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Query["ReturnUrl"]" />
+                        <div class="input-box">
+                            <input type="text" class="input-field" placeholder="Username" asp-for="UserName" required>
+                            <i class="bx bx-user icon"></i>
+                        </div>
+
+                        <div class="input-box">
+                            <input type="password" class="input-field" placeholder="Password" asp-for="Password" required>
+                            <i class="bx bx-lock-alt icon"></i>
+                        </div>
+
+                        <div class="forgot-pass">
+                            <a asp-controller="User" asp-action="CheckEmail">Forgot Password?</a>
+                        </div>
+
+                        <div class="input-box">
+                            <button type="submit" class="input-submit">
+                                <span>Sign In</span>
+                                <i class="bx bx-right-arrow-alt"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="featured-words">
+                    Or continue with
+                    </p>
+
+                    <div class="social-login">
+                        <i class="bx bxl-facebook"></i>
+                        <i class="bx bxl-twitter"></i>
+                        <i class="bx bxl-google"></i>
+                    </div>
+                </div>
+                <!-- register form Container -->
+                <div class="register-form">
+                <div class="form-title">
+                        <span>Sign Up</span>
+                </div>
+                <form class="form-inputs" asp-action="Register" asp-controller="User" method="post" enctype="multipart/form-data">
+                    <div class="input-box">
+                        <input type="text" class="input-field" placeholder="Username" asp-for="UserName" required>
+                        <i class="bx bx-user icon"></i>
+                    </div>
+
+                    <div class="input-box"> 
+                        <input type="email" class="input-field" placeholder="Email" asp-for="Email" required>
+                        <i class="bx bx-envelope icon"></i>
+                    </div>
+
+                    <div class="input-box">
+                        <input type="password" class="input-field" placeholder="Password" asp-for="Password" required>
+                        <i class="bx bx-lock-alt icon"></i>
+                    </div>
+
+                    <div class="input-box">
+                        <input type="password" class="input-field" placeholder="Confirm Password" asp-for="ConfirmPassword" required>
+                        <i class="bx bx-lock-alt icon"></i>
+                    </div>
+                    
+                    <div class="input-box">
+                        <label class="custom-file-upload">
+                            <i class="bx bx-lock-alt icon"></i>
+                            <span id="file-text">Avatar</span>
+                            <input type="file" class="input-field" asp-for="AvatarUrl" required>
+                        </label>
+                    </div>
+
+                    <div class="input-box">
+                        <input type="date" id="dob" class="input-field" placeholder="Date of Birth" asp-for="DateOfBirth" required>
+                        <i class="bx bx-calendar icon" id="calendarIcon"></i>
+                    </div>
+                    
+                    <div class="input-box">
+                        <select class="input-field" asp-for="Gender" required>
+                            <option value="" disabled selected>Select Gender</option>
+                            <option value="Male">Male</option> 
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <i class="bx bx-user icon"></i>
+                    </div>
+
+                    <div class="input-box">
+                        <input type="tel" class="input-field" placeholder="Phone" asp-for="Phone" required>
+                        <i class="bx bx-phone icon"></i>
+                    </div>
+
+                    <div class="input-box">
+                        <input type="text" class="input-field" placeholder="AddressLine" asp-for="Addresses[0].AddressLine1" required>
+                        <i class="bx bx-home icon"></i>
+                    </div>
+
+                    <div class="input-box">
+                        <input type="text" class="input-field" placeholder="City" asp-for="Addresses[0].City" required>
+                        <i class="bx bx-home icon"></i>
+                    </div>
+
+                    <div class="input-box">
+                        <input type="text" class="input-field" placeholder="Country" asp-for="Addresses[0].Country" required>
+                        <i class="bx bx-home icon"></i>
+                    </div>
+
+                    <div class="input-box">
+                        <button type="submit" class="input-submit">
+                            <span>Sign Up</span>
+                            <i class="bx bx-right-arrow-alt"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <p class="featured-words">
+                Or continue with
+                </p>
+
+                <div class="social-login">
+                    <i class="bx bxl-facebook"></i>
+                    <i class="bx bxl-twitter"></i>
+                    <i class="bx bxl-google"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="~/assets/js/script.js" asp-append-version="true"></script>

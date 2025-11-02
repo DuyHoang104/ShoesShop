@@ -1,0 +1,152 @@
+@using ShoesShop.Domain.Modules.Products.Dtos
+@model IEnumerable<ProductDto>
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    var counts = ViewData["CategoryCounts"] as Dictionary<int, int> ?? new Dictionary<int, int>();
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ion-rangeslider@2.3.1/css/ion.rangeSlider.min.css"/>
+<link rel="stylesheet" href="~/assets/css/share.css" asp-append-version="true" />
+
+
+<aside class="left_widgets p_filter_widgets">
+    <div class="l_w_title">
+        <h3>Browse Categories</h3>
+    </div>
+    <div class="widgets_inner">
+        <ul class="list">
+            @foreach (var category in Model.SelectMany(p => p.Categories).DistinctBy(c => c.Id))
+            {
+                <li>
+                    <a asp-action="Index" asp-controller="Product" asp-route-categoryId="@category.Id">
+                        @category.Name
+                    </a>
+                    <span class="filter-count" style="margin-left: 5px; color: red">
+                        @(counts.ContainsKey(category.Id) ? counts[category.Id] : 0)
+                    </span>
+                </li>
+            }
+        </ul>
+    </div>
+</aside>
+
+<aside class="left_widgets p_filter_widgets">
+    <div class="l_w_title">
+        <h3>Product filters</h3>
+    </div>
+    <div class="widgets_inner">
+        <ul class="list">
+            @foreach (var brand in Model.Select(p => p.Brand).Distinct())
+            {
+                <li>
+                    <a asp-action="Index" asp-controller="Product" asp-route-brand="@brand">@brand</a>
+                    <span class="filter-count" style="margin-left: 5px; color: red">
+                        @Model.Count(p => p.Brand == brand)
+                    </span>
+                </li>
+            }
+        </ul>
+    </div>
+</aside>
+
+<aside class="left_widgets p_filter_widgets">
+    <div class="l_w_title">
+        <h3>Color Filter</h3>
+    </div>
+    <div class="widgets_inner">
+        <ul class="list">
+            @foreach (var color in Model
+                .SelectMany(p => p.Color.Split(separator: ',', StringSplitOptions.RemoveEmptyEntries))
+                .Select(c => c.Trim())
+                .Distinct()
+                .Take(6))
+            {
+                <li>
+                    <a asp-action="Index" asp-controller="Product" asp-route-color="@color">@color</a>
+                    <span class="filter-count" style="margin-left: 5px; color: red">
+                        @Model.Count(p => p.Color != null && p.Color.Split(separator: ',', StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim()).Contains(color))
+                    </span>
+                </li>
+            }
+        </ul>
+    </div>
+</aside>
+
+<!-- ✅ SỬA PHẦN NÀY -->
+<aside class="left_widgets p_filter_widgets">
+    <div class="l_w_title d-flex justify-content-between align-items-center mb-3" 
+         data-bs-toggle="collapse" data-bs-target="#filterSizes" style="cursor: pointer;">
+        <h3 class="mb-3">Size Filters</h3>
+        <span class="toggle-icon">▼</span>
+    </div>
+
+    <div id="filterSizes" class="collapse show">
+        <div class="widgets_inner" style="color: #bdafaf;">
+            <form asp-action="Index" asp-controller="Product" method="get" id="sizeFilterForm" class="m-0">
+                <input type="hidden" name="categoryId" value="@Context.Request.Query["categoryId"]" />
+                <input type="hidden" name="brand" value="@Context.Request.Query["brand"]" />
+                <input type="hidden" name="color" value="@Context.Request.Query["color"]" />
+                <input type="hidden" name="sortBy" value="@Context.Request.Query["sortBy"]" />
+                <div class="d-flex flex-wrap gap-2">
+                    @{
+                        var allSizes = new[] { "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47" };
+                        var selectedSizes = ViewBag.SelectedSizes as List<string> ?? new List<string>();
+                    }
+
+                    @foreach (var size in allSizes)
+                    {
+                        var isChecked = selectedSizes.Contains(size);
+                        <label class="size-filter-option">
+                            <input type="checkbox" name="sizes" value="@size" @(isChecked ? "checked" : "") onchange="document.getElementById('sizeFilterForm').submit()" />
+                            <span>@size</span>
+                        </label>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</aside>
+
+<aside class="left_widgets p_filter_widgets price_rangs_aside">
+    <div class="l_w_title">
+        <h3>Price Filter</h3>
+    </div>
+    <div class="widgets_inner">
+        <div class="range_item">
+            <input type="text" class="js-range-slider" value="" />
+
+            <div class="d-flex" style="color: #bdafaf;">
+                <div class="price_text">
+                    <p style="color: #bdafaf;">Price :</p>
+                </div>
+                <div class="price_value d-flex justify-content-center">
+                    <input type="text" class="js-input-from" readonly />
+                    <span>to</span>
+                    <input type="text" class="js-input-to" readonly />
+                </div>
+            </div>
+        </div>
+
+        <form asp-action="Index" asp-controller="Product" method="get" 
+              style="display: flex; justify-content: center; margin-top: 18px;">
+            <input type="hidden" name="minPrice" class="js-input-from" />
+            <input type="hidden" name="maxPrice" class="js-input-to" />
+            <button type="submit" class="cw-btn btn-secondary">
+                <span class="text text-1">Filter</span>
+                <span class="text text-2" aria-hidden="true" data-text="Filter">Filter</span>
+            </button>
+        </form>
+    </div>
+</aside>
+
+
+<style>
+.p_filter_widgets { margin-bottom: 15px !important; }
+.l_w_title { margin-bottom: 10px !important; }
+#filterSizes { margin-top: 0 !important; padding-top: 0 !important; }
+.widgets_inner { margin: 0 !important; padding: 0 !important; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/ion-rangeslider@2.3.1/js/ion.rangeSlider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

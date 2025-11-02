@@ -1,0 +1,153 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model IEnumerable<ProductDto>
+@using Microsoft.Extensions.Options
+@using ShoesShop.Domain.Modules.Products.Dtos
+@inject IOptions<CloudinarySettings> CloudinaryConfig
+
+@{
+    ViewData["Title"] = "Product";
+    Layout = "~/Modules/Shares/Views/_Layout.cshtml";
+}
+
+ <link rel="icon" href="~/assets/product/img/favicon.png">
+<link rel="stylesheet" href="~/assets/product/css/bootstrap.min.css">
+<link rel="stylesheet" href="~/assets/product/css/animate.css">
+<link rel="stylesheet" href="~/assets/product/css/owl.carousel.min.css">
+<link rel="stylesheet" href="~/assets/product/css/nice-select.css">
+<link rel="stylesheet" href="~/assets/product/css/all.css">
+<link rel="stylesheet" href="~/assets/product/css/flaticon.css">
+<link rel="stylesheet" href="~/assets/product/css/themify-icons.css">
+<link rel="stylesheet" href="~/assets/product/css/magnific-popup.css">
+<link rel="stylesheet" href="~/assets/product/css/slick.css">
+<link rel="stylesheet" href="~/assets/product/css/price_rangs.css">
+<link rel="stylesheet" href="~/assets/product/css/style.css">
+
+<!-- breadcrumb start-->
+@RenderSection(name: "Breadcrumb", required: false)
+<!-- breadcrumb end-->
+
+<!--================Category Product Area =================-->
+<section class="cat_product_area section_padding">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="left_sidebar_area">
+                    @await Component.InvokeAsync(name: "Category")
+                </div>
+            </div>
+            <div class="col-lg-9">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="product_top_bar d-flex justify-content-between align-items-center">
+                            <div class="single_product_menu">
+                                <p><span style="color: red;">@Model.Count()</span> Product Found</p>
+                            </div>
+                            <div class="single_product_menu d-flex">
+                                <h5>sort by : </h5>
+                                 <form asp-action="Index" asp-controller="Product" method="get">
+                                    <input type="hidden" name="categoryId" value="@Context.Request.Query["categoryId"]" />
+                                    <input type="hidden" name="brand" value="@Context.Request.Query["brand"]" />
+                                    <input type="hidden" name="color" value="@Context.Request.Query["color"]" />
+
+                                    <select name="sortBy" onchange="this.form.submit()" class="nice-select">
+                                        <option value="">Default</option>
+                                        <option value="name" selected="@(Context.Request.Query["sortBy"]=="name")">Name</option>
+                                        <option value="price" selected="@(Context.Request.Query["sortBy"]=="price")">Price</option>
+                                        <option value="brand" selected="@(Context.Request.Query["sortBy"]=="brand")">Brand</option>
+                                    </select>
+                                </form>
+                            </div>
+                            <div class="single_product_menu d-flex">
+                                <h5>show :</h5>
+                                <div class="top_pageniation">
+                                    <ul>
+                                        <li>1</li>
+                                        <li>2</li>
+                                        <li>3</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="single_product_menu d-flex">
+                               <div class="input-group">
+                                    <form asp-action="Search" asp-controller="Product" method="post" class="d-flex w-100">
+                                        <input type="text" class="form-control" placeholder="Search" name="query" style="background-color: hsla(210, 4%, 9%, 1); color: #fff; border: 1px solid #444;"/>
+                                        <div class="input-group-prepend">
+                                            <button type="submit" class="input-group-text">
+                                                <i class="ti-search"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row align-items-center latest_product_inner">
+                    @RenderBody()
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<!--================End Category Product Area =================-->
+
+<!-- product_list part start-->
+@* <section class="product_list best_seller">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <div class="section_tittle text-center">
+                    <h2>Best Sellers <span>shop</span></h2>
+                </div>
+            </div>
+        </div>
+        <div class="row align-items-center justify-content-between">
+            <div class="col-lg-12">
+                <div class="best_product_slider owl-carousel">
+                @foreach (var item in Model)
+                {
+                    // Nếu có ảnh thì dùng ảnh đầu tiên, còn không thì dùng ảnh mặc định
+                    var fullUrl = (item.Images != null && item.Images.Any())
+                        ? item.Images.FirstOrDefault()?.Url?.ToCloudinaryUrl(CloudinaryConfig.Value.BaseUrl)
+                        : "/images/default.png";
+
+                    <div class="single_product_item">
+                        <img src="@fullUrl" alt="Product image" class="img-fluid">
+                        <div class="single_product_text">
+                            <h4>@item.Name</h4>
+                            <h3>@item.Price.ToString("C0")</h3>
+                        </div>
+                    </div>
+                }
+                </div>
+            </div>
+        </div>
+    </div>
+</section> *@
+
+<!-- product_list part start-->
+@await Html.PartialAsync(partialViewName: "~/Modules/Product/Views/Shared/BestSellers.cshtml", model: Model)
+<!-- product_list part end-->
+
+
+<script src="~/assets/product/js/jquery-1.12.1.min.js"></script>
+<script src="~/assets/product/js/popper.min.js"></script>
+<script src="~/assets/product/js/bootstrap.min.js"></script>
+<script src="~/assets/product/js/jquery.magnific-popup.js"></script>
+<script src="~/assets/product/js/swiper.min.js"></script>
+<script src="~/assets/product/js/masonry.pkgd.js"></script>
+<script src="~/assets/product/js/particles.min.js"></script>
+<script src="~/assets/product/js/owl.carousel.min.js"></script>
+<script src="~/assets/product/js/jquery.nice-select.min.js"></script>
+<script src="~/assets/product/js/slick.min.js"></script>
+<script src="~/assets/product/js/jquery.counterup.min.js"></script>
+<script src="~/assets/product/js/waypoints.min.js"></script>
+<script src="~/assets/product/js/contact.js"></script>
+<script src="~/assets/product/js/jquery.ajaxchimp.min.js"></script>
+<script src="~/assets/product/js/jquery.form.js"></script>
+<script src="~/assets/product/js/jquery.validate.min.js"></script>
+<script src="~/assets/product/js/mail-script.js"></script>
+<script src="~/assets/product/js/stellar.js"></script>
+<script src="~/assets/product/js/price_rangs.js"></script>
+<script src="~/assets/product/js/custom.js"></script>

@@ -1,0 +1,178 @@
+.btn_no_wrap {
+    white-space: nowrap;
+    display: inline-block;
+    text-align: center;
+}
+
+.table td:last-child {
+    text-align: center;
+    width: 160px;
+}
+
+input {
+    display: inline-block;
+    width: auto;
+}
+
+.form-control {
+    padding: 1rem 1rem;
+}
+
+a {
+    /* display: inline; */
+}
+
+input.form-control,
+select.form-control,
+textarea.form-control {
+    background: #000 !important;
+    color: #fff !important;
+    border: 1px solid #ced4da !important;
+}
+
+/* Khi focus vẫn trắng */
+.form-control:focus {
+    background: #000 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    border-color: #999 !important;
+}
+
+/* Placeholder trắng mờ */
+::placeholder {
+    color: #ced4da !important;
+    opacity: 1 !important; /* Đảm bảo hiển thị đều */
+}
+
+/* Đối với trình duyệt Webkit (Chrome, Safari) */
+::-webkit-input-placeholder {
+    color: #bbb !important;
+}
+:-ms-input-placeholder {
+    color: #bbb !important;
+}
+::-moz-placeholder {
+    color: #bbb !important;
+}
+
+/* Giữ chữ trắng luôn khi nhập */
+.form-control:valid,
+.form-control:not(:placeholder-shown) {
+    color: #fff !important;
+}
+
+.billing_details .contact_form .form-group .country_select span:valid {
+    color: #fff;
+}
+
+.size-filter-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  margin: 2px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.size-filter-option input {
+  display: none;
+}
+
+.size-filter-option:hover {
+  border-color: #ffb300;
+  color: #ffb300;
+  transform: scale(1.05);
+}
+
+.size-filter-option input:checked + span {
+  color: #ffb300;
+  border-color: #ffb300;
+  border-radius: 5px;
+}
+
+.toggle-icon {
+  margin-top: 14px;
+  font-size: 18px;
+  transition: transform 0.2s ease;
+}
+
+.collapsed .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.d-flex.flex-wrap.gap-4 {
+        margin-bottom: 30px;
+        row-gap: 20px;
+        column-gap: 25px;
+}
+
+.size-box {
+    color: #000;
+    width: 70px;
+    height: 70px;
+    border-radius: 12px;
+    border: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    user-select: none;
+    background-color: #fff;
+}
+
+.size-box.available:hover {
+    transform: scale(1.05);
+    border-color: #ffb300;
+}
+
+.size-box.unavailable {
+    border-color: #ccc;
+    color: #000;
+    cursor: not-allowed;
+    background-color: #a2a2a2;
+}
+
+.size-x {
+    position: absolute;
+    font-size: 90px;
+    color: rgba(255, 0, 0, 0.4);
+    top: 56%;
+    left: 50%;
+    transform: translate(-50%, -53%);
+    pointer-events: none;
+}
+
+.size-box.selected {
+    background-color: #fff8e1;
+    border-color: #ffb300;
+    color: #000;
+    box-shadow: 0 0 10px rgba(255, 179, 0, 0.5);
+    transform: scale(1.08);
+}
+
+.size-box.selected span {
+    color: #000 !important;
+}
+
+.size-box.highlight {
+animation: highlightShake 0.3s;
+border-color: #ffb300 !important;
+box-shadow: 0 0 10px #ffb300;
+}
+
+@keyframes highlightShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}

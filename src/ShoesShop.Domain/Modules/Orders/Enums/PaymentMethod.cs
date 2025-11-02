@@ -5,14 +5,14 @@ namespace ShoesShop.Domain.Modules.Orders.Enums;
 public enum PaymentMethod
 {
     [Description("Cash on delivery")]
-    Cash = 0,
+    Cash = 10,
 
     [Description("QR Code")]
-    QRCode = 1,
+    QRCode = 20,
 
     [Description("PayPal")]
-    PayPal = 2,
+    PayPal = 30,
 
     [Description("Card")]
-    Card = 3
+    Card = 40
 }
