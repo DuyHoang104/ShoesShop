@@ -1,0 +1,48 @@
+@{
+    Layout = "~/Modules/Shares/Views/_Layout.cshtml";
+    <link rel="icon" href="img/favicon.png">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/assets/product/css/bootstrap.min.css">
+    <!-- animate CSS -->
+    <link rel="stylesheet" href="~/assets/product/css/animate.css">
+    <!-- owl carousel CSS -->
+    <link rel="stylesheet" href="~/assets/product/css/owl.carousel.min.css">
+    <!-- nice select CSS -->
+    <link rel="stylesheet" href="~/assets/product/css/nice-select.css">
+    <!-- font awesome CSS -->
+    <link rel="stylesheet" href="~/assets/product/css/all.css">
+    <!-- flaticon CSS -->
+    <link rel="stylesheet" href="~/assets/product/css/flaticon.css">
+    <link rel="stylesheet" href="~/assets/product/css/themify-icons.css">
+    <!-- font awesome CSS -->
+    <link rel="stylesheet" href="~/assets/product/css/magnific-popup.css">
+    <!-- swiper CSS -->
+    <link rel="stylesheet" href="~/assets/product/css/slick.css">
+    <link rel="stylesheet" href="~/assets/product/css/price_rangs.css">
+    <!-- style CSS -->
+    <link rel="stylesheet" href="~/assets/product/css/style.css">
+}
+
+<section class="confirmation_part section_padding">
+    <div class="container text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="confirmation_tittle">
+                    <i class="fa fa-times-circle text-danger mb-4" style="font-size: 80px; margin-top: 200px;"></i>
+                    <h2 class="mb-3 text-danger">Payment failed!</h2>
+                    <p class="lead">
+                        We're sorry, but your transaction could not be completed.
+                        Please check your payment information or try again later.
+                    </p>
+                    <div class="mt-4">
+                        <a href="/" class="btn_1">Back to Home</a>
+                        <a href="/Cart" class="btn_1 checkout_btn_1">Try Again</a>
+                    </div>
+                </div>
+                <div class="mt-4 text-muted">
+                    <small>Error code or response: @ViewBag.ResponseCode</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

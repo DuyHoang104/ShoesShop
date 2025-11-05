@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using ShoesShop.Infrastructure.Collections;
 using ShoesShop.Infrastructure.Data.Databases.Context;

@@ -81,8 +81,12 @@
                     </div>
 
                     <div class="col-md-12 form-group p_star">
-                        <button type="submit" class="cod-btn">
+                        <button type="submit" name="payment" value="COD" class="cod-btn">
                             <img src="~/assets/images/cod.png" alt="Cash on Delivery">
+                        </button>
+
+                        <button type="submit" name="payment" value="VNPAY" class="vnpay-btn">
+                            <img src="~/assets/images/vnpay.png" alt="VNPAY">
                         </button>
 
                         <div id="paypal-button-container"></div>
@@ -133,6 +137,9 @@
 .cod-btn { background-color: #ffc439; border: 2px solid #ffc439; border-radius: 4px; padding: 6px; width: 100%; height: 53px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .25s ease; }
 .cod-btn img { width: 180px; object-fit: contain; }
 .cod-btn:hover { background-color: #f4b926; box-shadow: 0 3px 6px rgba(0,0,0,.15); }
+.vnpay-btn { background-color: #ffc439; border: 2px solid #ffc439; border-radius: 4px; padding: 6px; width: 100%; height: 53px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .25s ease; margin-top: 15px; }
+.vnpay-btn img { width: 180px; object-fit: contain;}
+.vnpay-btn:hover { background-color: #f4b926; box-shadow: 0 3px 6px rgba(0,0,0,.15); }
 #paypal-button-container { width: 100%; margin-top: 15px; }
 .col-lg-8 h3 { color: #fff; }
 keyframes bounce { 0%,100% { transform: translateY(0); } 25% { transform: translateY(-8px); } 50% { transform: translateY(4px); } 75% { transform: translateY(-4px); } }
@@ -145,7 +152,7 @@ $(document).ready(function () {
     const $sameAddress = $('#SameAddress');
     const $shippingFields = $('#shipping-fields');
 
-    // 🔹 Khi submit (COD hoặc PayPal đều dùng)
+    // 🔹 Gắn phí ship & giảm giá trước khi submit
     function appendFormData() {
         $form.find('input[name="ShippingCost"], input[name="DiscountValue"]').remove();
         const shippingCost = parseFloat($('#shippingSelect').val()) || 0;
@@ -154,7 +161,49 @@ $(document).ready(function () {
         $form.append(`<input type="hidden" name="DiscountValue" value="${discountValue}" />`);
     }
 
-    // 🔸 Submit COD
+    // 🔹 Kiểm tra thông tin nếu KHÔNG tick "SameAddress"
+    function validateShippingFields() {
+        if ($sameAddress.is(':checked')) {
+            // Nếu tick "Same your address" thì bỏ qua kiểm tra
+            return true;
+        }
+
+        let isValid = true;
+        const requiredFields = [
+            '#ReceiverName',
+            '#ReceiverPhone',
+            '#ReceiverAddress',
+            '#ReceiverCity',
+            '#ReceiverCountry'
+        ];
+
+        requiredFields.forEach(selector => {
+            const $field = $(selector);
+            if (!$field.val() || $field.val().trim() === "") {
+                $field.addClass('is-invalid');
+                isValid = false;
+            } else {
+                $field.removeClass('is-invalid');
+            }
+        });
+
+        // Kiểm tra số điện thoại (10–11 ký tự, chỉ chứa số)
+        const phone = $('#ReceiverPhone').val();
+        const phoneRegex = /^[0-9]{10,11}$/;
+        if (phone && !phoneRegex.test(phone)) {
+            $('#ReceiverPhone').addClass('is-invalid');
+            alert("Please enter a valid phone number (10–11 digits).");
+            isValid = false;
+        }
+
+        if (!isValid) {
+            alert("Please fill in all required shipping information.");
+        }
+
+        return isValid;
+    }
+
+    // 🔸 Gửi đơn COD
     $('.cod-btn').on('click', function (e) {
         const checkbox = $('#acceptTerms')[0];
         if (!checkbox.checked) {
@@ -163,10 +212,34 @@ $(document).ready(function () {
             setTimeout(() => $(checkbox).removeClass('bounce'), 600);
             return;
         }
+
+        if (!validateShippingFields()) {
+            e.preventDefault();
+            return;
+        }
+
         appendFormData();
     });
 
-    // 🔸 PayPal Buttons
+    // 🔸 Gửi đơn qua VNPAY
+    $('.vnpay-btn').on('click', function (e) {
+        const checkbox = $('#acceptTerms')[0];
+        if (!checkbox.checked) {
+            e.preventDefault();
+            $(checkbox).addClass('bounce');
+            setTimeout(() => $(checkbox).removeClass('bounce'), 600);
+            return;
+        }
+
+        if (!validateShippingFields()) {
+            e.preventDefault();
+            return;
+        }
+
+        appendFormData();
+    });
+
+    // 🔸 PayPal
     paypal.Buttons({
         style: {
             layout: 'vertical',
@@ -178,6 +251,10 @@ $(document).ready(function () {
             if (!checkbox.checked) {
                 $(checkbox).addClass('bounce');
                 setTimeout(() => $(checkbox).removeClass('bounce'), 600);
+                return;
+            }
+
+            if (!validateShippingFields()) {
                 return;
             }
 
@@ -214,7 +291,7 @@ $(document).ready(function () {
         }
     }).render('#paypal-button-container');
 
-    // 🔹 Toggle địa chỉ giao hàng
+    // 🔹 Ẩn/hiện các trường nhập nếu tick "Same your address"
     function toggleShippingFields() {
         const $fields = $shippingFields.find('input, select').closest('.form-group');
         if ($sameAddress.is(':checked')) {

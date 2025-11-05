@@ -1,6 +1,4 @@
 using ShoesShop.Domain.Modules.Carts.Dtos;
-using ShoesShop.Domain.Modules.Orders.Dtos;
-using ShoesShop.Domain.Modules.Orders.Enums;
 using ShoesShop.Domain.Modules.Users.Dtos;
 
 namespace ShoesShop.Web.Modules.Order.Dtos.Commands

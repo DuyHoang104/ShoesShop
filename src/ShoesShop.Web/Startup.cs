@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using ShoesShop.Crosscutting.Utilities.PayPal;
+using ShoesShop.Crosscutting.Utilities.VNpay;
 using ShoesShop.Domain.Collections;
 using ShoesShop.Domain.Modules.Carts.Entities;
 using ShoesShop.Domain.Modules.Carts.Services;
@@ -55,7 +56,6 @@ namespace ShoesShop.Web
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IOrderService, OrderService>();
 
-            // services.AddScoped<test>();
             services.AddScoped<IGenericRepository<User, int>>(serviceProvider =>
             {
                 var repositoryCollection = serviceProvider.GetRequiredService<IRepositoryCollection>();
@@ -117,6 +117,8 @@ namespace ShoesShop.Web
                 var mode = Configuration["PayPal:Mode"] ?? throw new InvalidOperationException("PayPal:Mode is not configured.");
                 return new PaypalClient(clientId, clientSecret, mode);
             });
+
+            services.AddScoped<IVnPayService, VnPayService>();
             
             services.AddAuthorization();
             

@@ -45,19 +45,20 @@ namespace ShoesShop.Domain.Services.Modules.Orders.Services
         {
             var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("userId")?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
-                throw new Exception("User not logged in");
+                throw new UnauthorizedAccessException("User not logged in");
             return int.Parse(userIdClaim);
         }
 
-       public async Task CreateOrderAsync(OrderDto orderDto)
+        public async Task CreateOrderAsync(OrderDto orderDto)
         {
             await using var transaction = await _unitOfWork.BeginTransactionAsync();
+
             try
             {
                 var userId = GetUserIdFromClaims();
 
                 var user = await _userRepository.GetByIdAsync(userId)
-                    ?? throw new Exception("User not found");
+                    ?? throw new InvalidOperationException("User not found");
 
                 Address? address;
 
@@ -65,7 +66,7 @@ namespace ShoesShop.Domain.Services.Modules.Orders.Services
                 {
                     address = (await _addressRepository.GetAllAsync(a => a.UserId == userId && a.IsDefault))
                         .FirstOrDefault()
-                        ?? throw new Exception("Default address not found");
+                        ?? throw new InvalidOperationException("Default address not found");
 
                     orderDto.ReceiverAddress = address.AddressLine1;
                     orderDto.ReceiverName = user.UserName;
@@ -104,26 +105,21 @@ namespace ShoesShop.Domain.Services.Modules.Orders.Services
                     .ToList();
 
                 if (cartItems.Count == 0)
-                    throw new Exception("Your cart is empty.");
-
-                decimal totalWithoutShipping = 0;
+                    throw new InvalidOperationException("Your cart is empty.");
 
                 foreach (var item in cartItems)
                 {
                     if (item.Product == null)
-                        throw new Exception("Cart item missing product data.");
+                        throw new InvalidOperationException("Cart item missing product data.");
 
-                    var subtotal = item.Quantity * item.Product.Price;
-
-                    var discountedSubtotal = Math.Round(subtotal * (1 - (orderDto.Discount ?? 0)), 2);
-
-                    totalWithoutShipping += discountedSubtotal;
+                    var unitPrice = item.Product.Price;
+                    var discountedPrice = Math.Round(unitPrice * (1 - (orderDto.Discount ?? 0)), 2);
 
                     var orderDetail = new OrderDetail(
                         order: order,
                         product: item.Product,
                         quantity: item.Quantity,
-                        subtotal: discountedSubtotal + (orderDto.ShippingFee ?? 0)
+                        subtotal: discountedPrice * item.Quantity 
                     );
 
                     order.AddOrderDetail(orderDetail);
@@ -149,9 +145,7 @@ namespace ShoesShop.Domain.Services.Modules.Orders.Services
             var items = await _cartService.GetByUserIdAsync();
 
             var subtotal = items.Sum(x => x.TotalPrice);
-            var discountAmount = subtotal * discount;
-
-            var finalTotal = (subtotal - discountAmount) + shippingFee;
+            var finalTotal = subtotal * (1 - discount) + shippingFee;
 
             return finalTotal;
         }

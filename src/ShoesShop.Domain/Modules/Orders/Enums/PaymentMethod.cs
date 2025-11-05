@@ -13,6 +13,6 @@ public enum PaymentMethod
     [Description("PayPal")]
     PayPal = 30,
 
-    [Description("Card")]
-    Card = 40
+    [Description("VNPay Card")]
+    VnPayCard = 40
 }
