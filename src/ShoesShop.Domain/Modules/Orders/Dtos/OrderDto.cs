@@ -4,6 +4,7 @@ namespace ShoesShop.Domain.Modules.Orders.Dtos
 {
     public class OrderDto
     {
+        public int Id { get; set; }
         public bool SameAddress { get; set; }
         public string? ReceiverName { get; set; } = null!;
         public string? ReceiverPhone { get; set; } = null!;

@@ -1,7 +1,7 @@
 using ShoesShop.Domain.Modules.Carts.Dtos;
 using ShoesShop.Domain.Modules.Users.Dtos;
 
-namespace ShoesShop.Web.Modules.Order.Dtos.Commands
+namespace ShoesShop.Web.Modules.Order.Dtos
 {
     public class OrderModalDto
     {

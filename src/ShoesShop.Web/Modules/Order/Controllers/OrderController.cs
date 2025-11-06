@@ -7,6 +7,7 @@ using ShoesShop.Crosscutting.Utilities.VNpay;
 using ShoesShop.Domain.Modules.Carts.Services;
 using ShoesShop.Domain.Modules.Orders.Dtos;
 using ShoesShop.Domain.Modules.Orders.Services;
+using ShoesShop.Web.Modules.Order.Dtos;
 using ShoesShop.Web.Modules.Order.Dtos.Commands;
 
 namespace ShoesShop.Web.Modules.Order.Controllers
@@ -73,7 +74,7 @@ namespace ShoesShop.Web.Modules.Order.Controllers
                 return Redirect(_vnPayService.CreatePaymentUrl(HttpContext, model));
             }
 
-            await _orderService.CreateOrderAsync(new OrderDto
+            var orderCreated = await _orderService.CreateOrderAsync(new OrderDto
             {
                 SameAddress = order.SameAddress,
                 ReceiverName = order.ReceiverName,
@@ -90,7 +91,7 @@ namespace ShoesShop.Web.Modules.Order.Controllers
             });
             await _cartService.ClearCartAsync();
 
-            return RedirectToAction("Success");
+            return RedirectToAction("Success", new { orderId = orderCreated.Id });
         }
 
         [Authorize]
@@ -125,7 +126,7 @@ namespace ShoesShop.Web.Modules.Order.Controllers
             try
             {
                 var response = await _paypalClient.CaptureOrder(orderID);
-                await _orderService.CreateOrderAsync(new OrderDto
+                var orderCreated = await _orderService.CreateOrderAsync(new OrderDto
                 {
                     SameAddress = order.SameAddress,
                     ReceiverName = order.ReceiverName,
@@ -143,7 +144,7 @@ namespace ShoesShop.Web.Modules.Order.Controllers
 
                 await _cartService.ClearCartAsync();
 
-                return Ok(response);
+                return Ok(new { orderID = orderCreated.Id });
             }
             catch (Exception ex)
             {
@@ -152,26 +153,32 @@ namespace ShoesShop.Web.Modules.Order.Controllers
             }
         }
 
-        [HttpGet("/Order/PaymentCallBack")]
+       [HttpGet("/Order/PaymentCallBack")]
         public async Task<IActionResult> PaymentCallBack()
         {
+            // 🔹 Xử lý phản hồi từ VNPay
             var response = _vnPayService.PaymentExcute(Request.Query);
             if (response == null || response.VnPayResponseCode != "00")
             {
-                TempData["Message"] = "Payment failed!";
+                TempData["Message"] = "Thanh toán thất bại!";
                 return RedirectToAction("Fail");
             }
+
             var tempOrderJson = HttpContext.Session.GetString("TempOrder");
             if (string.IsNullOrEmpty(tempOrderJson))
             {
-                TempData["Message"] = "Session expired or invalid order data.";
+                TempData["Message"] = "Phiên làm việc hết hạn hoặc dữ liệu đơn hàng không hợp lệ.";
                 return RedirectToAction("Fail");
             }
 
             var order = JsonConvert.DeserializeObject<OrderModalDto>(tempOrderJson);
+            if (order == null)
+            {
+                TempData["Message"] = "Không thể đọc thông tin đơn hàng.";
+                return RedirectToAction("Fail");
+            }
 
-            // ✅ Tạo order thực tế trong DB
-            await _orderService.CreateOrderAsync(new OrderDto
+            var orderDetail = await _orderService.CreateOrderAsync(new OrderDto
             {
                 SameAddress = order.SameAddress,
                 ReceiverName = order.ReceiverName,
@@ -187,26 +194,67 @@ namespace ShoesShop.Web.Modules.Order.Controllers
                 Discount = order.DiscountValue
             });
 
-            // ✅ Xóa giỏ hàng và session tạm
             await _cartService.ClearCartAsync();
             HttpContext.Session.Remove("TempOrder");
-            TempData["Message"] = "Payment successful!";
-            return RedirectToAction("Success");
+
+            TempData["Message"] = "Thanh toán thành công!";
+            return RedirectToAction("Success", new { orderId = orderDetail.Id });
         }
 
         [HttpGet("success")]
-        public IActionResult Success()
+        [ValidateModel("Index")]
+        public async Task<IActionResult> Success(int orderId)
         {
-            return View("~/Modules/Order/Views/Success.cshtml");
+            var order= await _orderService.GetOrderDetailByIdAsync(orderId);
+            var orderDetail = new OrderDetailModalDto
+            {
+                Id = order.Id,
+                ReceiverName = order.ReceiverName,
+                ReceiverPhone = order.ReceiverPhone,
+                ReceiverAddress = order.ReceiverAddress,
+                ReceiverCity = order.ReceiverCity,
+                ReceiverCountry = order.ReceiverCountry,
+                Note = order.Note,
+                ShippingCost = order.ShippingCost,
+                DiscountValue = order.DiscountValue,
+                PaymentMethod = order.PaymentMethod,
+                PaymentStatus = order.PaymentStatus,
+                OrderDate = order.OrderDate,
+                TotalAmount = order.TotalAmount,
+                OrderDetails = order.OrderDetails.Select(od => new OrderDetailItemModalDto
+                {
+                    ProductName = od.ProductName,
+                    Quantity = od.Quantity,
+                    UnitPrice = od.UnitPrice,
+                    Subtotal = od.Subtotal,
+                    ProductImage = od.ProductImage
+                }).ToList(),
+
+                Address = order.Address == null ? null : new AddressModalDto
+                {
+                    AddressLine1 = order.Address.AddressLine1,
+                    City = order.Address.City,
+                    Country = order.Address.Country,
+                    IsDefault = order.Address.IsDefault
+                }
+            };
+
+            if (orderDetail == null)
+            {
+                TempData["Message"] = "Không tìm thấy đơn hàng.";
+                return RedirectToAction("Fail");
+            }
+
+            return View("~/Modules/Order/Views/Success.cshtml", orderDetail);
         }
 
         [HttpGet("fail")]
         public IActionResult Fail(string vnp_ResponseCode)
         {
             ViewBag.ResponseCode = vnp_ResponseCode;
-            ViewBag.Message = TempData["Message"];
+                    ViewBag.Message = TempData["Message"];
 
-            return View("~/Modules/Order/Views/Fail.cshtml");
+                    return View("~/Modules/Order/Views/Fail.cshtml");
+                }
+            }
         }
-    }
-}

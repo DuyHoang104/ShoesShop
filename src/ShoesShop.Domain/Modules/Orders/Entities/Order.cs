@@ -233,7 +233,6 @@ public class Order : BaseEntity<int>
         Note = note;
         Status = OrderStatus.Pending;
         OrderDate = DateTime.UtcNow;
-        
     }
 
     public Order() { }

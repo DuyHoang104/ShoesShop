@@ -1,5 +1,5 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@model ShoesShop.Web.Modules.Order.Dtos.Commands.OrderModalDto
+@model ShoesShop.Web.Modules.Order.Dtos.OrderModalDto
 
 @{
     ViewData["Title"] = "Order Index";
@@ -285,10 +285,14 @@ $(document).ready(function () {
                 if (!response.ok) {
                     return response.json().then(error => { throw error; });
                 }
-                window.location.href = "/Order/PaymentSuccess";
+                return response.json();
+            })
+            .then(result => {
+                window.location.href = "/Order/Success?orderId=" + result.orderID;
             })
             .catch(error => alert(error.message));
         }
+
     }).render('#paypal-button-container');
 
     // 🔹 Ẩn/hiện các trường nhập nếu tick "Same your address"

@@ -1,19 +1,22 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using ShoesShop.Crosscutting.Utilities.Exceptions;
 using ShoesShop.Domain.Modules.Carts.Entities;
 using ShoesShop.Domain.Modules.Carts.Services;
 using ShoesShop.Domain.Modules.Commons.Repositories;
 using ShoesShop.Domain.Modules.Orders.Dtos;
+using ShoesShop.Domain.Modules.Orders.Dtos.Commands;
 using ShoesShop.Domain.Modules.Orders.Entities;
 using ShoesShop.Domain.Modules.Orders.Services;
 using ShoesShop.Domain.Modules.Shares.Entities;
+using ShoesShop.Domain.Modules.Users.Dtos;
 using ShoesShop.Domain.Modules.Users.Entities;
 using ShoesShop.Infrastructure.Data.UOW;
 
 namespace ShoesShop.Domain.Services.Modules.Orders.Services
 {
     public class OrderService : IOrderService
-{
+    {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IGenericRepository<Order, int> _orderRepository;
         private readonly IGenericRepository<User, int> _userRepository;
@@ -30,7 +33,7 @@ namespace ShoesShop.Domain.Services.Modules.Orders.Services
             IGenericRepository<CartItem, int> cartItemRepository,
             ICartService cartService,
             IUnitOfWork unitOfWork
-            )
+        )
         {
             _orderRepository = orderRepository;
             _userRepository = userRepository;
@@ -49,7 +52,7 @@ namespace ShoesShop.Domain.Services.Modules.Orders.Services
             return int.Parse(userIdClaim);
         }
 
-        public async Task CreateOrderAsync(OrderDto orderDto)
+        public async Task<OrderDetailDto> CreateOrderAsync(OrderDto orderDto)
         {
             await using var transaction = await _unitOfWork.BeginTransactionAsync();
 
@@ -81,11 +84,9 @@ namespace ShoesShop.Domain.Services.Modules.Orders.Services
                         orderDto.Country,
                         isDefault: false
                     );
-
-                    await _addressRepository.InsertAsync(address);
-                    await _addressRepository.SaveChangesAsync();
                 }
 
+                // ✅ Tạo Order
                 var order = new Order(
                     user: user,
                     address: address,
@@ -107,19 +108,23 @@ namespace ShoesShop.Domain.Services.Modules.Orders.Services
                 if (cartItems.Count == 0)
                     throw new InvalidOperationException("Your cart is empty.");
 
+                decimal subtotal = 0;
+
                 foreach (var item in cartItems)
                 {
                     if (item.Product == null)
                         throw new InvalidOperationException("Cart item missing product data.");
 
                     var unitPrice = item.Product.Price;
-                    var discountedPrice = Math.Round(unitPrice * (1 - (orderDto.Discount ?? 0)), 2);
+                    var subtotalItem = unitPrice * item.Quantity;
+
+                    subtotal += subtotalItem;
 
                     var orderDetail = new OrderDetail(
                         order: order,
                         product: item.Product,
                         quantity: item.Quantity,
-                        subtotal: discountedPrice * item.Quantity 
+                        subtotal: subtotalItem
                     );
 
                     order.AddOrderDetail(orderDetail);
@@ -128,10 +133,44 @@ namespace ShoesShop.Domain.Services.Modules.Orders.Services
                 }
 
                 await _cartItemRepository.SaveChangesAsync();
+
+                var totalAmount = (subtotal + (orderDto.ShippingFee ?? 0)) * (1 - (orderDto.Discount ?? 0));
+
                 await _orderRepository.InsertAsync(order);
                 await _orderRepository.SaveChangesAsync();
-
                 await transaction.CommitAsync();
+
+                return new OrderDetailDto
+                {
+                    Id = order.Id,
+                    ReceiverName = order.ReceiverName,
+                    ReceiverPhone = order.ReceiverPhone,
+                    ReceiverAddress = order.ReceiverAddress,
+                    ReceiverCity = address?.City ?? "",
+                    ReceiverCountry = address?.Country ?? "",
+                    Note = order.Note,
+                    ShippingCost = order.ShippingFee ?? 0,
+                    DiscountValue = order.Discount ?? 0,
+                    PaymentMethod = order.PaymentMethod,
+                    PaymentStatus = order.PaymentStatus,
+                    OrderDate = order.OrderDate,
+                    TotalAmount = totalAmount,
+                    OrderDetails = order.OrderDetails.Select(d => new OrderDetailItemDto
+                    {
+                        ProductName = d.Product?.Name ?? "Unknown",
+                        Quantity = d.Quantity,
+                        UnitPrice = d.UnitPrice,
+                        Subtotal = d.Subtotal,
+                        ProductImage = d.Product?.Images?.FirstOrDefault()?.Url ?? "/images/defaultpng"
+                    }).ToList(),
+                    Address = address == null ? null : new AddressDto
+                    {
+                        AddressLine1 = address.AddressLine1,
+                        City = address.City,
+                        Country = address.Country,
+                        IsDefault = address.IsDefault
+                    }
+                };
             }
             catch
             {
@@ -140,13 +179,58 @@ namespace ShoesShop.Domain.Services.Modules.Orders.Services
             }
         }
 
-        public async Task<decimal> CalculateOrderTotalAsync(decimal shippingFee = 0, decimal discount = 0)
+        public async Task<OrderDetailDto> GetOrderDetailByIdAsync(int orderId)
+        {
+            var order = (await _orderRepository.GetAllAsync(
+                include: q => q
+                    .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                    .ThenInclude(p => p.Images)
+                    .Include(o => o.Address)
+            )).FirstOrDefault(o => o.Id == orderId)
+            ?? throw new BusinessException("Order not found");
+
+            decimal total = order.OrderDetails.Sum(d => d.Subtotal);
+
+            return new OrderDetailDto
+            {
+                Id = order.Id,
+                ReceiverName = order.ReceiverName,
+                ReceiverPhone = order.ReceiverPhone,
+                ReceiverAddress = order.Address?.AddressLine1 ?? string.Empty,
+                ReceiverCity = order.Address?.City ?? string.Empty,
+                ReceiverCountry = order.Address?.Country ?? string.Empty,
+                Note = order.Note,
+                ShippingCost = order.ShippingFee ?? 0,
+                DiscountValue = order.Discount ?? 0,
+                PaymentMethod = order.PaymentMethod,
+                PaymentStatus = order.PaymentStatus,
+                OrderDate = order.OrderDate,
+                TotalAmount = (total + (order.ShippingFee ?? 0)) * (1 - (order.Discount ?? 0)),
+                OrderDetails = order.OrderDetails.Select(d => new OrderDetailItemDto
+                {
+                    ProductName = d.Product?.Name ?? "Unknown",
+                    Quantity = d.Quantity,
+                    UnitPrice = d.UnitPrice,
+                    Subtotal = d.Subtotal,
+                    ProductImage = d.Product?.Images?.FirstOrDefault()?.Url ?? "/images/default.png"
+                }).ToList(),
+                Address = order.Address == null ? null : new AddressDto
+                {
+                    AddressLine1 = order.Address.AddressLine1,
+                    City = order.Address.City,
+                    Country = order.Address.Country,
+                    IsDefault = order.Address.IsDefault
+                }
+            };
+        }
+        
+        public async Task<decimal> CalculateOrderTotalAsync(decimal shippingFee = 0, decimal discountRate = 0)
         {
             var items = await _cartService.GetByUserIdAsync();
-
             var subtotal = items.Sum(x => x.TotalPrice);
-            var finalTotal = subtotal * (1 - discount) + shippingFee;
-
+            var discountAmount = subtotal * discountRate;
+            var finalTotal = subtotal - discountAmount + shippingFee;
             return finalTotal;
         }
     }

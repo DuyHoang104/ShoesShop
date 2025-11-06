@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Microsoft.EntityFrameworkCore;
 using ShoesShop.Domain.Collections;
 using ShoesShop.Domain.Modules.Carts.Entities;

@@ -78,7 +78,6 @@ h2 { color: #fff; font-weight: 700; margin-bottom: 20px; }
             <a>
                 <span>Shipping</span>
                 <select id="shippingSelect">
-                    <option value="0">Select shipping method</option>
                     <option value="35">Standard Shipping – $35.00</option>
                     <option value="50">Express Shipping – $50.00</option>
                     <option value="80">Overnight Shipping – $80.00</option>
@@ -93,7 +92,6 @@ h2 { color: #fff; font-weight: 700; margin-bottom: 20px; }
                 <button type="button" id="applyDiscount">Apply</button>
             </div>
 
-            <!-- ✅ Giữ nguyên 3 thẻ p như mày muốn -->
             <p id="discountMessageDefault" class="discount-message">Enter SALE10 for 10% off, or SALE20 for 20% off</p>
             <p id="discountMessageSuccess" class="discount-message" style="display:none;"></p>
             <p id="discountMessageError" class="discount-message" style="display:none; color:#ff4444;"></p>
@@ -102,7 +100,7 @@ h2 { color: #fff; font-weight: 700; margin-bottom: 20px; }
         </li>
 
         <li class="line-item total-section">
-            <a><span>Total</span><span id="totalPrice">$@(Convert.ToDecimal(ViewBag.Total) + 35)</span></a>
+            <a><span>Total</span><span id="totalPrice">$@(Convert.ToDecimal(ViewBag.Total))</span></a>
         </li>
     </ul>
 </div>
@@ -112,25 +110,32 @@ h2 { color: #fff; font-weight: 700; margin-bottom: 20px; }
 <script src="~/assets/product/js/bootstrap.min.js"></script>
 <script>
 $(document).ready(function () {
-    const subtotal = parseFloat("@ViewBag.Total");
-    let shippingCost = 0;
+    const subtotal = parseFloat("@(Convert.ToDecimal(ViewBag.Total).ToString(System.Globalization.CultureInfo.InvariantCulture))") || 0;
+    let shippingCost = 35;
     let discountValue = 0;
 
-    function updateTotal() {
-        const total = subtotal + shippingCost - discountValue;
-        $("#totalPrice").text(`$${total.toFixed(2)}`);
+    function formatCurrency(num) {
+        return `$${num.toFixed(2)}`;
     }
 
+    function updateTotal() {
+        const total = (subtotal - discountValue) + shippingCost;
+        $("#totalPrice").text(formatCurrency(total));
+    }
+
+    // 🔹 Khi thay đổi phí ship
     $("#shippingSelect").on("change", function () {
         shippingCost = parseFloat($(this).val()) || 0;
         updateTotal();
     });
 
+    // 🔹 Khi áp mã giảm giá
     $("#applyDiscount").on("click", function () {
         const code = $("#discountCode").val().trim().toUpperCase();
         const msgDefault = $("#discountMessageDefault");
         const msgSuccess = $("#discountMessageSuccess");
         const msgError = $("#discountMessageError");
+
         msgDefault.hide();
         msgSuccess.hide();
         msgError.hide();
@@ -138,16 +143,19 @@ $(document).ready(function () {
         if (code === "SALE10") {
             discountValue = subtotal * 0.10;
             $("#discountRatio").val(0.1);
-            msgSuccess.text(`Discount applied: -$${discountValue.toFixed(2)}`).show();
-        } else if (code === "SALE20") {
+            msgSuccess.text(`Discount applied: -${formatCurrency(discountValue)}`).show();
+        } 
+        else if (code === "SALE20") {
             discountValue = subtotal * 0.20;
             $("#discountRatio").val(0.2);
-            msgSuccess.text(`Discount applied: -$${discountValue.toFixed(2)}`).show();
-        } else if (code === "") {
+            msgSuccess.text(`Discount applied: -${formatCurrency(discountValue)}`).show();
+        } 
+        else if (code === "") {
             msgDefault.show();
             discountValue = 0;
             $("#discountRatio").val(0);
-        } else {
+        } 
+        else {
             discountValue = 0;
             $("#discountRatio").val(0);
             msgError.text("Invalid code").show();
@@ -156,6 +164,7 @@ $(document).ready(function () {
         updateTotal();
     });
 
+    // ✅ Khởi tạo tổng ban đầu (đã có phí ship)
     updateTotal();
 });
 </script>
