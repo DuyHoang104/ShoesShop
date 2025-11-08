@@ -193,7 +193,7 @@
 
          <!-- Order -->
         <li class="navbar-item">
-            <a asp-controller="Order" asp-action="Checkout" class="navbar-link hover-underline">
+            <a asp-controller="Order" asp-action="Index" class="navbar-link hover-underline">
                 <div class="separator"></div>
                 <span class="span">Order</span>
             </a>
@@ -226,8 +226,8 @@
         @if (string.IsNullOrEmpty(userId))
         {
           <a class="cw-btn btn-secondary" asp-action="Index" asp-controller="User">
-              <span class="text text-1">Login Now</span>
-            <span class="text text-2" aria-hidden="true" data-text="Login Now">Login Now</span>
+              <span class="text text-1">Login</span>
+            <span class="text text-2" aria-hidden="true" data-text="Login">Login</span>
           </a>
         }
         else

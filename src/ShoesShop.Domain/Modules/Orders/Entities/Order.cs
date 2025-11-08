@@ -219,7 +219,7 @@ public class Order : BaseEntity<int>
     }
 
     public Order(User user, Address address, PaymentMethod paymentMethod, PaymentStatus paymentStatus, string? receiverName,
-        string? receiverPhone, string? receiverAddress, string? note = null, decimal? shippingFee = null, decimal? discount = null)
+        string? receiverPhone, string? receiverAddress, string? note, decimal? shippingFee, decimal? discount)
     {
         User = user;
         Address = address;

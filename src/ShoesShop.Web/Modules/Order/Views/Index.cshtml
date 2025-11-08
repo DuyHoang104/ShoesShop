@@ -1,25 +1,48 @@
+@using ShoesShop.Domain.Modules.Orders.Enums
+@using ShoesShop.Web.Modules.Order.Dtos
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@model ShoesShop.Web.Modules.Order.Dtos.OrderModalDto
+@inject Microsoft.Extensions.Options.IOptions<CloudinarySettings> CloudinaryConfig
+@model List<OrderModalDto>
 
 @{
-    ViewData["Title"] = "Order Index";
+    ViewData["Title"] = "My Orders";
     Layout = "~/Modules/Shares/Views/_Layout.cshtml";
-    <script src="https://www.paypal.com/sdk/js?client-id=@ViewBag.PayPalClientId"></script>
 }
 
-<link rel="icon" href="~/assets/product/img/favicon.png">
 <link rel="stylesheet" href="~/assets/product/css/bootstrap.min.css">
-<link rel="stylesheet" href="~/assets/product/css/animate.css">
-<link rel="stylesheet" href="~/assets/product/css/owl.carousel.min.css">
-<link rel="stylesheet" href="~/assets/product/css/nice-select.css">
-<link rel="stylesheet" href="~/assets/product/css/all.css">
-<link rel="stylesheet" href="~/assets/product/css/flaticon.css">
-<link rel="stylesheet" href="~/assets/product/css/themify-icons.css">
-<link rel="stylesheet" href="~/assets/product/css/magnific-popup.css">
-<link rel="stylesheet" href="~/assets/product/css/slick.css">
-<link rel="stylesheet" href="~/assets/product/css/price_rangs.css">
+<link rel="icon" href="~/images/favicon.png">
 <link rel="stylesheet" href="~/assets/product/css/style.css">
-<link rel="stylesheet" href="~/assets/css/share.css" asp-append-version="true" />
+
+<style>
+.order-container { max-width: 1200px; margin: 100px auto; padding: 0 20px; }
+.order-title { font-size: 32px; font-weight: 700; text-align: center; color: #fff; margin-bottom: 50px; }
+.order-card { background: #000; border-radius: 20px; padding: 25px 30px; margin-bottom: 35px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); transition: 0.3s; border: 1px solid #222; }
+.order-card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(28, 28, 28, 0.7); }
+.order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.order-header h3 { color: #fff; font-size: 20px; margin: 0; }
+.order-date { font-size: 14px; color: #aaa; }
+.order-status { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 30px; font-weight: 600; text-transform: capitalize; }
+.status-completed { background: #16a34a33; color: #16a34a; }
+.status-pending { background: #facc1533; color: #ffb700; }
+.status-cancelled { background: #f8717133; color: #b91c1c; }
+.order-body p { color: #ddd; font-size: 15px; margin: 8px 0; }
+.order-items { margin-top: 15px; background: #1a1a1a; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+.order-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #333; }
+.order-item:last-child { border-bottom: none; }
+.order-item-left { display: flex; align-items: center; gap: 15px; }
+.order-item-left img { width: 65px; height: 65px; object-fit: cover; border-radius: 12px; border: 1px solid #222; }
+.order-item-left .name { color: #fff; font-weight: 500; font-size: 15px; }
+.order-item-left .qty { color: #aaa; font-size: 13px; margin-top: 3px; }
+.order-item-right { color: #facc15; font-weight: 600; font-size: 14px; }
+.order-footer { display: flex; justify-content: flex-end; margin-top: 25px; }
+.btn-detail { background: linear-gradient(135deg, #0071e3, #0058a8); color: #fff; padding: 10px 22px; border-radius: 12px; font-weight: 600; transition: 0.3s; border: none; cursor: pointer; }
+.btn-detail:hover { transform: translateY(-2px); background: linear-gradient(135deg, #0058a8, #003f75); }
+.empty-order { display: flex; flex-direction: column; align-items: center; margin-top: 60px; color: #888; text-align: center; }
+.empty-order img { width: 180px; opacity: 0.7; margin-bottom: 15px; }
+
+media(max-width:768px){.order-header { flex-direction: column; align-items: flex-start; gap: 10px; } .order-item { flex-direction: column; align-items: flex-start; gap: 8px; } .order-footer { justify-content: center; }
+}
+</style>
 
 <section class="breadcrumb breadcrumb_bg">
     <div class="container">
@@ -27,8 +50,8 @@
             <div class="col-lg-8">
                 <div class="breadcrumb_iner">
                     <div class="breadcrumb_iner_item">
-                        <h2>Product Checkout</h2>
-                        <p>Home <span>-</span> Shop Single</p>
+                        <h2>Your Orders</h2>
+                        <p>Home <span>-</span>Orders</p>
                     </div>
                 </div>
             </div>
@@ -36,276 +59,78 @@
     </div>
 </section>
 
-<section class="checkout_area padding_top">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8">
-                <h3>Billing Details</h3>
+<div class="order-container">
+    <h2 class="order-title"></h2>
 
-                <form id="orderForm" asp-action="Checkout" asp-controller="Order" method="post" class="billing_details">
-                    @Html.AntiForgeryToken()
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty-order">
+            <img src="~/assets/images/empty-cart.png" alt="No Orders"/>
+            <p>You haven't placed any orders yet.</p>
+        </div>
+    }
+    else
+    {
+        foreach(var order in Model)
+        {
+            var statusText = order.Status switch
+            {
+                OrderStatus.Completed => "Completed",
+                OrderStatus.Pending => "Processing",
+                OrderStatus.Cancelled => "Cancelled",
+                _ => "Unknown"
+            };
 
-                    <div class="form-check mb-3">
-                        <input asp-for="SameAddress" class="form-check-input" />
-                        <label asp-for="SameAddress" class="form-check-label">Same Your Address?</label>
+            var statusClass = order.Status switch
+            {
+                OrderStatus.Completed => "status-completed",
+                OrderStatus.Pending => "status-pending",
+                OrderStatus.Cancelled => "status-cancelled",
+                _ => "status-pending"
+            };
+
+            <div class="order-card">
+                <div class="order-header">
+                    <div>
+                        <h3>Order #@order.Id</h3>
+                        <p class="order-date">Placed on @order.OrderDate.ToString("MMM dd, yyyy")</p>
                     </div>
+                    <span class="order-status @statusClass">@statusText</span>
+                </div>
 
-                    <div id="shipping-fields" class="row contact_form" novalidate="novalidate">
-                        <div class="col-md-6 form-group p_star">
-                            <input asp-for="ReceiverName" class="form-control" placeholder="Receiver Name" />
-                        </div>
-                        <div class="col-md-6 form-group p_star">
-                            <input asp-for="ReceiverPhone" class="form-control" placeholder="Receiver Number Phone" />
-                        </div>
+                <div class="order-body">
+                    <p><strong>Total:</strong> $@order.TotalAmount.ToString("N2")</p>
+                    <p><strong>Payment:</strong> @order.PaymentMethod.ToString() (@order.PaymentStatus.ToString())</p>
 
-                        <div class="col-md-12 form-group p_star">
-                            <select asp-for="ReceiverCountry" class="country_select">
-                                <option value="" disabled selected hidden>Select country</option>
-                                <option value="vn">Vietnam</option>
-                                <option value="us">United States</option>
-                                <option value="uk">United Kingdom</option>
-                            </select>
-                        </div>
+                    <div class="order-items">
+                        @foreach(var item in order.OrderDetails)
+                        {
+                            var baseUrl = CloudinaryConfig.Value.BaseUrl.EndsWith("/") ? CloudinaryConfig.Value.BaseUrl : $"{CloudinaryConfig.Value.BaseUrl}/";
+                            var imgUrl = !string.IsNullOrEmpty(item.ProductImage) 
+                                         ? (item.ProductImage.StartsWith("http") ? item.ProductImage : $"{baseUrl}{item.ProductImage}") 
+                                         : "/images/default.png";
 
-                        <div class="col-md-12 form-group p_star">
-                            <input asp-for="ReceiverAddress" class="form-control" placeholder="Address line" />
-                        </div>
-
-                        <div class="col-md-12 form-group p_star">
-                            <input asp-for="ReceiverCity" class="form-control" placeholder="Town / City" />
-                        </div>
-
-                        <div class="col-md-12 form-group">
-                            <textarea asp-for="Note" class="form-control" rows="1" placeholder="Order notes"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="col-md-12 form-group p_star">
-                        <button type="submit" name="payment" value="COD" class="cod-btn">
-                            <img src="~/assets/images/cod.png" alt="Cash on Delivery">
-                        </button>
-
-                        <button type="submit" name="payment" value="VNPAY" class="vnpay-btn">
-                            <img src="~/assets/images/vnpay.png" alt="VNPAY">
-                        </button>
-
-                        <div id="paypal-button-container"></div>
-                    </div>
-
-                </form>
-            </div>
-
-            <!-- Order summary -->
-            <div class="col-lg-4">
-                <div class="order_box">
-                    @await Html.PartialAsync(partialViewName: "Shared/CartOrder.cshtml", Model.CartItems)
-                    <div class="creat_account form-check">
-                        <input class="form-check-input-order" type="checkbox" id="acceptTerms" name="AcceptTerms" required />
-                        <label for="acceptTerms">I’ve read and accept the </label>
-                        <a style="display: inline;">terms & conditions*</a>
+                            <div class="order-item">
+                                <div class="order-item-left">
+                                    <img src="@imgUrl" alt="@item.ProductName"/>
+                                    <div>
+                                        <div class="name">@item.ProductName</div>
+                                        <div class="qty">Qty: @item.Quantity</div>
+                                    </div>
+                                </div>
+                                <div class="order-item-right">$@item.UnitPrice.ToString("N2")</div>
+                            </div>
+                        }
                     </div>
                 </div>
+
+                <div class="order-footer">
+                    <form asp-controller="Order" asp-action="Success" method="get">
+                        <input type="hidden" name="orderId" value="@order.Id" />
+                        <button class="btn-detail" type="submit">View Details</button>
+                    </form>
+                </div>
             </div>
-        </div>
-    </div>
-</section>
-
-<script src="~/assets/product/js/popper.min.js"></script>
-<script src="~/assets/product/js/jquery.magnific-popup.js"></script>
-<script src="~/assets/product/js/swiper.min.js"></script>
-<script src="~/assets/product/js/masonry.pkgd.js"></script>
-<script src="~/assets/product/js/owl.carousel.min.js"></script>
-<script src="~/assets/product/js/jquery.nice-select.min.js"></script>
-<script src="~/assets/product/js/slick.min.js"></script>
-<script src="~/assets/product/js/jquery.counterup.min.js"></script>
-<script src="~/assets/product/js/waypoints.min.js"></script>
-<script src="~/assets/product/js/contact.js"></script>
-<script src="~/assets/product/js/jquery.ajaxchimp.min.js"></script>
-<script src="~/assets/product/js/jquery.form.js"></script>
-<script src="~/assets/product/js/jquery.validate.min.js"></script>
-<script src="~/assets/product/js/mail-script.js"></script>
-<script src="~/assets/product/js/stellar.js"></script>
-<script src="~/assets/product/js/price_rangs.js"></script>
-<script src="~/assets/product/js/custom.js"></script>
-<script src="~/assets/js/share.js" asp-append-version="true"></script>
-
-<style>
-.form-check { display: flex; align-items: center; gap: 8px; margin-top: 35px; }
-.form-check-input { width: 12px; height: 12px; cursor: pointer; }
-.form-check-input-order { width: 12px; height: 12px; cursor: pointer; font-size: 16px; }
-.form-check-label { margin-left: 5px; color: #fff; font-size: 14px; cursor: pointer; }
-.cod-btn { background-color: #ffc439; border: 2px solid #ffc439; border-radius: 4px; padding: 6px; width: 100%; height: 53px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .25s ease; }
-.cod-btn img { width: 180px; object-fit: contain; }
-.cod-btn:hover { background-color: #f4b926; box-shadow: 0 3px 6px rgba(0,0,0,.15); }
-.vnpay-btn { background-color: #ffc439; border: 2px solid #ffc439; border-radius: 4px; padding: 6px; width: 100%; height: 53px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .25s ease; margin-top: 15px; }
-.vnpay-btn img { width: 180px; object-fit: contain;}
-.vnpay-btn:hover { background-color: #f4b926; box-shadow: 0 3px 6px rgba(0,0,0,.15); }
-#paypal-button-container { width: 100%; margin-top: 15px; }
-.col-lg-8 h3 { color: #fff; }
-keyframes bounce { 0%,100% { transform: translateY(0); } 25% { transform: translateY(-8px); } 50% { transform: translateY(4px); } 75% { transform: translateY(-4px); } }
-.bounce { animation: bounce .5s ease; }
-</style>
-
-<script>
-$(document).ready(function () {
-    const $form = $('#orderForm');
-    const $sameAddress = $('#SameAddress');
-    const $shippingFields = $('#shipping-fields');
-
-    // 🔹 Gắn phí ship & giảm giá trước khi submit
-    function appendFormData() {
-        $form.find('input[name="ShippingCost"], input[name="DiscountValue"]').remove();
-        const shippingCost = parseFloat($('#shippingSelect').val()) || 0;
-        const discountValue = parseFloat($('#discountRatio').val()) || 0;
-        $form.append(`<input type="hidden" name="ShippingCost" value="${shippingCost}" />`);
-        $form.append(`<input type="hidden" name="DiscountValue" value="${discountValue}" />`);
-    }
-
-    // 🔹 Kiểm tra thông tin nếu KHÔNG tick "SameAddress"
-    function validateShippingFields() {
-        if ($sameAddress.is(':checked')) {
-            // Nếu tick "Same your address" thì bỏ qua kiểm tra
-            return true;
-        }
-
-        let isValid = true;
-        const requiredFields = [
-            '#ReceiverName',
-            '#ReceiverPhone',
-            '#ReceiverAddress',
-            '#ReceiverCity',
-            '#ReceiverCountry'
-        ];
-
-        requiredFields.forEach(selector => {
-            const $field = $(selector);
-            if (!$field.val() || $field.val().trim() === "") {
-                $field.addClass('is-invalid');
-                isValid = false;
-            } else {
-                $field.removeClass('is-invalid');
-            }
-        });
-
-        // Kiểm tra số điện thoại (10–11 ký tự, chỉ chứa số)
-        const phone = $('#ReceiverPhone').val();
-        const phoneRegex = /^[0-9]{10,11}$/;
-        if (phone && !phoneRegex.test(phone)) {
-            $('#ReceiverPhone').addClass('is-invalid');
-            alert("Please enter a valid phone number (10–11 digits).");
-            isValid = false;
-        }
-
-        if (!isValid) {
-            alert("Please fill in all required shipping information.");
-        }
-
-        return isValid;
-    }
-
-    // 🔸 Gửi đơn COD
-    $('.cod-btn').on('click', function (e) {
-        const checkbox = $('#acceptTerms')[0];
-        if (!checkbox.checked) {
-            e.preventDefault();
-            $(checkbox).addClass('bounce');
-            setTimeout(() => $(checkbox).removeClass('bounce'), 600);
-            return;
-        }
-
-        if (!validateShippingFields()) {
-            e.preventDefault();
-            return;
-        }
-
-        appendFormData();
-    });
-
-    // 🔸 Gửi đơn qua VNPAY
-    $('.vnpay-btn').on('click', function (e) {
-        const checkbox = $('#acceptTerms')[0];
-        if (!checkbox.checked) {
-            e.preventDefault();
-            $(checkbox).addClass('bounce');
-            setTimeout(() => $(checkbox).removeClass('bounce'), 600);
-            return;
-        }
-
-        if (!validateShippingFields()) {
-            e.preventDefault();
-            return;
-        }
-
-        appendFormData();
-    });
-
-    // 🔸 PayPal
-    paypal.Buttons({
-        style: {
-            layout: 'vertical',
-            color: 'gold',
-            tagline: false
-        },
-        createOrder: (data, actions) => {
-            const checkbox = $('#acceptTerms')[0];
-            if (!checkbox.checked) {
-                $(checkbox).addClass('bounce');
-                setTimeout(() => $(checkbox).removeClass('bounce'), 600);
-                return;
-            }
-
-            if (!validateShippingFields()) {
-                return;
-            }
-
-            appendFormData();
-
-            return fetch("/Order/create-paypal-order", {
-                method: "POST",
-                body: new FormData($form[0])
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(error => { throw error; });
-                }
-                return response.json();
-            })
-            .then(order => order.id)
-            .catch(error => alert(error.message));
-        },
-        onApprove: (data, actions) => {
-            appendFormData();
-            const formData = new FormData($form[0]);
-
-            return fetch(`/Order/capture-paypal-order?orderId=${data.orderID}`, {
-                method: "POST",
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(error => { throw error; });
-                }
-                return response.json();
-            })
-            .then(result => {
-                window.location.href = "/Order/Success?orderId=" + result.orderID;
-            })
-            .catch(error => alert(error.message));
-        }
-
-    }).render('#paypal-button-container');
-
-    // 🔹 Ẩn/hiện các trường nhập nếu tick "Same your address"
-    function toggleShippingFields() {
-        const $fields = $shippingFields.find('input, select').closest('.form-group');
-        if ($sameAddress.is(':checked')) {
-            $fields.slideUp();
-        } else {
-            $fields.slideDown();
         }
     }
-
-    toggleShippingFields();
-    $sameAddress.change(toggleShippingFields);
-});
-</script>
+</div>

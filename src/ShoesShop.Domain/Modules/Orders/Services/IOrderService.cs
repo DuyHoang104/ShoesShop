@@ -5,7 +5,8 @@ namespace ShoesShop.Domain.Modules.Orders.Services
 {
     public interface IOrderService
     {
-        Task<OrderDetailDto> CreateOrderAsync(OrderDto orderDto);
+        Task<List<OrderDto>> GetAllOrderAsync();
+        Task<OrderDetailDto> CreateOrderAsync(OrderCheckoutDto orderDto);
         Task<decimal> CalculateOrderTotalAsync(decimal shippingFee = 0, decimal discount = 0);
         Task<OrderDetailDto> GetOrderDetailByIdAsync(int orderId);
     }

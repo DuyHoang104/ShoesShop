@@ -5,7 +5,7 @@ using ShoesShop.Crosscutting.Utilities.Attribute;
 using ShoesShop.Crosscutting.Utilities.PayPal;
 using ShoesShop.Crosscutting.Utilities.VNpay;
 using ShoesShop.Domain.Modules.Carts.Services;
-using ShoesShop.Domain.Modules.Orders.Dtos;
+using ShoesShop.Domain.Modules.Orders.Dtos.Commands;
 using ShoesShop.Domain.Modules.Orders.Services;
 using ShoesShop.Web.Modules.Order.Dtos;
 using ShoesShop.Web.Modules.Order.Dtos.Commands;
@@ -33,8 +33,36 @@ namespace ShoesShop.Web.Modules.Order.Controllers
             _vnPayService = vnPayService;
         }
 
-        [HttpGet("checkout")]
+        [HttpGet("index")]
         [ValidateModel("Index")]
+        public async Task<IActionResult> Index()
+        {
+            var orders = await _orderService.GetAllOrderAsync();
+            var ordermodalDto = new List<OrderModalDto>(
+                orders.Select(o => new OrderModalDto
+                {
+                    Id = o.Id,
+                    OrderDate = o.OrderDate,
+                    Status = o.Status,
+                    TotalAmount = o.TotalAmount,
+                    PaymentMethod = o.PaymentMethod,
+                    PaymentStatus = o.PaymentStatus,
+                    OrderDetails = o.OrderDetails.Select(od => new OrderDetailItemModalDto
+                    {
+                        ProductName = od.ProductName,
+                        Quantity = od.Quantity,
+                        UnitPrice = od.UnitPrice,
+                        Subtotal = od.Subtotal,
+                        ProductSize = od.ProductSize,
+                        ProductImage = od.ProductImage
+                    }).ToList()
+                })
+            );
+            return View("~/Modules/Order/Views/Index.cshtml", ordermodalDto);
+        }
+
+        [HttpGet("checkout")]
+        [ValidateModel("Checkout")]
         public async Task<IActionResult> Checkout()
         {
             var items = await _cartService.GetByUserIdAsync();
@@ -45,17 +73,17 @@ namespace ShoesShop.Web.Modules.Order.Controllers
 
             ViewBag.Total = items.Sum(x => x.TotalPrice);
             ViewBag.PayPalClientId = _paypalClient.ClientId;
-            var orderModelDto = new OrderModalDto
+            var orderModelDto = new OrderCheckoutModalDto
             {
                 CartItems = items
             };
 
-            return View("~/Modules/Order/Views/Index.cshtml", orderModelDto);
+            return View("~/Modules/Order/Views/Checkout.cshtml", orderModelDto);
         }
 
         [HttpPost("checkout")]
-        [ValidateModel("Index")]
-        public async Task<IActionResult> Checkout(OrderModalDto order, string payment = "COD")
+        [ValidateModel("Checkout")]
+        public async Task<IActionResult> Checkout(OrderCheckoutModalDto order, string payment = "COD")
         {
             if (payment == "VNPAY")
             {
@@ -74,7 +102,7 @@ namespace ShoesShop.Web.Modules.Order.Controllers
                 return Redirect(_vnPayService.CreatePaymentUrl(HttpContext, model));
             }
 
-            var orderCreated = await _orderService.CreateOrderAsync(new OrderDto
+            var orderCreated = await _orderService.CreateOrderAsync(new OrderCheckoutDto
             {
                 SameAddress = order.SameAddress,
                 ReceiverName = order.ReceiverName,
@@ -121,12 +149,12 @@ namespace ShoesShop.Web.Modules.Order.Controllers
 
         [Authorize]
         [HttpPost("/Order/capture-paypal-order")]
-        public async Task<IActionResult> CapturePaypalOrder(string orderID, CancellationToken cancellationToken, [FromForm] OrderModalDto order)
+        public async Task<IActionResult> CapturePaypalOrder(string orderID, CancellationToken cancellationToken, [FromForm] OrderCheckoutModalDto order)
         {
             try
             {
                 var response = await _paypalClient.CaptureOrder(orderID);
-                var orderCreated = await _orderService.CreateOrderAsync(new OrderDto
+                var orderCreated = await _orderService.CreateOrderAsync(new OrderCheckoutDto
                 {
                     SameAddress = order.SameAddress,
                     ReceiverName = order.ReceiverName,
@@ -171,14 +199,14 @@ namespace ShoesShop.Web.Modules.Order.Controllers
                 return RedirectToAction("Fail");
             }
 
-            var order = JsonConvert.DeserializeObject<OrderModalDto>(tempOrderJson);
+            var order = JsonConvert.DeserializeObject<OrderCheckoutModalDto>(tempOrderJson);
             if (order == null)
             {
                 TempData["Message"] = "Không thể đọc thông tin đơn hàng.";
                 return RedirectToAction("Fail");
             }
 
-            var orderDetail = await _orderService.CreateOrderAsync(new OrderDto
+            var orderDetail = await _orderService.CreateOrderAsync(new OrderCheckoutDto
             {
                 SameAddress = order.SameAddress,
                 ReceiverName = order.ReceiverName,

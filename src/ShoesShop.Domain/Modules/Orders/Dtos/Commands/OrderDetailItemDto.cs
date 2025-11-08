@@ -7,5 +7,6 @@ namespace ShoesShop.Domain.Modules.Orders.Dtos.Commands
         public int Quantity { get; set; }
         public decimal Subtotal { get; set; }
         public string? ProductImage { get; set; } = null!;
+        public string? ProductSize { get; set; } = null!;
     }
 }

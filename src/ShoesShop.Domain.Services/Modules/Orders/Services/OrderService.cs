@@ -52,7 +52,50 @@ namespace ShoesShop.Domain.Services.Modules.Orders.Services
             return int.Parse(userIdClaim);
         }
 
-        public async Task<OrderDetailDto> CreateOrderAsync(OrderDto orderDto)
+        public async Task<List<OrderDto>> GetAllOrderAsync()
+        {
+            var userId = GetUserIdFromClaims();
+
+            var orders = await _orderRepository.GetAllAsync(
+                include: q => q
+                    .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                    .ThenInclude(p => p.Images)
+                    .Include(o => o.Address)
+            );
+            
+            var userOrders = orders
+                .Where(o => o.UserId == userId);
+
+            var orderDtos = userOrders.Select(order =>
+            {
+                decimal total = order.OrderDetails.Sum(d => d.Subtotal);
+                return new OrderDto
+                {
+                    Id = order.Id,
+                    PaymentMethod = order.PaymentMethod,
+                    PaymentStatus = order.PaymentStatus,
+                    OrderDate = order.OrderDate,
+                    Status = order.Status,
+                    ShippingFee = order.ShippingFee,
+                    Discount = order.Discount,
+                    TotalAmount = (total* (1 - (order.Discount ?? 0) )) + (order.ShippingFee ?? 0),
+                    OrderDetails = order.OrderDetails.Select(d => new OrderDetailItemDto
+                    {
+                        ProductName = d.Product?.Name,
+                        Quantity = d.Quantity,
+                        UnitPrice = d.UnitPrice,
+                        Subtotal = d.Subtotal,
+                        ProductSize = d.Product?.Sizes,
+                        ProductImage = d.Product?.Images?.FirstOrDefault()?.Url
+                    }).ToList(),
+                };
+            }).ToList();
+
+            return orderDtos;
+        }
+
+        public async Task<OrderDetailDto> CreateOrderAsync(OrderCheckoutDto orderDto)
         {
             await using var transaction = await _unitOfWork.BeginTransactionAsync();
 
@@ -86,7 +129,6 @@ namespace ShoesShop.Domain.Services.Modules.Orders.Services
                     );
                 }
 
-                // ✅ Tạo Order
                 var order = new Order(
                     user: user,
                     address: address,

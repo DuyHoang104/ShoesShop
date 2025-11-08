@@ -2,7 +2,6 @@
     Layout = "~/Modules/Shares/Views/_Layout.cshtml";
     @model ShoesShop.Web.Modules.Order.Dtos.Commands.OrderDetailModalDto
     @inject Microsoft.Extensions.Options.IOptions<CloudinarySettings> CloudinaryConfig
-
     var subtotal = Model.OrderDetails.Sum(x => x.Subtotal);
     var shipping = Model.ShippingCost;
     var discountPercent = (Model.DiscountValue ?? 0) * 100;
@@ -10,16 +9,33 @@
     var total = subtotal + shipping - discountAmount;
 }
 
+<link rel="stylesheet" href="~/assets/product/css/bootstrap.min.css" />
 <link rel="icon" href="img/favicon.png">
-<link rel="stylesheet" href="~/assets/product/css/bootstrap.min.css">
 <link rel="stylesheet" href="~/assets/product/css/style.css">
 
 <style>
-.order_details_iner { background: #000; border-radius: 16px; padding: 25px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-.order_details_iner h3 { font-size: 22px; font-weight: 700; color: #fff; text-transform: uppercase; margin-bottom: 25px; padding-bottom: 10px; }
-.order_details_iner td { color: #fff; vertical-align: middle; }
+.confirmation_part { padding: 80px 0; }
+.confirmation_tittle { text-align: center; margin-bottom: 40px; }
+.confirmation_tittle span { font-size: 22px; font-weight: 600; color: #0d99ff; }
+.single_confirmation_details { background: #1a1a1a; border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; box-shadow: 0 4px 25px rgba(255, 255, 255, 0.05); transition: all 0.3s ease; }
+.single_confirmation_details:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255, 255, 255, 0.07); }
+.single_confirmation_details h4 { color: #fff; font-weight: 600; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; }
+.single_confirmation_details ul { list-style: none; padding-left: 0; }
+.single_confirmation_details ul li { display: flex; justify-content: space-between; border-bottom: 1px dashed #333; padding: 8px 0; font-size: 15px; }
+.single_confirmation_details ul li p { margin: 0; color: #bbb; }
+.single_confirmation_details ul li span { color: #fff; font-weight: 500; }
+.order_details_iner { background: #111; border-radius: 20px; padding: 30px; box-shadow: 0 6px 25px rgba(255, 255, 255, 0.05); margin-top: 40px; }
+.order_details_iner h3 { color: #fff; font-weight: 700; font-size: 22px; border-bottom: 1px solid #222; padding-bottom: 15px; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; }
+.order_details_iner table { color: #eee; }
+.order_details_iner th { color: #bbb; font-weight: 500; text-transform: uppercase; border-bottom: 2px solid #222; padding-bottom: 10px; }
+.order_details_iner td { vertical-align: middle; border-bottom: 1px dashed #222; padding: 14px 10px; }
+.order_details_iner tr:hover td { background: #333; }
+.order_details_iner img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 1px solid #333; }
 .order_details_iner .text-danger { color: #e63946 !important; }
-.order_details_iner .text-end { font-weight: 600; }
+.order_details_iner .fw-bold { font-weight: 600 !important; }
+.order_details_iner .text-end { text-align: right !important; }
+.total-highlight { color: #fff; font-weight: 700; font-size: 18px; }
+media (max-width: 768px) { .order_details_iner table { font-size: 13px; } }
 </style>
 
 <section class="breadcrumb breadcrumb_bg">
@@ -37,107 +53,97 @@
     </div>
 </section>
 
-<section class="confirmation_part padding_top">
+<section class="confirmation_part">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="confirmation_tittle">
-                    <span style="font-size: 20px;">Thank you! Your order has been received.</span>
-                </div>
-            </div>
+        <div class="confirmation_tittle">
+            <span>🎉 Thank you! Your order has been received successfully.</span>
+        </div>
 
-            <!-- Order Info -->
+        <div class="row g-4">
             <div class="col-lg-6">
                 <div class="single_confirmation_details">
                     <h4>Order Info</h4>
                     <ul>
-                        <li><p>Order Number</p><span>: @Model.Id</span></li>
-                        <li><p>Date</p><span>: @Model.OrderDate.ToString("MMM dd, yyyy")</span></li>
-                        <li><p>Total</p><span style="color:yellow">: $@string.Format("{0:N2}", total)</span></li>
-                        <li><p>Payment Method</p><span>: @Model.PaymentMethod</span></li>
-                        <li><p>Payment Status</p><span>: @Model.PaymentStatus</span></li>
+                        <li><p>Order Number</p><span>@Model.Id</span></li>
+                        <li><p>Date</p><span>@Model.OrderDate.ToString("MMM dd, yyyy")</span></li>
+                        <li><p>Total</p><span class="total-highlight">$@string.Format("{0:N2}", total)</span></li>
+                        <li><p>Payment Method</p><span>@Model.PaymentMethod</span></li>
+                        <li><p>Payment Status</p><span>@Model.PaymentStatus</span></li>
                     </ul>
                 </div>
             </div>
 
-            <!-- Address Info -->
             <div class="col-lg-6">
                 <div class="single_confirmation_details">
                     <h4>Shipping Address</h4>
                     <ul>
-                        <li><p>Full Name</p><span>: @Model.ReceiverName</span></li>
-                        <li><p>Phone</p><span>: @Model.ReceiverPhone</span></li>
-                        <li><p>Street</p><span>: @Model.ReceiverAddress</span></li>
-                        <li><p>City</p><span>: @Model.ReceiverCity</span></li>
-                        <li><p>Country</p><span>: @Model.ReceiverCountry</span></li>
+                        <li><p>Full Name</p><span>@Model.ReceiverName</span></li>
+                        <li><p>Phone</p><span>@Model.ReceiverPhone</span></li>
+                        <li><p>Street</p><span>@Model.ReceiverAddress</span></li>
+                        <li><p>City</p><span>@Model.ReceiverCity</span></li>
+                        <li><p>Country</p><span>@Model.ReceiverCountry</span></li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <!-- Order Details -->
-        <div class="row mt-4">
-            <div class="col-lg-12">
-                <div class="order_details_iner">
-                    <h3>Order Details</h3>
-                    <table class="table table-borderless align-middle">
-                        <thead>
-                            <tr>
-                                <th>Image</th>
-                                <th>Product</th>
-                                <th class="text-center">Quantity</th>
-                                <th class="text-end">Unit Price</th>
-                                <th class="text-end">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.OrderDetails)
-                            {
-                                var firstImageUrl = !string.IsNullOrEmpty(item.ProductImage)
-                                    ? (item.ProductImage.StartsWith("http")
-                                        ? item.ProductImage
-                                        : $"{CloudinaryConfig.Value.BaseUrl}{item.ProductImage}")
-                                    : "/images/default.png";
+        <div class="order_details_iner">
+            <h3>Order Details</h3>
+            <table class="table table-borderless align-middle">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Product</th>
+                        <th class="text-center">Quantity</th>
+                        <th class="text-end">Unit Price</th>
+                        <th class="text-end">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderDetails)
+                    {
+                        var firstImageUrl = !string.IsNullOrEmpty(item.ProductImage)
+                            ? (item.ProductImage.StartsWith("http")
+                                ? item.ProductImage
+                                : $"{CloudinaryConfig.Value.BaseUrl}{item.ProductImage}")
+                            : "/images/default.png";
 
-                                <tr>
-                                    <td><img src="@firstImageUrl" alt="@item.ProductName" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;"></td>
-                                    <td>@item.ProductName</td>
-                                    <td class="text-center">x @item.Quantity</td>
-                                    <td class="text-end">$@item.UnitPrice.ToString("N2")</td>
-                                    <td class="text-end">$@item.Subtotal.ToString("N2")</td>
-                                </tr>
-                            }
+                        <tr>
+                            <td><img src="@firstImageUrl" alt="@item.ProductName" /></td>
+                            <td>@item.ProductName</td>
+                            <td class="text-center">x @item.Quantity</td>
+                            <td class="text-end">$@item.UnitPrice.ToString("N2")</td>
+                            <td class="text-end">$@item.Subtotal.ToString("N2")</td>
+                        </tr>
+                    }
 
-                            <tr class="fw-bold border-top">
-                                <td colspan="4" class="text-end">Subtotal (Before Shipping & Discount)</td>
-                                <td class="text-end">$@subtotal.ToString("N2")</td>
-                            </tr>
+                    <tr class="fw-bold border-top">
+                        <td colspan="4" class="text-end">Subtotal</td>
+                        <td class="text-end">@subtotal.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" class="text-end">Shipping Fee</td>
+                        <td class="text-end">$@shipping</td>
+                    </tr>
 
-                            <tr>
-                                <td colspan="4" class="text-end">Shipping Fee</td>
-                                <td class="text-end">$@string.Format("{0:N2}", shipping)</td>
-                            </tr>
+                    @if (Model.DiscountValue > 0)
+                    {
+                        <tr>
+                            <td colspan="4" class="text-end text-danger">Discount (@discountPercent.ToString("0.##")%)</td>
+                            <td class="text-end text-danger">-$@discountAmount.ToString("N2")</td>
+                        </tr>
+                    }
 
-                            @if (Model.DiscountValue > 0)
-                            {
-                                <tr>
-                                    <td colspan="4" class="text-end text-danger">Discount (@discountPercent.ToString("0.##")%)</td>
-                                    <td class="text-end text-danger">-$@discountAmount.ToString("N2")</td>
-                                </tr>
-                            }
-
-                            <tr class="border-top fw-bold">
-                                <td colspan="4" class="text-end">Total</td>
-                                <td class="text-end">$@string.Format("{0:N2}", total)</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                    <tr class="fw-bold border-top">
+                        <td colspan="4" class="text-end">Total</td>
+                        <td class="text-end total-highlight">
+                            @(total.HasValue 
+                                ? total.Value.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US")) 
+                                : "$0.00")
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </section>
-
-<script src="~/assets/product/js/jquery-1.12.1.min.js"></script>
-<script src="~/assets/product/js/bootstrap.min.js"></script>
-<script src="~/assets/product/js/custom.js"></script>
