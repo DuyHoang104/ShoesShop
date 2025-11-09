@@ -8,7 +8,7 @@
 }
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ion-rangeslider@2.3.1/css/ion.rangeSlider.min.css"/>
 <link rel="stylesheet" href="~/assets/css/share.css" asp-append-version="true" />
-
+<link rel="stylesheet" href="~/assets/product/css/style.css">
 
 <aside class="left_widgets p_filter_widgets">
     <div class="l_w_title">
@@ -88,7 +88,7 @@
                 <input type="hidden" name="brand" value="@Context.Request.Query["brand"]" />
                 <input type="hidden" name="color" value="@Context.Request.Query["color"]" />
                 <input type="hidden" name="sortBy" value="@Context.Request.Query["sortBy"]" />
-                <div class="d-flex flex-wrap gap-2">
+                <div class="d-flex flex-wrap-default gap-2">
                     @{
                         var allSizes = new[] { "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47" };
                         var selectedSizes = ViewBag.SelectedSizes as List<string> ?? new List<string>();
@@ -140,12 +140,36 @@
     </div>
 </aside>
 
-
 <style>
 .p_filter_widgets { margin-bottom: 15px !important; }
 .l_w_title { margin-bottom: 10px !important; }
 #filterSizes { margin-top: 0 !important; padding-top: 0 !important; }
 .widgets_inner { margin: 0 !important; padding: 0 !important; }
+.col-lg-3 {
+    position: relative;
+    width: 100%;
+    padding-right: 25px;
+    padding-left: 25px;
+}
+.col-lg-12 {
+    position: relative;
+    width: 100%;
+    padding-right: 25px;
+    padding-left: 25px;
+}
+.latest_product_inner {
+    padding-right: 25px;
+    padding-left: 25px;
+}
+
+.flex-wrap-default { flex-wrap:wrap!important }
+
+media (max-width: 576px) {
+    .flex-wrap {
+        row-gap: 15px;
+        column-gap: 42px;
+    }
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/ion-rangeslider@2.3.1/js/ion.rangeSlider.min.js"></script>

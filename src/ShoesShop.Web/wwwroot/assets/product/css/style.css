@@ -107,6 +107,9 @@ input:focus {
   padding-top: 140px;
 }
 
+.padding_bottom_60 {
+  padding-bottom: 60px;
+}
 @media only screen and (min-width: 992px) and (max-width: 1200px) {
   /* line 64, ../../01 cl html template/03_jun 2019/188_Aranoz shop_html/sass/_common.scss */
   .padding_top {
@@ -4068,6 +4071,8 @@ ul {
 /* line 813, ../../01 cl html template/03_jun 2019/188_Aranoz shop_html/sass/_product.scss */
 .product_description_area .tab-content {
   padding-top: 30px;
+  padding-left: 2px;
+  padding-right: 2px;
 }
 
 /* line 818, ../../01 cl html template/03_jun 2019/188_Aranoz shop_html/sass/_product.scss */

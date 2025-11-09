@@ -6,6 +6,7 @@
     ViewData["Title"] = "Cart";
     Layout = "~/Modules/Shares/Views/_Layout.cshtml";
 }
+
 <link rel="icon" href="~/assets/product/img/favicon.png">
 <link rel="stylesheet" href="~/assets/product/css/bootstrap.min.css">
 <link rel="stylesheet" href="~/assets/product/css/animate.css">
@@ -19,7 +20,15 @@
 <link rel="stylesheet" href="~/assets/product/css/price_rangs.css">
 <link rel="stylesheet" href="~/assets/product/css/style.css">
 <link rel="stylesheet" href="~/assets/css/share.css" asp-append-version="true" />
-
+<style>
+.cart-img {
+max-width: none !important; /* bỏ giới hạn 100% */
+width: 130px; /* hoặc bất kỳ kích thước bạn muốn */
+height: 130px;
+object-fit: cover;
+border-radius: 8px;
+}
+</style>
 <section class="breadcrumb breadcrumb_bg">
     <div class="container">
         <div class="row justify-content-center">
@@ -35,7 +44,7 @@
     </div>
 </section>
 
-<section class="cart_area padding_top">
+<section class="cart_area padding_top padding_bottom_60">
     <div class="container">
         <div class="cart_inner">
             <div class="table-responsive">
@@ -70,9 +79,7 @@
                                         <td>
                                             <div class="media">
                                                 <div class="d-flex">
-                                                    <img src="@firstImageUrl"
-                                                         alt="@item.Product?.Name"
-                                                         style="width:130px; height:130px; object-fit:cover; border-radius:8px;" />
+                                                    <img src="@firstImageUrl" alt="@item.Product?.Name" class="cart-img" />
                                                 </div>
                                                 <div class="media-body">
                                                     <p>@item.Product?.Name</p>
@@ -142,10 +149,10 @@
                 <!-- ✅ Đóng form ở đây -->
 
                 <div class="checkout_btn_inner float-right">
-                    <a class="btn_1" href="/product">Continue Shopping</a>
+                    <a class="btn_1 btn_cart" href="/product">Continue Shopping</a>
                     @if (Model != null && Model.Any())
                     {
-                        <a class="btn_1 checkout_btn_1" asp-action="Checkout" asp-controller="Order">Proceed to checkout</a>
+                        <a class="btn_1 checkout_btn_1 btn_cart" asp-action="Checkout" asp-controller="Order">Proceed to checkout</a>
                     }
                 </div>
             </div>

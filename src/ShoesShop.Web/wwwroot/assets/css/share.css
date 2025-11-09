@@ -107,12 +107,6 @@ textarea.form-control {
   transform: rotate(180deg);
 }
 
-.d-flex.flex-wrap.gap-4 {
-        margin-bottom: 30px;
-        row-gap: 20px;
-        column-gap: 25px;
-}
-
 .size-box {
     color: #000;
     width: 70px;
@@ -147,7 +141,7 @@ textarea.form-control {
     position: absolute;
     font-size: 90px;
     color: rgba(255, 0, 0, 0.4);
-    top: 56%;
+    top: 50%;
     left: 50%;
     transform: translate(-50%, -53%);
     pointer-events: none;
@@ -176,3 +170,101 @@ box-shadow: 0 0 10px #ffb300;
     25% { transform: translateX(-4px); }
     75% { transform: translateX(4px); }
 }
+
+.col-lg-5 {
+    position: relative;
+    width: 100%;
+    padding-right: 20px;
+    padding-left: 20px;
+}
+
+.col-xl-4 {
+    position: relative;
+    width: 100%;
+    padding-right: 20px;
+    padding-left: 20px;
+}/* Điện thoại rất nhỏ: <=410px */
+@media (max-width: 410px) {
+    .d-flex.flex-wrap.gap-4 {
+        margin-bottom: 25px;
+        row-gap: 15px;
+        column-gap: 3px;
+        flex-wrap: wrap;
+    }
+
+    .flex-wrap-default {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+/* Điện thoại nhỏ: >410px và <=576px */
+@media (min-width: 411px) and (max-width: 576px) {
+    .d-flex.flex-wrap.gap-4 {
+        margin-bottom: 25px;
+        row-gap: 15px;
+        column-gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .flex-wrap-default {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+   .btn_cart {
+    width: 100%;
+    margin-bottom: 10px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    }
+    .checkout_area {
+        padding-right: 25px !important;
+        padding-left: 25px !important;
+    }
+    .confirmation_part .order_details_iner{
+        padding: 0 !important;
+    }
+}
+
+/* Tablet nhỏ: >576px và <=768px */
+@media (min-width: 577px) and (max-width: 768px) {
+    .d-flex.flex-wrap.gap-4 {
+        margin-bottom: 25px;
+        row-gap: 15px;
+        column-gap: 25px;
+        flex-wrap: wrap;
+    }
+
+    .flex-wrap-default {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+}
+
+/* Tablet lớn: >768px và <=1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .d-flex.flex-wrap.gap-4 {
+        margin-bottom: 25px;
+        row-gap: 15px;
+        column-gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .flex-wrap-default {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+}
+
+/* Desktop: >1024px */
+@media (min-width: 1025px) {
+    .d-flex.flex-wrap.gap-4 {
+        margin-bottom: 25px;
+        row-gap: 15px;
+        column-gap: 26px;
+        flex-wrap: wrap;
+    }
+}
+
