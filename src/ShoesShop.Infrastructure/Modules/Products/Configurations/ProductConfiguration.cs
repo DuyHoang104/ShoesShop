@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ShoesShop.Domain.Modules.Products.Entities;
+using ShoesShop.Domain.Modules.User.Products.Entities;
 
 namespace ShoesShop.Infrastructure.Modules.Products.Configurations;
 public class ProductConfiguration : IEntityTypeConfiguration<Product>
@@ -16,9 +16,16 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Status).HasField("_status").HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.Property(p => p.Brand).HasField("_brand").HasMaxLength(100).IsRequired();
         builder.Property(p => p.Color).HasField("_color").HasMaxLength(50).IsRequired();
-        
+        builder.Property(p => p.Sizes).HasField("_sizes").HasMaxLength(100).IsRequired();
+
+        builder.Property(c => c.LastActionTimeStamp).IsRequired();
+        builder.Property(c => c.LastAction).HasConversion<string>().IsRequired();
+        builder.Property(c => c.CreateBy).IsRequired();
+        builder.Property(c => c.CreateTimeStamp).IsRequired();
+        builder.Property(c => c.LastActionBy).IsRequired();
+    
         builder.HasMany(p => p.OrderDetails).WithOne(od => od.Product).HasForeignKey(od => od.ProductId).OnDelete(DeleteBehavior.Cascade);
-        builder.HasMany(p => p.CartItems).WithOne(c => c.Product).HasForeignKey(c => c.ProductId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(p => p.Carts).WithOne(c => c.Product).HasForeignKey(c => c.ProductId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(p => p.ProductCategories).WithOne(pc => pc.Product).HasForeignKey(pc => pc.ProductId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(p => p.Images).WithOne(i => i.Product).HasForeignKey(i => i.ProductId).OnDelete(DeleteBehavior.Cascade);
     }

@@ -1,9 +1,9 @@
-using ShoesShop.Domain.Modules.Commons.Repositories;
-using ShoesShop.Domain.Modules.Commons.Entities;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using ShoesShop.Crosscutting.Utilities.Exceptions;
 using System.Linq.Expressions;
+using ShoesShop.Domain.Modules.User.Commons.Repositories;
+using ShoesShop.Domain.Modules.User.Commons.Entities;
 
 namespace ShoesShop.Infrastructure.Modules.Commons.Repositories
 {

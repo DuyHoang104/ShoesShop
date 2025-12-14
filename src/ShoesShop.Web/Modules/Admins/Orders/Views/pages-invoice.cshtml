@@ -1,0 +1,197 @@
+﻿@using ShoesShop.Domain.Modules.User.Orders.Enums
+@using ShoesShop.Web.Modules.Admins.Orders.Dtos
+@model OrderDetailAdminModalDto
+
+@{
+    Layout = "~/Modules/Admins/Shares/Views/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Invoice";
+    var subtotal = Model.OrderDetails.Sum(x => x.Subtotal);
+    var shipping = Model.ShippingCost ?? 0;
+    var discountAmount = subtotal * (Model.DiscountValue ?? 0);
+    var total = subtotal + shipping - discountAmount;
+}
+
+<div class="container-fluid">
+
+    <!-- Page Title -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-title-box d-flex align-items-center justify-content-between">
+                <h4 class="page-title mb-0">Invoice</h4>
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Hyper</a></li>
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Pages</a></li>
+                    <li class="breadcrumb-item active">Invoice</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Card -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded">
+                <div class="card-body">
+
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <img src="~/assets/Admin/images/logo-light.png" alt="Logo" height="24">
+                        <h4 class="m-0">Invoice #@Model.Id</h4>
+                    </div>
+
+                    <!-- Customer & Order Info -->
+                    <div class="row mb-4">
+                        <div class="col-sm-6">
+                            <p><b>Hello, @Model.ReceiverName</b></p>
+                            <p class="text-muted font-13">
+                                Here is a summary of your order. Please make the payment at your earliest convenience.
+                            </p>
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                            <p class="mb-1"><strong>Order Date:</strong> @Model.OrderDate.ToString("MMM dd, yyyy")</p>
+                            <p class="mb-1"><strong>Order Status:</strong> <span class="badge bg-success">@Model.Status</span></p>
+                            <p class="mb-0"><strong>Order ID:</strong> #@Model.Id</p>
+                        </div>
+                    </div>
+
+                    <!-- Addresses & Barcode -->
+                    <div class="row mb-4">
+                       <div class="col-sm-4">
+                            <h6>Sender Address</h6>
+                            <address>
+                                @Model.User.UserName<br>
+                                @{
+                                    var userAddress = Model.User.Addresses?.FirstOrDefault(a => a.IsDefault) 
+                                                    ?? Model.User.Addresses?.FirstOrDefault();
+                                }
+                                @userAddress?.AddressLine1<br>
+                                @userAddress?.City, @userAddress?.Country<br>
+                                @Model.User.Phone
+                            </address>
+                        </div>
+
+                        <div class="col-sm-4">
+                            <h6>Receiver Address</h6>
+                            <address>
+                                @Model.ReceiverName<br>
+                                @Model.ReceiverAddress<br>
+                                @Model.ReceiverCity, @Model.ReceiverCountry<br>
+                                @Model.ReceiverPhone
+                            </address>
+                        </div>
+                        <div class="col-sm-4 text-sm-end">
+                            <img src="~/assets/Admin/images/barcode.png" alt="barcode" class="img-fluid">
+                        </div>
+                    </div>
+
+                    <!-- Order Items Table -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Item</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Price</th>
+                                            <th class="text-end">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.OrderDetails)
+                                        {
+                                            <tr>
+                                                <td>@item.ProductID</td>
+                                                <td><b>@item.ProductName</b></td>
+                                                <td>@item.Quantity</td>
+                                                <td>$@item.UnitPrice</td>
+                                                <td class="text-end">$@(item.Quantity * item.UnitPrice)</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes & Summary -->
+                    <div class="row mt-4">
+                        <div class="col-sm-6">
+                            <h6 class="text-muted">Notes:</h6>
+                            <p>@(string.IsNullOrEmpty(Model.Note) ? "No notes for this order." : Model.Note)</p>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    
+                                    <!-- Card Title -->
+                                    <h4 class="header-title mb-3">Order Summary</h4>
+
+                                    <!-- Tổng tiền -->
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <div>SubTotal:</div>
+                                            <div>$@subtotal.ToString("F2")</div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <div>Shipping:</div>
+                                            <div>$@shipping.ToString("F2")</div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <div>Discount (@((int)(Model.DiscountValue * 100))%):</div>
+                                            <div>$@discountAmount.ToString("F2")</div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <div>Method:</div>
+                                            <div>@Model.PaymentMethod</div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <div>Status:</div>
+                                            <div>
+                                                @switch(Model.PaymentStatus)
+                                                {
+                                                    case PaymentStatus.Paid:
+                                                        <span class="badge bg-success">Paid</span>
+                                                        break;
+                                                    case PaymentStatus.Failed:
+                                                        <span class="badge bg-warning text-dark">Failed</span>
+                                                        break;
+                                                    case PaymentStatus.Unpaid:
+                                                        <span class="badge bg-danger">Unpaid</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-secondary">Unknown</span>
+                                                        break;
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <hr />
+
+                                        <div class="d-flex justify-content-between mt-2 fw-bold fs-5">
+                                            <div>Total:</div>
+                                            <div>$@total.ToString("F2")</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-print-none mt-4 text-end">
+                        <a href="javascript:window.print()" class="btn btn-primary me-2"><i class="mdi mdi-printer"></i> Print</a>
+                        <a href="javascript:void(0);" class="btn btn-info">Submit</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

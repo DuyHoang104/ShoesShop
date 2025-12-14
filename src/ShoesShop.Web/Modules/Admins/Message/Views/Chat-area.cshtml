@@ -1,0 +1,265 @@
+@using ShoesShop.Domain.Modules.Shares.Messages.Dtos
+@using ShoesShop.Domain.Modules.User.Orders.Enums
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject Microsoft.Extensions.Options.IOptions<CloudinarySettings> CloudinaryConfig
+
+@{
+    dynamic orderInfo = ViewData["OrderInfo"];
+    var messages = ViewData["Messages"] as List<MessageDto> ?? new List<MessageDto>();
+
+    var baseUrl = CloudinaryConfig.Value.BaseUrl.EndsWith("/")
+        ? CloudinaryConfig.Value.BaseUrl
+        : $"{CloudinaryConfig.Value.BaseUrl}/";
+
+    var adminId = User.FindFirst("adminId")?.Value ?? "0";
+    var adminName = User.Identity?.Name ?? "Admin";
+    var adminAvatar = ViewBag.AdminAvatarUrl ?? "/assets/Admin/images/users/admin-avatar.png";
+    var orderId = orderInfo != null ? orderInfo.orderId : 0;
+    var customerId = ViewBag.UserId ?? "0";
+}
+
+<style>
+.order-box { background: #fff; padding: 20px; border-radius: 14px; border: 1px solid #ececec; box-shadow: 0 4px 14px rgba(0,0,0,0.05); }
+.order-row { padding: 10px 0; border-bottom: 1px dashed #e5e5e5; }
+.order-row:last-child { border-bottom: none; }
+.conversation-list { padding: 0; margin: 0; list-style: none; overflow-y: auto; max-height: 520px; }
+.conversation-list li { margin-bottom: 18px; display: flex; align-items: flex-start; }
+.conversation-list li.admin { flex-direction: row-reverse; }
+.conversation-list li.user { flex-direction: row; }
+.chat-avatar img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+.conversation-text { max-width: 70%; }
+.ctext-wrap { background: #f5f7fb; border-radius: 12px; padding: 12px 16px; margin: 0 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.06); }
+.admin .ctext-wrap { background: #d8f3dc; }
+.ctext-wrap i { font-size: 12px; font-weight: 600; color: #555; display: block; margin-bottom: 4px; }
+.ctext-wrap p { margin: 0; font-size: 14px; line-height: 1.45; }
+.chat-input-box { background: #f9fafb; border-radius: 14px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.chat-message-pending { opacity: 1;} 
+</style>
+
+<div class="col-xxl-6 col-xl-12 order-xl-2 d-flex">
+    <div class="card flex-fill">
+        <div class="card-body">
+            
+            @if(orderInfo != null)
+            {
+                <div class="order-box mb-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <a asp-action="Details"
+                           asp-controller="OrderAdmin"
+                           asp-route-id="@orderInfo.orderId"
+                           class="d-flex align-items-center text-dark text-decoration-none">
+                            <i class="uil uil-receipt-alt me-2" style="font-size:22px; color:#ff7b00;"></i>
+                            <span class="fw-bold fs-5 mb-0">Order #@orderInfo.orderId Information</span>
+                        </a>
+                    </div>
+                </div>
+            }
+
+            <ul class="conversation-list" data-simplebar id="chatList">
+                @if(!messages.Any())
+                {
+                    <p class="text-center text-muted mt-3">No messages yet.</p>
+                }
+                else
+                {
+                    foreach(var message in messages)
+                    {
+                        string liClass = message.SenderRole == "Admin" ? "admin" : "user";
+                        string avatarUrl = !string.IsNullOrWhiteSpace(message.SenderAvatar)
+                            ? (message.SenderAvatar.StartsWith("http") ? message.SenderAvatar : $"{baseUrl}{message.SenderAvatar}")
+                            : (liClass == "admin" ? "/assets/Admin/images/users/admin-avatar.png" : "/images/default.png");
+                        string senderName = !string.IsNullOrWhiteSpace(message.SenderName)
+                            ? message.SenderName
+                            : (liClass == "admin" ? "Admin" : "User");
+
+                        <li class="@liClass">
+                            <div class="chat-avatar">
+                                <img src="@avatarUrl" alt="@senderName" />
+                                <i>@message.SentAt.ToLocalTime().ToString("HH:mm")</i>
+                            </div>
+                            <div class="conversation-text">
+                                <div class="ctext-wrap">
+                                    <i>@senderName</i>
+                                    <p>@message.Content</p>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                }
+            </ul>
+
+            <div class="chat-input-box mt-3">
+                <form id="chatForm">
+                    <input type="hidden" id="orderId" value="@(orderInfo != null ? orderInfo.orderId.ToString() : "")" />
+                    <input type="hidden" id="receiverId" value="@customerId" /> 
+                    <input type="hidden" id="senderId" value="@adminId" />
+                    <input type="hidden" id="senderName" value="@adminName" />
+                    <input type="hidden" id="senderAvatar" value="@adminAvatar" />
+
+                    <div class="row g-2">
+                        <div class="col">
+                            <input type="text" id="messageContent" name="content" class="form-control border-0 shadow-none" placeholder="Type your message..." required />
+                        </div>
+                        <div class="col-auto d-flex align-items-center gap-1">
+                            <button type="button" class="btn btn-light"><i class="uil uil-paperclip"></i></button>
+                            <button type="button" class="btn btn-light"><i class="uil uil-smile"></i></button>
+                            <button type="submit" class="btn btn-success px-3"><i class="uil uil-message"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (orderInfo != null && orderInfo.orderId > 0)
+{
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+<script>
+    console.log("[ADMIN] Chat script loaded for order:", "@orderInfo.orderId");
+
+    const orderId      = parseInt(document.getElementById("orderId").value || 0);
+    const receiverId   = parseInt(document.getElementById("receiverId").value || 0);
+    const senderId     = parseInt(document.getElementById("senderId").value || 0);
+    const senderName   = document.getElementById("senderName").value;
+    const senderAvatar = document.getElementById("senderAvatar").value;
+    const chatList     = document.getElementById("chatList");
+    const chatForm     = document.getElementById("chatForm");
+    const baseUrl      = '@baseUrl';
+
+    function generateTempId() {
+        return `temp_${Date.now()}_${Math.random().toString(36).substring(2,9)}`;
+    }
+
+    function getAvatarUrl(msg){
+        if (msg.senderAvatar)
+            return msg.senderAvatar.startsWith("http") ? msg.senderAvatar : `${baseUrl}${msg.senderAvatar}`;
+        return msg.senderRole === "Admin" ? senderAvatar : "/images/default.png";
+    }
+
+    function appendMessage(msg){
+        const li = document.createElement("li");
+        li.className = msg.senderRole === "Admin" ? "admin" : "user";
+
+        const avatarUrl = getAvatarUrl(msg);
+        const sentDate = msg.sentAt ? new Date(msg.sentAt) : new Date();
+
+        const sentAt = sentDate.toLocaleTimeString("vi-VN", {
+            hour:"2-digit", minute:"2-digit"
+        });
+
+        if (msg.TempId || msg.tempId){
+            li.dataset.tempId = msg.TempId || msg.tempId;
+            li.classList.add("chat-message-pending");
+        }
+
+        li.innerHTML = `
+            <div class="chat-avatar">
+                <img src="${avatarUrl}" alt="${msg.senderName}" />
+                <i>${sentAt}</i>
+            </div>
+            <div class="conversation-text">
+                <div class="ctext-wrap">
+                    <i>${msg.senderName}</i>
+                    <p>${msg.content}</p>
+                </div>
+            </div>`;
+
+        chatList.appendChild(li);
+        chatList.scrollTop = chatList.scrollHeight;
+    }
+
+    if (!window.__adminChatConnection){
+        window.__adminChatConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+    }
+
+    const connection = window.__adminChatConnection;
+    let connectionStarted = false;
+
+    async function safeConnect(){
+        if (connectionStarted) return;
+        if (connection.state !== "Disconnected") return;
+
+        try {
+            await connection.start();
+            await connection.invoke("JoinOrderGroup", orderId);
+            connectionStarted = true;
+
+            console.log("[ADMIN] Connected & Joined group", orderId);
+        }
+        catch(err){
+            console.error("[ADMIN] Connection error:", err);
+        }
+    }
+    
+    connection.off("ReceiveMessage");
+
+    connection.on("ReceiveMessage", msg => {
+        const msgOrderId = parseInt(msg.orderId || msg.OrderId || 0);
+        if (msgOrderId !== orderId) return;
+
+        // remove pending
+        if (msg.senderRole === "Admin"
+            && parseInt(msg.senderId) === senderId
+            && msg.tempId)
+        {
+            const pending = document.querySelector(`li[data-temp-id="${msg.tempId}"]`);
+            if (pending) pending.remove();
+        }
+
+        appendMessage(msg);
+    });
+
+    /* auto-connect */
+    document.addEventListener("DOMContentLoaded", safeConnect);
+
+    /* reconnect khi tab quay lại */
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") safeConnect();
+    });
+
+    /* stop khi rời trang */
+    window.addEventListener("beforeunload", () => {
+        if (connection.state === "Connected") connection.stop();
+    });
+
+    chatForm.addEventListener("submit", async e => {
+        e.preventDefault();
+
+        if (!connectionStarted){
+            alert("Connecting...");
+            return;
+        }
+
+        const input = document.getElementById("messageContent");
+        const content = input.value.trim();
+        if (!content) return;
+
+        const tempId = generateTempId();
+
+        appendMessage({
+            orderId,
+            senderRole: "Admin",
+            senderId,
+            senderName,
+            senderAvatar,
+            content,
+            sentAt: new Date(),
+            TempId: tempId
+        });
+
+        await connection.invoke("SendMessage", receiverId, content, orderId, tempId);
+        input.value = "";
+    });
+</script>
+}
+else
+{
+    <script>
+        console.warn("[ADMIN] Chat disabled: no order selected.");
+    </script>
+}

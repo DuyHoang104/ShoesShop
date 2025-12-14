@@ -209,7 +209,7 @@ box-shadow: 0 0 10px #ffb300;
 
     .flex-wrap-default {
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 20px;
     }
 
    .btn_cart {
@@ -219,6 +219,7 @@ box-shadow: 0 0 10px #ffb300;
     align-items: center;
     text-align: center;
     }
+    
     .checkout_area {
         padding-right: 25px !important;
         padding-left: 25px !important;

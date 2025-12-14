@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ShoesShop.Domain.Modules.Shares.Entities;
+using ShoesShop.Domain.Modules.User.Shares.Entities;
 
 namespace ShoesShop.Infrastructure.Modules.Shares.Configurations;
 

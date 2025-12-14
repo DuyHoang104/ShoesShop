@@ -1,8 +1,9 @@
-using ShoesShop.Domain.Modules.Commons.Entities;
+using ShoesShop.Domain.Modules.User.Commons.Entities;
+using ShoesShop.Domain.Modules.User.Products.Entities;
 
-namespace ShoesShop.Domain.Modules.Products.Entities;
+namespace ShoesShop.Domain.Modules.Shares.Entities;
 
-public class ImageUpload : EntityAuditLog<int>
+public class Image : EntityAuditLog<int>
 {
     private string _url = string.Empty;
 
@@ -13,9 +14,6 @@ public class ImageUpload : EntityAuditLog<int>
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentException("Image URL cannot be empty or whitespace.", nameof(Url));
-
-            if (!value.StartsWith("/") && !value.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                throw new ArgumentException("Image URL must start with '/' or 'http'.", nameof(Url));
 
             if (value.Length > 2048)
                 throw new ArgumentOutOfRangeException(nameof(Url), "Image URL cannot exceed 2048 characters.");
@@ -41,12 +39,12 @@ public class ImageUpload : EntityAuditLog<int>
         private set => _product = value ?? throw new ArgumentNullException(nameof(Product), "Product cannot be null.");
     }
 
-    public ImageUpload(string url, Product product)
+    public Image(string url, Product product)
     {
         Url = url;
         Product = product ?? throw new ArgumentNullException(nameof(product));
         ProductId = product.Id;
     }
 
-    protected ImageUpload() { }
+    protected Image() { }
 }

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ShoesShop.Domain.Modules.Users.Entities;
+using ShoesShop.Domain.Modules.User.Users.Entities;
 
 namespace ShoesShop.Infrastructure.Modules.Users.Configurations;
 
@@ -22,6 +22,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         
         builder.HasMany(e => e.Addresses).WithOne(e => e.User).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(e => e.Orders).WithOne(e => e.User).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
-        builder.HasMany(e => e.CartItems).WithOne(e => e.User).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(e => e.Carts).WithOne(e => e.User).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }

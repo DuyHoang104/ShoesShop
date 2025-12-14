@@ -22,7 +22,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Carts.Entities.CartItem", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.Carts.Entities.Cart", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -49,10 +49,102 @@ namespace ShoesShop.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CartItems", (string)null);
+                    b.ToTable("Carts", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Categories.Entities.Category", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.Messages.Entity.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderAvatar")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("SenderRole")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("SentAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("Messages", (string)null);
+                });
+
+            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Entities.Image", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CreateBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateTimeStamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LastAction")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LastActionBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastActionTimeStamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Images", (string)null);
+                });
+
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Categories.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -70,8 +162,9 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("LastAction")
-                        .HasColumnType("int");
+                    b.Property<string>("LastAction")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("LastActionBy")
                         .HasColumnType("int");
@@ -84,12 +177,16 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Categories", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Orders.Entities.Order", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Orders.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -151,7 +248,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("Orders", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Orders.Entities.OrderDetail", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Orders.Entities.OrderDetail", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -168,6 +265,10 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<string>("Size")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("Subtotal")
                         .HasColumnType("decimal(18,2)");
 
@@ -183,45 +284,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("OrderDetails", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Products.Entities.ImageUpload", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CreateBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreateTimeStamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("LastAction")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LastActionBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("LastActionTimeStamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ImageUploads", (string)null);
-                });
-
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Products.Entities.Product", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Products.Entities.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -250,8 +313,9 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("LastAction")
-                        .HasColumnType("int");
+                    b.Property<string>("LastAction")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("LastActionBy")
                         .HasColumnType("int");
@@ -275,7 +339,8 @@ namespace ShoesShop.Infrastructure.Data.Migrations
 
                     b.Property<string>("Sizes")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -287,7 +352,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Products.Entities.ProductCategory", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Products.Entities.ProductCategory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -310,7 +375,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("ProductCategories", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Entities.Address", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Shares.Entities.Address", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -346,7 +411,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("Addresses", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Entities.ObjectChangeLog", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Shares.Entities.ObjectChangeLog", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -383,7 +448,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("ObjectChangeLogs", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Users.Entities.User", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Users.Entities.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -437,16 +502,16 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Carts.Entities.CartItem", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.Carts.Entities.Cart", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.Products.Entities.Product", "Product")
-                        .WithMany("CartItems")
+                    b.HasOne("ShoesShop.Domain.Modules.User.Products.Entities.Product", "Product")
+                        .WithMany("Carts")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ShoesShop.Domain.Modules.Users.Entities.User", "User")
-                        .WithMany("CartItems")
+                    b.HasOne("ShoesShop.Domain.Modules.User.Users.Entities.User", "User")
+                        .WithMany("Carts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -456,15 +521,37 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Orders.Entities.Order", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.Messages.Entity.Message", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.Shares.Entities.Address", "Address")
+                    b.HasOne("ShoesShop.Domain.Modules.User.Orders.Entities.Order", "Order")
+                        .WithMany("Messages")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Entities.Image", b =>
+                {
+                    b.HasOne("ShoesShop.Domain.Modules.User.Products.Entities.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Orders.Entities.Order", b =>
+                {
+                    b.HasOne("ShoesShop.Domain.Modules.User.Shares.Entities.Address", "Address")
                         .WithMany("Orders")
                         .HasForeignKey("AddressId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ShoesShop.Domain.Modules.Users.Entities.User", "User")
+                    b.HasOne("ShoesShop.Domain.Modules.User.Users.Entities.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -475,15 +562,15 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Orders.Entities.OrderDetail", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Orders.Entities.OrderDetail", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.Orders.Entities.Order", "Order")
+                    b.HasOne("ShoesShop.Domain.Modules.User.Orders.Entities.Order", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ShoesShop.Domain.Modules.Products.Entities.Product", "Product")
+                    b.HasOne("ShoesShop.Domain.Modules.User.Products.Entities.Product", "Product")
                         .WithMany("OrderDetails")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -494,26 +581,15 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Products.Entities.ImageUpload", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Products.Entities.ProductCategory", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.Products.Entities.Product", "Product")
-                        .WithMany("Images")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Products.Entities.ProductCategory", b =>
-                {
-                    b.HasOne("ShoesShop.Domain.Modules.Categories.Entities.Category", "Category")
+                    b.HasOne("ShoesShop.Domain.Modules.User.Categories.Entities.Category", "Category")
                         .WithMany("ProductCategories")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ShoesShop.Domain.Modules.Products.Entities.Product", "Product")
+                    b.HasOne("ShoesShop.Domain.Modules.User.Products.Entities.Product", "Product")
                         .WithMany("ProductCategories")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -524,9 +600,9 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Entities.Address", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Shares.Entities.Address", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.Users.Entities.User", "User")
+                    b.HasOne("ShoesShop.Domain.Modules.User.Users.Entities.User", "User")
                         .WithMany("Addresses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -535,9 +611,9 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Entities.ObjectChangeLog", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Shares.Entities.ObjectChangeLog", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.Users.Entities.User", "User")
+                    b.HasOne("ShoesShop.Domain.Modules.User.Users.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -546,19 +622,21 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Categories.Entities.Category", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Categories.Entities.Category", b =>
                 {
                     b.Navigation("ProductCategories");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Orders.Entities.Order", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Orders.Entities.Order", b =>
                 {
+                    b.Navigation("Messages");
+
                     b.Navigation("OrderDetails");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Products.Entities.Product", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Products.Entities.Product", b =>
                 {
-                    b.Navigation("CartItems");
+                    b.Navigation("Carts");
 
                     b.Navigation("Images");
 
@@ -567,16 +645,16 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("ProductCategories");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Entities.Address", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Shares.Entities.Address", b =>
                 {
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Users.Entities.User", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Users.Entities.User", b =>
                 {
                     b.Navigation("Addresses");
 
-                    b.Navigation("CartItems");
+                    b.Navigation("Carts");
 
                     b.Navigation("Orders");
                 });
