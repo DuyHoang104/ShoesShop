@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using ShoesShop.Domain.Modules.User.Categories.Enums;
 using ShoesShop.Domain.Modules.User.Categories.Services;
+using ShoesShop.Domain.Modules.User.Products.Enums;
 using ShoesShop.Domain.Modules.User.Products.Services;
 using ShoesShop.Web.Modules.Product.Dtos;
 
@@ -19,49 +21,63 @@ public class ProductController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(SearchModalDto searchDto)
     {
-        var products = await _productService.GetAllCategoriesAsync();
+        var products = (await _productService.GetAllCategoriesAsync())
+            .Where(p => p.Status == ProductStatus.Active)
+            .AsQueryable();
 
         if (searchDto.CategoryId.HasValue)
-            products = products.Where(p => p.Categories.Any(c => c.Id == searchDto.CategoryId.Value)).ToList();
+        {
+            products = products.Where(p =>
+                p.Categories.Any(c =>
+                    c.Id == searchDto.CategoryId.Value &&
+                    c.Status == CategoryStatus.Active
+                ));
+        }
 
         if (!string.IsNullOrEmpty(searchDto.Brand))
-            products = products.Where(p => p.Brand.Equals(searchDto.Brand, StringComparison.OrdinalIgnoreCase)).ToList();
+        {
+            products = products.Where(p =>
+                p.Brand.Equals(searchDto.Brand, StringComparison.OrdinalIgnoreCase)
+                );
+        }
 
         if (!string.IsNullOrEmpty(searchDto.Color))
-            products = products
-                .Where(p =>
-                    !string.IsNullOrEmpty(p.Color) &&
-                    p.Color.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Any(c => c.Trim().Equals(searchDto.Color, StringComparison.OrdinalIgnoreCase)))
-                .ToList();
+        {
+            products = products.Where(p =>
+                !string.IsNullOrEmpty(p.Color) &&
+                p.Color.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Any(c => c.Trim().Equals(searchDto.Color, StringComparison.OrdinalIgnoreCase)));
+        }
 
         if (searchDto.MinPrice.HasValue && searchDto.MaxPrice.HasValue)
-            products = products.Where(p => p.Price >= searchDto.MinPrice && p.Price <= searchDto.MaxPrice).ToList();
+        {
+            products = products.Where(p =>
+                p.Price >= searchDto.MinPrice &&
+                p.Price <= searchDto.MaxPrice);
+        }
 
         products = searchDto.SortBy switch
         {
-            "name" => products.OrderBy(p => p.Name).ToList(),
-            "price" => products.OrderBy(p => p.Price).ToList(),
-            "brand" => products.OrderBy(p => p.Brand).ToList(),
-            _ => products
+            "name"  => products.OrderBy(p => p.Name),
+            "price" => products.OrderBy(p => p.Price),
+            "brand" => products.OrderBy(p => p.Brand),
+            _       => products
         };
 
         if (searchDto.Sizes != null && searchDto.Sizes.Count != 0)
         {
-            products = products
-                .Where(p =>
-                    !string.IsNullOrEmpty(p.Sizes) &&
-                    searchDto.Sizes.All(selectedSize =>
-                        p.Sizes
-                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(s => s.Trim())
-                            .Contains(selectedSize)
-                    )
-                ).ToList();
+            products = products.Where(p =>
+                !string.IsNullOrEmpty(p.Sizes) &&
+                searchDto.Sizes.All(selectedSize =>
+                    p.Sizes
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim())
+                        .Contains(selectedSize)
+                ));
         }
 
         ViewBag.SelectedSizes = searchDto.Sizes ?? [];
-        return View("~/Modules/Users/Product/Views/Index.cshtml", products);
+        return View("~/Modules/Users/Product/Views/Index.cshtml", products.ToList());
     }
 
     [HttpPost]
@@ -76,10 +92,15 @@ public class ProductController : Controller
     public async Task<IActionResult> Detail(int id)
     {
         var product = await _productService.GetByIdAsync(id);
+
         if (product == null)
         {
             return View("~/Modules/Users/Home/Views/PageNotFound.cshtml");
-        }
+        }  
+
+        product.Categories = product.Categories
+            .Where(c => c.Status == CategoryStatus.Active)
+            .ToList();
 
         return View("~/Modules/Users/Product/Views/Detail.cshtml", product);
     }

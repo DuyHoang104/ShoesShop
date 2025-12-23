@@ -68,16 +68,5 @@ public class Category : EntityAuditLog<int>
         Description = description;
         Status = status;
     }
-    
-    public Category(string name, string description, CategoryStatus status, int adminId) : this(name, description, status)
-    {
-        CreateBy = adminId;
-        CreateTimeStamp = DateTime.UtcNow;
-
-        LastActionBy = adminId;
-        LastAction = Domain.Modules.User.Commons.Enums.LastAction.Create;
-        LastActionTimeStamp = DateTime.UtcNow;
-    }
-
     public Category() { }
 }

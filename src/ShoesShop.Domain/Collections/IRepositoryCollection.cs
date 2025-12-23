@@ -1,5 +1,7 @@
-using ShoesShop.Domain.Modules.Carts.Entities;
 using ShoesShop.Domain.Modules.Messages.Entity;
+using ShoesShop.Domain.Modules.Shares.Image.Entities;
+using ShoesShop.Domain.Modules.Shares.Review.Entity;
+using ShoesShop.Domain.Modules.User.Carts.Entities;
 using ShoesShop.Domain.Modules.User.Categories.Entities;
 using ShoesShop.Domain.Modules.User.Commons.Entities;
 using ShoesShop.Domain.Modules.User.Commons.Repositories;
@@ -32,4 +34,8 @@ public interface IRepositoryCollection
     public IGenericRepository<Address, int> Address { get; }
 
     public IGenericRepository<Message, int> Message { get; }
+
+    public IGenericRepository<Image, int> Image { get; }
+
+    public IGenericRepository<Review, int> Review { get; }
 }

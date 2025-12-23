@@ -43,15 +43,16 @@
                     <div class="form-title">
                         <span>Sign In</span>
                     </div>
+
                     <form class="form-inputs" asp-action="Login" asp-controller="User" method="post">
                         <input type="hidden" name="returnUrl" value="@Context.Request.Query["ReturnUrl"]" />
                         <div class="input-box">
-                            <input type="text" class="input-field" placeholder="Username" asp-for="UserName" required>
+                            <input type="text" class="input-field" placeholder="Username" asp-for="UserName">
                             <i class="bx bx-user icon"></i>
                         </div>
 
                         <div class="input-box">
-                            <input type="password" class="input-field" placeholder="Password" asp-for="Password" required>
+                            <input type="password" class="input-field" placeholder="Password" asp-for="Password">
                             <i class="bx bx-lock-alt icon"></i>
                         </div>
 
@@ -84,22 +85,22 @@
                 </div>
                 <form class="form-inputs" asp-action="Register" asp-controller="User" method="post" enctype="multipart/form-data">
                     <div class="input-box">
-                        <input type="text" class="input-field" placeholder="Username" asp-for="UserName" required>
+                        <input type="text" class="input-field" placeholder="Username" asp-for="UserName">
                         <i class="bx bx-user icon"></i>
                     </div>
 
                     <div class="input-box"> 
-                        <input type="email" class="input-field" placeholder="Email" asp-for="Email" required>
+                        <input type="email" class="input-field" placeholder="Email" asp-for="Email">
                         <i class="bx bx-envelope icon"></i>
                     </div>
 
                     <div class="input-box">
-                        <input type="password" class="input-field" placeholder="Password" asp-for="Password" required>
+                        <input type="password" class="input-field" placeholder="Password" asp-for="Password">
                         <i class="bx bx-lock-alt icon"></i>
                     </div>
 
                     <div class="input-box">
-                        <input type="password" class="input-field" placeholder="Confirm Password" asp-for="ConfirmPassword" required>
+                        <input type="password" class="input-field" placeholder="Confirm Password" asp-for="ConfirmPassword">
                         <i class="bx bx-lock-alt icon"></i>
                     </div>
                     
@@ -107,17 +108,17 @@
                         <label class="custom-file-upload">
                             <i class="bx bx-lock-alt icon"></i>
                             <span id="file-text">Avatar</span>
-                            <input type="file" class="input-field" asp-for="AvatarUrl" required>
+                            <input type="file" class="input-field" asp-for="AvatarUrl">
                         </label>
                     </div>
 
                     <div class="input-box">
-                        <input type="date" id="dob" class="input-field" placeholder="Date of Birth" asp-for="DateOfBirth" required>
+                        <input type="date" id="dob" class="input-field" placeholder="Date of Birth" asp-for="DateOfBirth">
                         <i class="bx bx-calendar icon" id="calendarIcon"></i>
                     </div>
                     
                     <div class="input-box">
-                        <select class="input-field" asp-for="Gender" required>
+                        <select class="input-field" asp-for="Gender">
                             <option value="" disabled selected>Select Gender</option>
                             <option value="Male">Male</option> 
                             <option value="Female">Female</option>
@@ -127,22 +128,22 @@
                     </div>
 
                     <div class="input-box">
-                        <input type="tel" class="input-field" placeholder="Phone" asp-for="Phone" required>
+                        <input type="tel" class="input-field" placeholder="Phone" asp-for="Phone">
                         <i class="bx bx-phone icon"></i>
                     </div>
 
                     <div class="input-box">
-                        <input type="text" class="input-field" placeholder="AddressLine" asp-for="Addresses[0].AddressLine1" required>
+                        <input type="text" class="input-field" placeholder="AddressLine" asp-for="Addresses[0].AddressLine1">
                         <i class="bx bx-home icon"></i>
                     </div>
 
                     <div class="input-box">
-                        <input type="text" class="input-field" placeholder="City" asp-for="Addresses[0].City" required>
+                        <input type="text" class="input-field" placeholder="City" asp-for="Addresses[0].City">
                         <i class="bx bx-home icon"></i>
                     </div>
 
                     <div class="input-box">
-                        <input type="text" class="input-field" placeholder="Country" asp-for="Addresses[0].Country" required>
+                        <input type="text" class="input-field" placeholder="Country" asp-for="Addresses[0].Country">
                         <i class="bx bx-home icon"></i>
                     </div>
 
@@ -180,15 +181,17 @@ $(document).ready(function(){
         Swal.fire({
             toast: true,
             position: 'top-end',
-            icon: type,           // 'success' | 'error' | 'info' | 'warning'
+            icon: type,
             title: message,
             showConfirmButton: false,
-            timer: 2000,
+            timer: 2500,
             timerProgressBar: true,
             background: '#1f1f1f',
             color: '#fff',
             didClose: () => {
-                if (redirectUrl && type === 'success') window.location.href = redirectUrl;
+                if (redirectUrl && type === 'success') {
+                    window.location.href = redirectUrl;
+                }
             }
         });
     }
@@ -197,7 +200,6 @@ $(document).ready(function(){
     function showLoading(message = 'Processing...') {
         Swal.fire({
             title: message,
-            html: '<div class="swal2-spinner"></div>',
             background: '#1f1f1f',
             color: '#fff',
             allowOutsideClick: false,
@@ -206,15 +208,33 @@ $(document).ready(function(){
         });
     }
 
-    // --- AJAX submit form helper ---
+    // --- Hiển thị validation errors từ server ---
+    function showValidationErrors(errors) {
+        let html = '<div style="text-align:left">';
+        Object.keys(errors).forEach(key => {
+            errors[key].forEach(msg => {
+                html += `<div>• ${msg}</div>`;
+            });
+        });
+        html += '</div>';
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            html: html,
+            background: '#1f1f1f',
+            color: '#fff'
+        });
+    }
+
+    // --- AJAX submit form ---
     function ajaxFormSubmit(formSelector, urlSuccessRedirect) {
-        $(formSelector).submit(function(e){
+        $(formSelector).on('submit', function(e){
             e.preventDefault();
+
             const form = $(this);
-            const formData = form.attr('enctype') === 'multipart/form-data' 
-                             ? new FormData(this) 
-                             : form.serialize();
-            const isMultipart = formData instanceof FormData;
+            const isMultipart = form.attr('enctype') === 'multipart/form-data';
+            const formData = isMultipart ? new FormData(this) : form.serialize();
 
             showLoading();
 
@@ -224,25 +244,32 @@ $(document).ready(function(){
                 data: formData,
                 contentType: isMultipart ? false : 'application/x-www-form-urlencoded; charset=UTF-8',
                 processData: !isMultipart,
+
                 success: function(response){
                     Swal.close();
-                    if(response.success) {
+                    if (response.success) {
                         showToast(response.message, 'success', urlSuccessRedirect);
                     } else {
                         showToast(response.message || 'Operation failed!', 'error');
                     }
                 },
-                error: function(){
+
+                error: function(xhr){
                     Swal.close();
+                    if (xhr.status === 400 && xhr.responseJSON?.errors) {
+                        showValidationErrors(xhr.responseJSON.errors);
+                        return;
+                    }
+
+                    // fallback
                     showToast("An unexpected error occurred!", 'error');
                 }
             });
         });
     }
 
-    // --- Apply AJAX submit to forms ---
+    // --- Apply ---
     ajaxFormSubmit(".register-form form", "/User/Login");
     ajaxFormSubmit(".login-form form", "/Home/Index");
-
 });
 </script>

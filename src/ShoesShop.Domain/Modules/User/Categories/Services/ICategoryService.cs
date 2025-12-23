@@ -14,5 +14,5 @@ public interface ICategoryService
 
     public Task<bool> UpdateAsync(CategoryDto categoryDto);
 
-    public Task<bool> DeleteAsync(CategoryDto categoryDto);
+    public Task<bool> DeleteAsync(int categoryId);
 }

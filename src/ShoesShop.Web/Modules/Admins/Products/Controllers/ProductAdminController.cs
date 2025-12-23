@@ -6,7 +6,6 @@ using ShoesShop.Domain.Modules.User.Categories.Services;
 using ShoesShop.Domain.Modules.User.Commons.Enums;
 using ShoesShop.Domain.Modules.User.Commons.Repositories;
 using ShoesShop.Domain.Modules.User.Products.Commands;
-using ShoesShop.Domain.Modules.User.Products.Enums;
 using ShoesShop.Domain.Modules.User.Products.Services;
 using ShoesShop.Web.Modules.Admins.Products.Dtos;
 using ProductUpdateDto = ShoesShop.Domain.Modules.User.Products.Commands.Dtos.ProductUpdateDto;
@@ -17,15 +16,13 @@ namespace ShoesShop.Web.Modules.Admins.Products.Controllers;
 [Route("Admin/Products")]
 public class ProductAdminController : Controller
 {
-    private readonly IWebHostEnvironment _env;
     private readonly IProductService _productService;
     private readonly ICategoryService _categoryService;
     private readonly CloudinaryService _cloudinaryService;
-    private readonly IGenericRepository<ShoesShop.Domain.Modules.User.Products.Entities.Product, int> _productRepository;
+    private readonly IGenericRepository<Domain.Modules.User.Products.Entities.Product, int> _productRepository;
     
-    public ProductAdminController(IWebHostEnvironment env, IProductService productService, ICategoryService categoryService, CloudinaryService cloudinaryService, IGenericRepository<ShoesShop.Domain.Modules.User.Products.Entities.Product, int> productRepository)
+    public ProductAdminController(IProductService productService, ICategoryService categoryService, CloudinaryService cloudinaryService, IGenericRepository<Domain.Modules.User.Products.Entities.Product, int> productRepository)
     {
-        _env = env;
         _productService = productService;
         _categoryService = categoryService;
         _cloudinaryService = cloudinaryService;
@@ -78,7 +75,6 @@ public class ProductAdminController : Controller
 
         var categories = await _categoryService.GetAllAsync();
 
-        // Lọc bỏ Delete + Inactive
         createProductAdminDto.Categories = categories
             .Where(c => c.LastAction != LastAction.Delete &&
                         c.Status != CategoryStatus.Inactive)
@@ -88,52 +84,33 @@ public class ProductAdminController : Controller
     }   
 
     [HttpPost("Add")]
-    public async Task<IActionResult> AddProduct(CreateProductAdminDto createProductAdminDto)
+    public async Task<IActionResult> Add(CreateProductAdminDto dto)
     {
-        if (string.IsNullOrWhiteSpace(createProductAdminDto.Sizes))
-        {
-            ModelState.AddModelError("Sizes", "Please select at least one size.");
-        }
-
         if (!ModelState.IsValid)
         {
-            createProductAdminDto.Categories = (await _categoryService.GetAllAsync()).ToList();
-            return View("~/Modules/Admins/Products/Views/apps-projects-add.cshtml", createProductAdminDto);
+            dto.Categories = (await _categoryService.GetAllAsync()).ToList();
+            return View("~/Modules/Admins/Products/Views/apps-projects-add.cshtml", dto);
         }
 
-        // Convert Sizes CSV to list nếu cần
-        var sizesList = createProductAdminDto.Sizes.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
-
-        var uploadedImages = new List<string>();
-        foreach (var file in createProductAdminDto.ImageFiles)
+        await _productService.CreateAsync(new CreateProductDto
         {
-            var result = await _cloudinaryService.UploadImageAsync(file, $"Products/{createProductAdminDto.Name.Replace(" ", "-")}");
-            if (result != null) uploadedImages.Add(result.Value.Url);
-        }
-
-        var productDto = new CreateProductDto
-        {
-            Name = createProductAdminDto.Name,
-            Price = createProductAdminDto.Price,
-            Description = createProductAdminDto.Description ?? string.Empty,
-            Quantity = createProductAdminDto.Quantity,
-            SaleOff = createProductAdminDto.SaleOff,
-            Status = createProductAdminDto.Status,
-            Brand = createProductAdminDto.Brand,
-            Color = createProductAdminDto.Color ?? string.Empty,
-            Sizes = createProductAdminDto.Sizes,
-            ImageUrl = uploadedImages,
+            Name = dto.Name,
+            Price = dto.Price,
+            Description = dto.Description ?? string.Empty,
+            Quantity = dto.Quantity,
+            SaleOff = dto.SaleOff,
+            Status = dto.Status,
+            Brand = dto.Brand,
+            Color = dto.Color ?? string.Empty,
+            Sizes = dto.Sizes,
+            ImageFiles = dto.ImageFiles,
             CreateBy = GetCurrentAdminId(),
-            CreateTimeStamp = DateTime.UtcNow,
-            LastActionBy = GetCurrentAdminId(),
-            LastAction = LastAction.Create,
-            LastActionTimeStamp = DateTime.UtcNow,
-            Categories = createProductAdminDto.Categories.Where(c => !string.IsNullOrWhiteSpace(c.Name)).ToList(),
-        };
+            Categories = dto.Categories.Where(c => !string.IsNullOrWhiteSpace(c.Name)).ToList()
+        });
 
-        await _productService.CreateAsync(productDto);
         return RedirectToAction("Index", "ProductAdmin");
     }
+
 
     [HttpGet("Details/{id}")]
     public async Task<IActionResult> Details(int id)
@@ -169,19 +146,12 @@ public class ProductAdminController : Controller
     [ValidateModel("Index")]
     public async Task<IActionResult> Delete(int id)
     {
-        var product = await _productRepository.GetByIdAsync(id);
+        var product = await _productService.GetByIdAsync(id);
 
         if (product == null)
             return Json(new { success = false, message = "Product not found" });
 
-        product.Status = ProductStatus.InActive;
-        product.LastAction = LastAction.Delete;
-        product.LastActionBy = GetCurrentAdminId();
-        product.LastActionTimeStamp = DateTime.UtcNow;
-
-        await _productRepository.UpdateAsync(product);
-        await _productRepository.SaveChangesAsync();
-
+        await _productService.DeleteAsync(product.Id);
         return Json(new { success = true, message = "Delete successful" });
     }
 

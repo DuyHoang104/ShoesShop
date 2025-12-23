@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using ShoesShop.Crosscutting.Utilities.Exceptions;
-using ShoesShop.Domain.Modules.Carts.Entities;
 using ShoesShop.Domain.Modules.User.Carts.Dtos;
+using ShoesShop.Domain.Modules.User.Carts.Entities;
 using ShoesShop.Domain.Modules.User.Carts.Services;
 using ShoesShop.Domain.Modules.User.Commons.Repositories;
 using ShoesShop.Domain.Modules.User.Products.Commands.Dtos;

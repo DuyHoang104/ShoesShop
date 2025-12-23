@@ -38,9 +38,9 @@ public class CategoryService : ICategoryService
             Description = categoryDto.Description,
             Status = categoryDto.Status,
             CreateBy = categoryDto.CreateBy,
-            CreateTimeStamp = DateTime.UtcNow,
+            CreateTimeStamp = categoryDto.CreateTimeStamp,
             LastActionBy = categoryDto.LastActionBy,
-            LastActionTimeStamp = DateTime.UtcNow,
+            LastActionTimeStamp = categoryDto.LastActionTimeStamp,
             LastAction = categoryDto.LastAction
         };
 
@@ -70,7 +70,11 @@ public class CategoryService : ICategoryService
             Id = category.Id,
             Name = category.Name,
             Description = category.Description,
-            LastActionTimeStamp = category.LastActionTimeStamp
+            LastActionTimeStamp = category.LastActionTimeStamp,
+            CreateTimeStamp = category.CreateTimeStamp,
+            CreateBy = category.CreateBy,
+            LastActionBy = category.LastActionBy,
+            LastAction = category.LastAction
         };
     }
 
@@ -113,18 +117,9 @@ public class CategoryService : ICategoryService
         return true;
     }
 
-    public async Task<bool> DeleteAsync(CategoryDto categoryDto)
+    public async Task<bool> DeleteAsync(int categoryId)
     {
-        var category = await _categoryRepository.GetByIdAsync(categoryDto.Id);
-        if (category == null)
-            return false;
-
-        category.Status = categoryDto.Status;
-        category.LastActionBy = categoryDto.LastActionBy;
-        category.LastActionTimeStamp = DateTime.UtcNow;
-        category.LastAction = categoryDto.LastAction;
-
-        await _categoryRepository.UpdateAsync(category);
+        await _categoryRepository.DeleteAsync(categoryId);
         await _categoryRepository.SaveChangesAsync();
         return true;
     }

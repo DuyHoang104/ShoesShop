@@ -40,6 +40,7 @@ public class CategoryAdminController : Controller
 
         dto.CreateBy = adminId;
         dto.LastActionBy = adminId;
+        dto.CreateTimeStamp = DateTime.UtcNow;
         dto.LastActionTimeStamp = DateTime.UtcNow;
         dto.LastAction = LastAction.Create;
         dto.Status = CategoryStatus.Active;
@@ -75,13 +76,7 @@ public class CategoryAdminController : Controller
     public async Task<IActionResult> Delete(int id)
     {
         var dto = await _categoryService.GetByIdAsync(id);
-       
-        dto.Status = CategoryStatus.Inactive;
-        dto.LastAction = LastAction.Delete;
-        dto.LastActionBy = GetCurrentAdminId();
-        dto.LastActionTimeStamp = DateTime.UtcNow;
-
-        var result = await _categoryService.DeleteAsync(dto);
+        var result = await _categoryService.DeleteAsync(dto.Id);
 
         if (!result)
         {

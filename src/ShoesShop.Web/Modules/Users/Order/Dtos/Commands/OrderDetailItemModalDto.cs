@@ -2,6 +2,7 @@ namespace ShoesShop.Web.Modules.Users.Order.Dtos.Commands;
 
 public class OrderDetailItemModalDto
 {
+    public int ProductId { get; set; }
     public string? ProductName { get; set; } = null!;
     public decimal UnitPrice { get; set; }
     public int Quantity { get; set; }

@@ -1,5 +1,7 @@
 @using Microsoft.Extensions.Options
+@using ShoesShop.Domain.Modules.User.Categories.Enums
 @using ShoesShop.Domain.Modules.User.Products.Commands.Dtos
+@using ShoesShop.Domain.Modules.User.Products.Enums
 @using ShoesShop.Domain.Modules.User.Shares.Dtos
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @model ProductDto
@@ -68,14 +70,30 @@
                 <li>
                     <a class="active">
                         <span>Categories</span> :
-                        @string.Join(", ", Model.Categories.Select(c => c.Name))
+                        @(Model.Categories != null && Model.Categories.Any()
+                            ? string.Join(", ", Model.Categories.Select(c => c.Name))
+                            : "No categories")
                     </a>
                 </li>
 
                 <li>
-                    <a> <span>Availability</span> : @Model.Status.ToString()</a>
-                    <a> <span>Brand</span> : @Model.Brand</a>
-                    <a> <span>Color</span> : @Model.Color</a>
+                    <a>
+                        <span>Availability</span> :
+                        @(Model.Status == ProductStatus.Active ? "In stock" : "Unavailable")
+                    </a>
+                    <a>
+                        <span>Brand</span> :
+                        @(string.IsNullOrWhiteSpace(Model.Brand) ? "N/A" : Model.Brand)
+                    </a>
+                    <a>
+                        <span>Color</span> :
+                        @(string.IsNullOrWhiteSpace(Model.Color)
+                            ? "N/A"
+                            : string.Join(", ",
+                                Model.Color
+                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(c => c.Trim())))
+                    </a>
                 </li>
             </ul>
 

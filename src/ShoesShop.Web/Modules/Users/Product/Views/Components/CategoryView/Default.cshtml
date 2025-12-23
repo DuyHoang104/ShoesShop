@@ -33,16 +33,25 @@
 
 <aside class="left_widgets p_filter_widgets">
     <div class="l_w_title">
-        <h3>Product filters</h3>
+        <h3>Brand filters</h3>
     </div>
     <div class="widgets_inner">
         <ul class="list">
-            @foreach (var brand in Model.Select(p => p.Brand).Distinct())
+            @foreach (var brand in Model
+                .Where(p => !string.IsNullOrWhiteSpace(p.Brand))
+                .Select(p => p.Brand.Trim())
+                .Distinct())
             {
                 <li>
-                    <a asp-action="Index" asp-controller="Product" asp-route-brand="@brand">@brand</a>
-                    <span class="filter-count" style="margin-left: 5px; color: red">
-                        @Model.Count(p => p.Brand == brand)
+                    <a asp-action="Index"
+                    asp-controller="Product"
+                    asp-route-brand="@brand">
+                        @brand
+                    </a>
+                    <span class="filter-count" style="margin-left:5px;color:red">
+                        @Model.Count(p =>
+                            !string.IsNullOrWhiteSpace(p.Brand) &&
+                            p.Brand.Trim().Equals(brand, StringComparison.OrdinalIgnoreCase))
                     </span>
                 </li>
             }
@@ -57,18 +66,30 @@
     <div class="widgets_inner">
         <ul class="list">
             @foreach (var color in Model
-                .SelectMany(p => p.Color.Split(separator: ',', StringSplitOptions.RemoveEmptyEntries))
-                .Select(c => c.Trim())
+                .Where(p => !string.IsNullOrWhiteSpace(p.Color))
+                .SelectMany(p => p.Color
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(c => c.Trim()))
+                .Where(c => !string.IsNullOrWhiteSpace(c))
                 .Distinct()
                 .Take(4))
             {
                 <li>
-                    <a asp-action="Index" asp-controller="Product" asp-route-color="@color">@color</a>
-                    <span class="filter-count" style="margin-left: 5px; color: red">
-                        @Model.Count(p => p.Color != null && p.Color.Split(separator: ',', StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim()).Contains(color))
+                    <a asp-action="Index"
+                    asp-controller="Product"
+                    asp-route-color="@color">
+                        @color
+                    </a>
+                    <span class="filter-count" style="margin-left:5px;color:red">
+                        @Model.Count(p =>
+                            !string.IsNullOrWhiteSpace(p.Color) &&
+                            p.Color.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(c => c.Trim())
+                                .Contains(color))
                     </span>
                 </li>
             }
+
         </ul>
     </div>
 </aside>

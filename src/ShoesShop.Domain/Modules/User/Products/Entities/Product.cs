@@ -1,5 +1,5 @@
-using ShoesShop.Domain.Modules.Carts.Entities;
-using ShoesShop.Domain.Modules.Shares.Entities;
+using ShoesShop.Domain.Modules.Shares.Image.Entities;
+using ShoesShop.Domain.Modules.User.Carts.Entities;
 using ShoesShop.Domain.Modules.User.Categories.Entities;
 using ShoesShop.Domain.Modules.User.Commons.Entities;
 using ShoesShop.Domain.Modules.User.Orders.Entities;
@@ -166,27 +166,31 @@ public class Product : EntityAuditLog<int>
         }
     }
 
-    private readonly HashSet<Image> _images = new();
-    public IReadOnlyCollection<Image> Images => _images;
+    private readonly HashSet<ImageProduct> _images = [];
+    public IReadOnlyCollection<ImageProduct> Images => _images;
 
-    public void AddImage(string url)
+    public void AddImage(string url, string publicId)
     {
         if (string.IsNullOrWhiteSpace(url))
             throw new ArgumentException("Image URL cannot be empty.", nameof(url));
 
-        if (_images.Any(i => i.Url.Equals(url, StringComparison.OrdinalIgnoreCase)))
-            throw new InvalidOperationException($"Image URL '{url}' already exists for this product.");
+        if (string.IsNullOrWhiteSpace(publicId))
+            throw new ArgumentException("PublicId cannot be empty.", nameof(publicId));
 
-        _images.Add(new Image(url, this));
+        if (_images.Any(i => i.PublicId == publicId))
+            throw new InvalidOperationException("Image already exists.");
+
+        _images.Add(new ImageProduct(url, publicId));
     }
 
-    public void RemoveImage(string url)
+    public void RemoveImage(string publicId)
     {
-        var image = _images.FirstOrDefault(i => i.Url.Equals(url, StringComparison.OrdinalIgnoreCase))
+        var image = _images.FirstOrDefault(i => i.PublicId == publicId)
             ?? throw new InvalidOperationException("Image not found.");
+
         _images.Remove(image);
     }
-    
+
     private readonly HashSet<ProductCategory> _productCategories = [];
     public IReadOnlyCollection<ProductCategory> ProductCategories => _productCategories;
     

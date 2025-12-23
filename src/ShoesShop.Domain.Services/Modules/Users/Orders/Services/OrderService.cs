@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using ShoesShop.Crosscutting.Utilities.Exceptions;
-using ShoesShop.Domain.Modules.Carts.Entities;
+using ShoesShop.Domain.Modules.Shares.Review.Entity;
+using ShoesShop.Domain.Modules.User.Carts.Entities;
 using ShoesShop.Domain.Modules.User.Carts.Services;
 using ShoesShop.Domain.Modules.User.Commons.Repositories;
 using ShoesShop.Domain.Modules.User.Orders.Dtos;
@@ -23,6 +23,7 @@ public class OrderService : IOrderService
     private readonly IGenericRepository<User, int> _userRepository;
     private readonly IGenericRepository<Address, int> _addressRepository;
     private readonly IGenericRepository<Cart, int> _cartRepository;
+    private readonly IGenericRepository<Review, int> _reviewRepository = null!;
     private readonly ICartService _cartService;
 
     public OrderService(
@@ -30,6 +31,7 @@ public class OrderService : IOrderService
         IGenericRepository<User, int> userRepository,
         IGenericRepository<Address, int> addressRepository,
         IGenericRepository<Cart, int> cartRepository,
+        IGenericRepository<Review, int> reviewRepository,
         ICartService cartService,
         IUnitOfWork unitOfWork
     )
@@ -39,6 +41,7 @@ public class OrderService : IOrderService
         _addressRepository = addressRepository;
         _cartRepository = cartRepository;
         _cartService = cartService;
+        _reviewRepository = reviewRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -73,7 +76,7 @@ public class OrderService : IOrderService
                 TotalAmount = (total * (1 - (order.Discount ?? 0))) + (order.ShippingFee ?? 0),
                 OrderDetails = order.OrderDetails.Select(d => new OrderDetailItemDto
                 {
-                    ProductID = d.Product.Id,
+                    ProductId = d.Product.Id,
                     ProductName = d.Product?.Name,
                     Quantity = d.Quantity,
                     UnitPrice = d.UnitPrice,
@@ -222,12 +225,13 @@ public class OrderService : IOrderService
                 .Include(o => o.Address)
                 .Include(o => o.User)
                     .ThenInclude(u => u.Addresses)
-        ))
-        .FirstOrDefault()
-        ?? throw new BusinessException("Order not found");
+        )).FirstOrDefault()
+            ?? throw new BusinessException("Order not found");
 
         decimal total = order.OrderDetails.Sum(d => d.Subtotal);
 
+        var userId = order.UserId;
+        
         return new OrderDetailDto
         {
             Id = order.Id,
@@ -247,13 +251,14 @@ public class OrderService : IOrderService
 
             OrderDetails = order.OrderDetails.Select(d => new OrderDetailItemDto
             {
-                ProductID = d.Product.Id,
+                Id = d.Id,
+                ProductId = d.Product.Id,
                 ProductName = d.Product?.Name ?? "Unknown",
                 Quantity = d.Quantity,
                 UnitPrice = d.UnitPrice,
                 Subtotal = d.Subtotal,
                 Size = d.Size,
-                ProductImage = d.Product?.Images?.FirstOrDefault()?.Url ?? "/images/default.png"
+                ProductImage = d.Product?.Images?.FirstOrDefault()?.Url ?? "/images/default.png",
             }).ToList(),
 
             Address = order.Address == null ? null : new AddressDto
@@ -279,6 +284,7 @@ public class OrderService : IOrderService
             }
         };
     }
+
 
     public async Task<decimal> CalculateOrderTotalAsync(int userId, decimal shippingFee = 0, decimal discountRate = 0)
     {

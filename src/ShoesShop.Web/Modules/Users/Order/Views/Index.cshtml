@@ -140,6 +140,17 @@ media(max-width:768px){.order-header { flex-direction: column; align-items: flex
                         <button type="submit" class="btn-detail">Contact Shop</button>
                     </form>
                 </div>
+                    <div class="order-footer">
+                        @if(order.Status == OrderStatus.Completed)
+                        {
+                            <form asp-controller="Review" asp-action="Create" method="get">
+                                <input type="hidden" name="orderId" value="@order.Id" />
+                                <button type="submit" class="btn-detail" style="background-color:#b91c1c;">
+                                    Review Now
+                                </button>
+                            </form>
+                        }
+                    </div>
             </div>
         }
     }

@@ -1,3 +1,4 @@
+using ShoesShop.Domain.Modules.Shares.Review.Entity;
 using ShoesShop.Domain.Modules.User.Orders.Enums;
 namespace ShoesShop.Web.Modules.Users.Order.Dtos.Commands;
 
@@ -18,4 +19,5 @@ public class OrderDetailModalDto
     public DateTime OrderDate { get; set; }
     public decimal TotalAmount { get; set; }
     public List<OrderDetailItemModalDto> OrderDetails { get; set; } = [];
+    public OrderStatus? OrderStatus { get; set; } = null!;
 }

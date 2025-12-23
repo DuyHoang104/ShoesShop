@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
-using ShoesShop.Domain.Modules.Carts.Entities;
+using ShoesShop.Domain.Modules.Shares.Image.Entities;
+using ShoesShop.Domain.Modules.Shares.Image.Enums;
+using ShoesShop.Domain.Modules.User.Carts.Entities;
 using ShoesShop.Domain.Modules.User.Commons.Entities;
 using ShoesShop.Domain.Modules.User.Orders.Entities;
 using ShoesShop.Domain.Modules.User.Shares.Entities;
@@ -152,28 +154,40 @@ public partial class User : BaseEntity<int>
         }
     }
 
-    private string? _avatarUrl;
-    public string? AvatarUrl
+    private readonly HashSet<ImageUser> _images = new();
+    public IReadOnlyCollection<ImageUser> Images => _images;
+    public void SetAvatar(string url, string publicId)
     {
-        get => _avatarUrl;
-        set
+        if (string.IsNullOrWhiteSpace(url))
+            throw new ArgumentException("Avatar URL cannot be empty.", nameof(url));
+
+        if (string.IsNullOrWhiteSpace(publicId))
+            throw new ArgumentException("PublicId cannot be empty.", nameof(publicId));
+
+        var oldAvatar = _images.FirstOrDefault(i =>
+            i.OwnerType == OwnerType.User &&
+            i.OwnerId == Id);
+
+        if (oldAvatar != null)
+            _images.Remove(oldAvatar);
+
+        _images.Add(new ImageUser(url, publicId)
         {
-            if (value != null)
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    throw new ArgumentException("Image cannot be empty or whitespace.", nameof(AvatarUrl));
-                    }
+            OwnerId = Id
+        });
+    }
 
-                if (value.Length > 2048)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(AvatarUrl), "Image cannot exceed 2048 characters.");
-                    }
-                }
+    public ImageUser RemoveAvatar()
+    {
+        var avatar = _images.FirstOrDefault(i =>
+            i.OwnerType == OwnerType.User &&
+            i.OwnerId == Id)
+            ?? throw new InvalidOperationException("Avatar not found.");
 
-            _avatarUrl = value;
-        }
-    }   
+        _images.Remove(avatar);
+
+        return avatar;
+    }
 
     private UserGender _gender;
     public UserGender Gender
@@ -211,13 +225,12 @@ public partial class User : BaseEntity<int>
     private readonly HashSet<Cart> _carts = [];
     public IReadOnlyCollection<Cart> Carts => _carts;
 
-    public User(string userName, string password, DateOnly dateOfBirth, string email, string? phone, string? avatarUrl, UserAccountRole role, UserStatus status, UserGender gender)
+    public User(string userName, string password, DateOnly dateOfBirth, string email, string? phone, UserAccountRole role, UserStatus status, UserGender gender)
     {
         UserName = userName;
         Password = password;
         DateOfBirth = dateOfBirth;
         Email = email;
-        AvatarUrl = avatarUrl;
         Status = status;
         Phone = phone;
         Role = role;

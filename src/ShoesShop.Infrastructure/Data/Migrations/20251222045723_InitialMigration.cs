@@ -41,10 +41,10 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Brand = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Color = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     Sizes = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    SaleOff = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    SaleOff = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: true),
                     Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     CreateBy = table.Column<int>(type: "int", nullable: false),
                     CreateTimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -55,6 +55,27 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Products", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Reviews",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Comment = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    Rating = table.Column<int>(type: "int", nullable: false),
+                    Metadata = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ParentId = table.Column<int>(type: "int", nullable: true),
+                    CreateBy = table.Column<int>(type: "int", nullable: false),
+                    CreateTimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastActionBy = table.Column<int>(type: "int", nullable: false),
+                    LastAction = table.Column<int>(type: "int", nullable: false),
+                    LastActionTimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reviews", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -70,37 +91,11 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     Role = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    AvatarUrl = table.Column<string>(type: "nvarchar(2048)", maxLength: 2048, nullable: true),
                     Gender = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Images",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Url = table.Column<string>(type: "nvarchar(2048)", maxLength: 2048, nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    CreateBy = table.Column<int>(type: "int", nullable: false),
-                    CreateTimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastActionBy = table.Column<int>(type: "int", nullable: false),
-                    LastAction = table.Column<int>(type: "int", nullable: false),
-                    LastActionTimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Images", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Images_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -181,6 +176,22 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Images",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Url = table.Column<string>(type: "nvarchar(2048)", maxLength: 2048, nullable: false),
+                    OwnerId = table.Column<int>(type: "int", nullable: false),
+                    OwnerType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PublicId = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Images", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ObjectChangeLogs",
                 columns: table => new
                 {
@@ -218,8 +229,8 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     ReceiverName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     ReceiverPhone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: true),
                     ReceiverAddress = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    ShippingFee = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    Discount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    ShippingFee = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
+                    Discount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
                     AddressId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -312,9 +323,9 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Images_ProductId",
+                name: "IX_Images_OwnerId",
                 table: "Images",
-                column: "ProductId");
+                column: "OwnerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_OrderId",
@@ -377,6 +388,9 @@ namespace ShoesShop.Infrastructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProductCategories");
+
+            migrationBuilder.DropTable(
+                name: "Reviews");
 
             migrationBuilder.DropTable(
                 name: "Orders");

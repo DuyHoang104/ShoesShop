@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using ShoesShop.Domain.Modules.User.Carts.Dtos;
 using ShoesShop.Domain.Modules.User.Categories.Dtos;
 using ShoesShop.Domain.Modules.User.Commons.Enums;
@@ -32,8 +33,8 @@ public class CreateProductDto
 
     public List<CartDto> Carts { get; set; }
     
-    public List<string>? ImageUrl { get; set; }
-
+    public List<IFormFile> ImageFiles { get; set; } = new();
+    
     public int CreateBy { get; set; }
 
     public DateTime CreateTimeStamp { get; set; }

@@ -1,0 +1,165 @@
+@using ShoesShop.Web.Modules.Users.Review.Dtos
+@model ReviewModalDto
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject Microsoft.Extensions.Options.IOptions<CloudinarySettings> CloudinaryConfig
+
+@{
+    ViewData["Title"] = "Rate Your Order";
+    Layout = "~/Modules/Users/Shares/Views/_Layout.cshtml";
+}
+<style>
+:root { --bg:#0d0f14; --card:#11131e; --border:rgba(255,255,255,.08); --text-main:#e5e7eb; --text-soft:#9ca3af; --accent:#fbbf24; --accent-2:#f97316; }
+.review-wrapper { max-width:1080px; margin:180px auto; padding:0 20px; color:var(--text-main); font-family:system-ui; }
+.card { background:linear-gradient(180deg,#181c2b,#0f111c); border-radius:22px; padding:28px 32px; margin-bottom:32px; border:1px solid var(--border); }
+.card-title { font-size:21px; font-weight:700; margin-bottom:22px; color:var(--accent); }
+.star-group { display:flex; flex-direction:row-reverse; gap:8px; font-size:26px; }
+.star-group input { display:none; }
+.star-group label { cursor:pointer; color:#2b2f45; transition:.15s; }
+.star-group label:hover,
+.star-group input:checked ~ label,
+.star-group label:hover ~ label { color:var(--accent); }
+.rating-row { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:12px 0; border-bottom:1px solid var(--border); }
+textarea { width:100%; min-height:90px; margin-top:12px; padding:14px 16px; border-radius:14px; background:#0b0d15; border:1px solid var(--border); color:var(--text-main); }
+.product { display:flex; gap:22px; padding:22px; border-radius:18px; background:linear-gradient(180deg,#14172a,#0f111c); border:1px solid var(--border); margin-bottom:22px; }
+.product-thumb img { width:110px; height:110px; object-fit:cover; border-radius:16px; }
+.product-body { flex:1; display:flex; flex-direction:column; gap:12px; }
+.product-head { display:flex; justify-content:space-between; }
+.product-meta { display:flex; gap:18px; font-size:14px; color:var(--text-soft); }
+.upload-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:12px; }
+.upload-tile { height:90px; border-radius:14px; border:1.5px dashed rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.upload-tile input { display:none; }
+.preview-item { position:relative; height:90px; border-radius:14px; overflow:hidden; }
+.preview-item img { width:100%; height:100%; object-fit:cover; }
+.preview-item button { position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:50%; border:none; background:rgba(0,0,0,.7); color:#fff; cursor:pointer; }
+.submit-btn { width:100%; margin-top:32px; padding:16px; border-radius:20px; border:none; font-size:17px; font-weight:700; background:linear-gradient(135deg,var(--accent),var(--accent-2)); }
+</style>
+
+<div class="review-wrapper">
+<form asp-action="Create" asp-controller="Review" method="post" enctype="multipart/form-data">
+@Html.AntiForgeryToken()
+
+<input type="hidden" asp-for="CreateReview.OrderId" />
+
+<div class="card">
+    <div class="card-title">⭐ Overall Experience</div>
+
+    <div class="rating-row">
+        <span>Overall Order</span>
+        <div class="star-group">
+            @for (int i = 5; i >= 1; i--)
+            {
+                <input type="radio" asp-for="Rating" value="@i" id="order-@i" />
+                <label for="order-@i">★</label>
+            }
+        </div>
+    </div>
+
+    <div class="rating-row">
+        <span>Shipper Attitude</span>
+        <div class="star-group">
+            @for (int i = 5; i >= 1; i--)
+            {
+                <input type="radio" asp-for="CreateReview.ShipperRating" value="@i" id="shipper-@i" />
+                <label for="shipper-@i">★</label>
+            }
+        </div>
+    </div>
+
+    <div class="rating-row">
+        <span>Employee Attitude</span>
+        <div class="star-group">
+            @for (int i = 5; i >= 1; i--)
+            {
+                <input type="radio" asp-for="CreateReview.EmployeeRating" value="@i" id="employee-@i" />
+                <label for="employee-@i">★</label>
+            }
+        </div>
+    </div>
+
+    <textarea asp-for="Comment"
+              placeholder="Your overall experience..."></textarea>
+</div>
+
+<div class="card">
+<div class="card-title">📦 Product Reviews</div>
+
+@for (int i = 0; i < Model.ProductReviews.Count; i++)
+{
+    var p = Model.ProductReviews[i].Product;
+    var img = p.Images.FirstOrDefault();
+    var imgUrl = img != null
+        ? (img.Url.StartsWith("http") ? img.Url : $"{CloudinaryConfig.Value.BaseUrl}{img.Url}")
+        : "/images/default.png";
+
+<div class="product">
+    <div class="product-thumb">
+        <img src="@imgUrl" />
+    </div>
+
+    <div class="product-body">
+        <div class="product-head">
+            <b>@p.Name</b>
+            <b>@p.Price.ToString("N2") $</b>
+        </div>
+
+        <div class="product-meta">
+            <span>Size: <b>@p.Sizes</b></span>
+            <span>Qty: <b>@p.Quantity</b></span>
+        </div>
+
+        <input type="hidden" asp-for="ProductReviews[i].OrderDetailId" />
+
+        <!-- ⭐ Product Rating -->
+        <div class="star-group">
+            @for (int r = 5; r >= 1; r--)
+            {
+                <input type="radio"
+                       asp-for="ProductReviews[i].ProductRating"
+                       value="@r"
+                       id="p-@i-@r" />
+                <label for="p-@i-@r">★</label>
+            }
+        </div>
+
+        <!-- 📝 Product Comment -->
+        <textarea asp-for="ProductReviews[i].ProductComment"
+                  placeholder="Your review for this product..."></textarea>
+
+        <!-- 📷 Product Images -->
+        <div class="upload-grid" id="preview-@i">
+            <label class="upload-tile">
+                📷 Add
+                <input type="file"
+                       name="ProductReviews[@i].Images"
+                       multiple
+                       accept="image/*"
+                       onchange="previewImages(this,@i)" />
+            </label>
+        </div>
+    </div>
+</div>
+}
+</div>
+
+<button class="submit-btn" type="submit">Submit Review</button>
+</form>
+</div>
+
+<script>
+function previewImages(input, index) {
+    const grid = document.getElementById(`preview-${index}`);
+
+    [...input.files].forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+
+        const div = document.createElement('div');
+        div.className = 'preview-item';
+        div.innerHTML = `
+            <img src="${URL.createObjectURL(file)}" />
+            <button type="button">×</button>
+        `;
+        div.querySelector('button').onclick = () => div.remove();
+        grid.appendChild(div);
+    });
+}
+</script>

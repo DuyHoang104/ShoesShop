@@ -1,7 +1,7 @@
 using ShoesShop.Domain.Modules.User.Commons.Entities;
 using ShoesShop.Domain.Modules.User.Products.Entities;
 
-namespace ShoesShop.Domain.Modules.Carts.Entities;
+namespace ShoesShop.Domain.Modules.User.Carts.Entities;
 
 public class Cart : BaseEntity<int>
 {
@@ -48,8 +48,8 @@ public class Cart : BaseEntity<int>
         get => _userId;
     }
 
-    private User.Users.Entities.User _user = null!;
-    public User.Users.Entities.User User
+    private Users.Entities.User _user = null!;
+    public Users.Entities.User User
     {
         get => _user;
         internal set
@@ -79,7 +79,7 @@ public class Cart : BaseEntity<int>
         }
     }
 
-    public Cart(User.Users.Entities.User user, Product product, int quantity, string size)
+    public Cart(Users.Entities.User user, Product product, int quantity, string size)
     {
         User = user;
         Product = product;

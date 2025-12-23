@@ -100,15 +100,9 @@
                                                         break;
 
                                                     case LastAction.Update:
-                                                        actionClass = "bg-info text-dark";
+                                                        actionClass = "bg-primary";
                                                         actionText = "Update";
                                                         break;
-
-                                                    case LastAction.Delete:
-                                                        actionClass = "bg-danger";
-                                                        actionText = "Delete";
-                                                        break;
-
                                                     default:
                                                         actionClass = "bg-secondary";
                                                         actionText = "Unknown";
@@ -128,7 +122,7 @@
                                                     case ShoesShop.Domain.Modules.User.Categories.Enums.CategoryStatus.Active:
                                                         badgeClass = "bg-success"; badgeText = "Active"; break;
                                                     case ShoesShop.Domain.Modules.User.Categories.Enums.CategoryStatus.Inactive:
-                                                        badgeClass = "bg-warning text-dark"; badgeText = "Inactive"; break;
+                                                        badgeClass = "bg-danger text-dark"; badgeText = "Inactive"; break;
                                                     default:
                                                         badgeClass = "bg-secondary"; badgeText = "Unknown"; break;
                                                 }

@@ -239,7 +239,7 @@ public class OrderController : Controller
     {
         var userId = GetCurrentUserId();
         if (userId == 0) return Unauthorized();
-                    var orderUser = await _orderService.GetUserInfoForOrderAsync(userId, orderId);
+            var orderUser = await _orderService.GetUserInfoForOrderAsync(userId, orderId);
 
         if(!orderUser)
         {
@@ -261,15 +261,17 @@ public class OrderController : Controller
             PaymentMethod = order.PaymentMethod,
             PaymentStatus = order.PaymentStatus,
             OrderDate = order.OrderDate,
+            OrderStatus = order.Status,
             TotalAmount = order.TotalAmount,
             OrderDetails = order.OrderDetails.Select(od => new OrderDetailItemModalDto
             {
+                ProductId = od.ProductId,
                 ProductName = od.ProductName,
                 Quantity = od.Quantity,
                 UnitPrice = od.UnitPrice,
                 Subtotal = od.Subtotal,
                 ProductImage = od.ProductImage,
-                Size = od.Size
+                Size = od.Size,
             }).ToList(),
 
             Address = order.Address == null ? null : new AddressModalDto

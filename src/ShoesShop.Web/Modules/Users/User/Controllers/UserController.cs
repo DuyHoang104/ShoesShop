@@ -35,24 +35,21 @@ public class UserController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Register(RegisterModalDto registerModalDto)
     {
-        string? imageUrl = null;
-
-        if (registerModalDto.AvatarUrl != null)
+        if (!ModelState.IsValid)
         {
-            try
-            {
-                var image = await _cloudinaryService.UploadImageAsync(
-                    registerModalDto.AvatarUrl,
-                    $"Users/{registerModalDto.UserName.Replace(" ", "-")}"
+            var errors = ModelState
+                .Where(x => x.Value!.Errors.Any())
+                .ToDictionary(
+                    x => x.Key,
+                    x => x.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
                 );
 
-                if (image != null)
-                    imageUrl = image.Value.Url;
-            }
-            catch (Exception)
+            return BadRequest(new
             {
-                return Json(new { success = false, message = "Error uploading avatar image." });
-            }
+                success = false,
+                message = "Validation failed",
+                errors
+            });
         }
 
         var registerCommandDto = new RegisterCommandDto
@@ -64,7 +61,7 @@ public class UserController : Controller
             Phone = registerModalDto.Phone,
             Gender = registerModalDto.Gender,
             Addresses = registerModalDto.Addresses,
-            AvatarUrl = imageUrl,
+            AvatarUrl = registerModalDto.AvatarUrl,
             Role = UserAccountRole.Customer
         };
 
@@ -72,31 +69,45 @@ public class UserController : Controller
 
         if (result != null)
         {
-            return Json(new { success = true, message = "Registration successful!" });
+            return Ok(new { success = true, message = "Registration successful!" });
         }
 
-        return Json(new { success = false, message = "Registration failed. Please check your data." });
+        return BadRequest(new
+        {
+            success = false,
+            message = "Registration failed. Please check your data."
+        });
     }
 
     [HttpGet("Login")]
     [AllowAnonymous]
-    public IActionResult Login(string? returnUrl = null)
+    public IActionResult Login()
     {
-        ViewData["ReturnUrl"] = returnUrl;
-        return View("~/Modules/Users/User/Views/index.cshtml");
+        return View("~/Modules/Users/User/Views/Index.cshtml");
     }
 
     [HttpPost("Login")]
     [AllowAnonymous]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginModalDto loginModalDto)
     {
-        var loginCommandDto = new LoginCommandDto
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .Where(x => x.Value!.Errors.Count > 0)
+                .ToDictionary(
+                    x => x.Key,
+                    x => x.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            return BadRequest(new { errors });
+        }
+
+        var result = await _userServices.LoginAsync(new LoginCommandDto
         {
             UserName = loginModalDto.UserName,
             Password = loginModalDto.Password
-        };
-
-        var result = await _userServices.LoginAsync(loginCommandDto);
+        });
 
         if (result == null)
             return Json(new { success = false, message = "Invalid login attempt." });
@@ -115,13 +126,15 @@ public class UserController : Controller
             new("userId", result.ID.ToString())
         };
 
-        var identity = new ClaimsIdentity(claims, "UserCookie");
-        var principal = new ClaimsPrincipal(identity);
-
-        await HttpContext.SignInAsync("UserScheme", principal);
+        await HttpContext.SignInAsync(
+            "UserScheme",
+            new ClaimsPrincipal(new ClaimsIdentity(claims, "UserCookie"))
+        );
 
         return Json(new { success = true, message = "Login successful!" });
     }
+
+
 
     [HttpGet("Logout")]
     public async Task<IActionResult> Logout()

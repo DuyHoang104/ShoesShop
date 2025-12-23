@@ -190,8 +190,8 @@ public class Order : BaseEntity<int>
         get => _userId;
     }
     
-    private ShoesShop.Domain.Modules.User.Users.Entities.User _user = null!;
-    public ShoesShop.Domain.Modules.User.Users.Entities.User User
+    private Users.Entities.User _user = null!;
+    public Users.Entities.User User
     {
         get => _user;
         internal set
@@ -220,7 +220,7 @@ public class Order : BaseEntity<int>
 
     public ICollection<Message> Messages { get; set; } = [];
 
-    public Order(ShoesShop.Domain.Modules.User.Users.Entities.User user, Address address, PaymentMethod paymentMethod, PaymentStatus paymentStatus, string? receiverName,
+    public Order(User.Users.Entities.User user, Address address, PaymentMethod paymentMethod, PaymentStatus paymentStatus, string? receiverName,
         string? receiverPhone, string? receiverAddress, string? note, decimal? shippingFee, decimal? discount)
     {
         User = user;

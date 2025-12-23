@@ -5,10 +5,10 @@ using Microsoft.Extensions.Options;
 
 public class CloudinarySettings
 {
-    public string CloudName { get; set; }
-    public string ApiKey { get; set; }
-    public string ApiSecret { get; set; }
-    public string BaseUrl { get; set; } 
+    public string CloudName { get; set; } = null!;
+    public string ApiKey { get; set; } = null!;
+    public string ApiSecret { get; set; } = null!;
+    public string BaseUrl { get; set; } = null!;
 }
 
 public class CloudinaryService
@@ -29,7 +29,7 @@ public class CloudinaryService
     }
 
     public async Task<(string Folder, string FileName, string Url)?> UploadImageAsync(IFormFile file, string folderName)
-    {
+    {        
         if (file == null || file.Length == 0)
             return null;
 
@@ -48,7 +48,6 @@ public class CloudinaryService
 
         var fullUrl = uploadResult.SecureUrl?.ToString();
 
-        //lấy phần sau "image/upload/"
         const string marker = "/image/upload/";
         var index = fullUrl?.IndexOf(marker, StringComparison.Ordinal) ?? -1;
         var relativeUrl = index >= 0
@@ -57,6 +56,23 @@ public class CloudinaryService
 
         return (folderName, uploadResult.PublicId, relativeUrl ?? string.Empty);
     }
+
+    public async Task<bool> DeleteImageAsync(string publicId)
+    {
+        if (string.IsNullOrWhiteSpace(publicId))
+            return false;
+
+        var deleteParams = new DeletionParams(publicId)
+        {
+            ResourceType = ResourceType.Image,
+            Invalidate = true
+        };
+
+        var result = await _cloudinary.DestroyAsync(deleteParams);
+
+        return result.Result == "Deleted" || result.Result == "not found";
+    }
+
 }
 
 public static class CloudinaryExtensions

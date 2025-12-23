@@ -6,7 +6,7 @@ namespace ShoesShop.Web.Modules.Admins.Admin.Dtos
     {
         [Required(ErrorMessage = "Username is required.")]
         [Display(Name = "UserName")]
-        [MaxLength(20, ErrorMessage = "Max length is 20 characters!")]
+        [StringLength(20, MinimumLength = 6, ErrorMessage = "Username must be between 6 and 20 characters.")]
         [RegularExpression(@"^\S+$", ErrorMessage = "Username must not contain spaces.")]
         public required string UserName { get; set; }
 

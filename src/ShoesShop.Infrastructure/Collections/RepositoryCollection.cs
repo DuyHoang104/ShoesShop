@@ -1,8 +1,10 @@
 
 using Microsoft.EntityFrameworkCore;
 using ShoesShop.Domain.Collections;
-using ShoesShop.Domain.Modules.Carts.Entities;
 using ShoesShop.Domain.Modules.Messages.Entity;
+using ShoesShop.Domain.Modules.Shares.Image.Entities;
+using ShoesShop.Domain.Modules.Shares.Review.Entity;
+using ShoesShop.Domain.Modules.User.Carts.Entities;
 using ShoesShop.Domain.Modules.User.Categories.Entities;
 using ShoesShop.Domain.Modules.User.Commons.Entities;
 using ShoesShop.Domain.Modules.User.Commons.Repositories;
@@ -39,6 +41,9 @@ namespace ShoesShop.Infrastructure.Collections
         public IGenericRepository<Address, int> Address => GetRepository<Address, int>();
 
         public IGenericRepository<Message, int> Message => GetRepository<Message, int>();
+
+        public IGenericRepository<Image, int> Image => GetRepository<Image, int>();
+        public IGenericRepository<Review, int> Review => GetRepository<Review, int>();
 
         public IGenericRepository<TEntity> GetRepository<TEntity>()
             where TEntity : class, IBaseEntity

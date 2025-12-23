@@ -86,7 +86,7 @@ namespace ShoesShop.Web.Modules.Admins.Users.Controllers
 
                     OrderDetails = o.OrderDetails?.Select(od => new OrderDetailItemAdminModalDto
                     {
-                        ProductID = od.ProductID,
+                        ProductId = od.ProductId,
                         Quantity = od.Quantity,
                         UnitPrice = od.UnitPrice
                     }).ToList() ?? new List<OrderDetailItemAdminModalDto>()

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ShoesShop.Domain.Modules.Messages.Entity;
+using ShoesShop.Domain.Modules.Shares.Image.Entities;
+using ShoesShop.Domain.Modules.Shares.Image.Enums;
 using ShoesShop.Domain.Modules.Shares.Messages.Dtos;
 using ShoesShop.Domain.Modules.Shares.Messages.Services;
 using ShoesShop.Domain.Modules.User.Commons.Repositories;
@@ -13,40 +15,73 @@ public class ChatService : IChatService
 {
     private readonly IGenericRepository<Message, int> _messageRepository;
     private readonly IGenericRepository<Order, int> _orderRepository;
+    private readonly IGenericRepository<Image, int> _imageRepository;
+
+    private readonly IGenericRepository<ImageUser, int> _imageUserRepository;
+    private readonly IGenericRepository<ImageProduct, int> _imageProductRepository;
+
 
     private readonly IGenericRepository<Domain.Modules.User.Users.Entities.User, int> _userRepository;
 
     public ChatService(
         IGenericRepository<Message, int> messageRepository,
         IGenericRepository<Domain.Modules.User.Users.Entities.User, int> userRepository,
-        IGenericRepository<Order, int> orderRepository)
+        IGenericRepository<Order, int> orderRepository,
+        IGenericRepository<Image, int> imageRepository,
+        IGenericRepository<ImageUser, int> imageUserRepository,
+        IGenericRepository<ImageProduct, int> imageProductRepository)
     {
         _messageRepository = messageRepository;
         _orderRepository = orderRepository;
         _userRepository = userRepository;
+        _imageRepository = imageRepository;
+        _imageUserRepository = imageUserRepository;
+        _imageProductRepository = imageProductRepository;
     }
 
-    public async Task<Message> SaveMessage(int senderId, int receiverId, string content, int orderId,
-        string senderRole, string senderName, string senderAvatar)
+    public async Task<Message> SaveMessage(int senderId, int receiverId, string content,int orderId,
+        string? senderRole, string? senderName, string? senderAvatar)
     {
-        if (string.IsNullOrWhiteSpace(senderRole))
-            senderRole = "User";
+        senderRole ??= "User";
 
+        string defaultAvatar;
+        string defaultName;
+
+        // 1️⃣ Lấy user/admin
+        var sender = await _userRepository.GetByIdAsync(senderId)
+            ?? throw new InvalidOperationException($"User {senderId} không tồn tại");
+
+        // 2️⃣ Xác định role + default
         if (senderRole.StartsWith("Admin", StringComparison.OrdinalIgnoreCase))
         {
-            var admin = await _userRepository.GetByIdAsync(senderId);
-            senderName ??= admin?.UserName ?? "Admin";
-            senderAvatar ??= admin?.AvatarUrl ?? "/assets/images/admin-default.jpg";
+            defaultName = "Admin";
+            defaultAvatar = "/assets/images/admin-default.jpg";
         }
         else
         {
-            var user = await _userRepository.GetByIdAsync(senderId);
-            senderName ??= user?.UserName ?? "User";
-            senderAvatar ??= user?.AvatarUrl ?? "/images/default.png";
+            defaultName = "User";
+            defaultAvatar = "/images/default.png";
         }
 
-        var order = await _orderRepository.GetByIdAsync(orderId) ?? throw new InvalidOperationException($"Order {orderId} không tồn tại");
+        // 3️⃣ Name
+        senderName ??= sender.UserName ?? defaultName;
 
+        // 4️⃣ Avatar (LẤY TỪ IMAGE)
+        if (string.IsNullOrWhiteSpace(senderAvatar))
+        {
+            var avatarImage = await _imageUserRepository
+                .GetAsync(i =>
+                    i.OwnerType == OwnerType.User &&
+                    i.OwnerId == senderId);
+
+            senderAvatar = avatarImage?.Url ?? defaultAvatar;
+        }
+
+        // 5️⃣ Order
+        var order = await _orderRepository.GetByIdAsync(orderId)
+            ?? throw new InvalidOperationException($"Order {orderId} không tồn tại");
+
+        // 6️⃣ Create message
         var msg = new Message(
             senderId,
             receiverId,
@@ -63,6 +98,7 @@ public class ChatService : IChatService
         return msg;
     }
 
+
     public async Task<List<Message>> GetMessagesByOrderIdAsync(int orderId)
     {
         var messages = await _messageRepository.GetAllAsync(
@@ -76,33 +112,59 @@ public class ChatService : IChatService
 
     public async Task<List<OrderDto>> GetAllOrdersFromMessagesAsync()
     {
+        // 1️⃣ Lấy orderId từ messages
         var messages = await _messageRepository.GetAllAsync(
             predicate: m => m.OrderId != null
         );
 
         var orderIds = messages
-        .Select(m => m.OrderId)
-        .Distinct()
-        .ToList();
+            .Select(m => m.OrderId)
+            .Distinct()
+            .ToList();
 
         if (orderIds.Count == 0)
             return [];
 
+        // 2️⃣ Lấy orders (KHÔNG include Images)
         var orders = await _orderRepository.GetAllAsync(
             predicate: o => orderIds.Contains(o.Id),
             include: q => q
                 .Include(o => o.OrderDetails)
-                .ThenInclude(od => od.Product)
-                .ThenInclude(p => p.Images)
+                    .ThenInclude(od => od.Product)
                 .Include(o => o.User)
-                .ThenInclude(u => u.Addresses)
+                    .ThenInclude(u => u.Addresses)
         );
 
+        // 3️⃣ Gom productIds & userIds
+        var productIds = orders
+            .SelectMany(o => o.OrderDetails)
+            .Select(od => od.Product.Id)
+            .Distinct()
+            .ToList();
+
+        var userIds = orders
+            .Select(o => o.User.Id)
+            .Distinct()
+            .ToList();
+
+        // 4️⃣ Load images 1 lần
+        var imagesUser = new List<ImageUser>();
+        imagesUser.AddRange(await _imageUserRepository.GetAllAsync(x => userIds.Contains(x.OwnerId)));
+        var imagesProduct = new List<ImageProduct>();
+        imagesProduct.AddRange(await _imageProductRepository.GetAllAsync(x => productIds.Contains(x.OwnerId)));
+
+        // 5️⃣ Map DTO
         return orders.Select(order =>
         {
             decimal total = order.OrderDetails.Sum(od => od.Subtotal);
             decimal discount = order.Discount ?? 0;
             decimal ship = order.ShippingFee ?? 0;
+
+            var userAvatar = imagesUser
+                .FirstOrDefault(i =>
+                    i.OwnerType == OwnerType.User &&
+                    i.OwnerId == order.User.Id)
+                ?.Url ?? "/images/default.png";
 
             return new OrderDto
             {
@@ -116,15 +178,24 @@ public class ChatService : IChatService
                 ReceiverName = order.ReceiverName,
                 TotalAmount = (total * (1 - discount)) + ship,
 
-                OrderDetails = order.OrderDetails.Select(d => new OrderDetailItemDto
+                OrderDetails = order.OrderDetails.Select(d =>
                 {
-                    ProductID = d.Product.Id,
-                    ProductName = d.Product?.Name,
-                    Quantity = d.Quantity,
-                    UnitPrice = d.UnitPrice,
-                    Subtotal = d.Subtotal,
-                    Size = d.Size,
-                    ProductImage = d.Product?.Images?.FirstOrDefault()?.Url
+                    var productImage = imagesProduct
+                        .FirstOrDefault(i =>
+                            i.OwnerType == OwnerType.Product &&
+                            i.OwnerId == d.Product.Id)
+                        ?.Url;
+
+                    return new OrderDetailItemDto
+                    {
+                        ProductId = d.Product.Id,
+                        ProductName = d.Product.Name,
+                        Quantity = d.Quantity,
+                        UnitPrice = d.UnitPrice,
+                        Subtotal = d.Subtotal,
+                        Size = d.Size,
+                        ProductImage = productImage
+                    };
                 }).ToList(),
 
                 User = new UserDto
@@ -135,18 +206,19 @@ public class ChatService : IChatService
                     Phone = order.User.Phone,
                     DateOfBirth = order.User.DateOfBirth,
                     Gender = order.User.Gender,
-                    AvatarUrl = order.User.AvatarUrl,
-                    Addresses = order.User.Addresses?.Select(a => new AddressDto
+                    AvatarUrl = userAvatar,
+                    Addresses = order.User.Addresses.Select(a => new AddressDto
                     {
                         AddressLine1 = a.AddressLine1,
                         City = a.City,
                         Country = a.Country,
                         IsDefault = a.IsDefault
-                    }).ToList() ?? []
+                    }).ToList()
                 }
             };
         }).ToList();
     }
+
 
     // GET ALL MESSAGES
     public async Task<List<MessageDto>> GetAllMessagesAsync()
@@ -169,17 +241,24 @@ public class ChatService : IChatService
     
     public async Task<UserDto> GetCurrentAdminAsync(int adminId)
     {
-        var adminEntity = await _userRepository.GetByIdAsync(adminId) ?? throw new Exception("Admin not found");
+        var admin = await _userRepository.GetByIdAsync(adminId)
+            ?? throw new Exception("Admin not found");
+
+        // Lấy avatar từ bảng Image
+        var avatar = await _imageUserRepository.GetAsync(i =>
+            i.OwnerType == OwnerType.User &&
+            i.OwnerId == admin.Id
+        );
 
         return new UserDto
         {
-            ID = adminEntity.Id,
-            UserName = adminEntity.UserName,
-            Email = adminEntity.Email,
-            Phone = adminEntity.Phone,
-            DateOfBirth = adminEntity.DateOfBirth,
-            Gender = adminEntity.Gender,
-            AvatarUrl = adminEntity.AvatarUrl
+            ID = admin.Id,
+            UserName = admin.UserName,
+            Email = admin.Email,
+            Phone = admin.Phone,
+            DateOfBirth = admin.DateOfBirth,
+            Gender = admin.Gender,
+            AvatarUrl = avatar?.Url ?? "/assets/images/admin-default.jpg"
         };
     }
 

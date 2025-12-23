@@ -39,7 +39,7 @@ public class OrderAdminController : Controller
                 PaymentStatus = o.PaymentStatus,
                 OrderDetails = o.OrderDetails.Select(od => new OrderDetailItemAdminModalDto
                 {
-                    ProductID = od.ProductID,
+                    ProductId = od.ProductId,
                     ProductName = od.ProductName,
                     Quantity = od.Quantity,
                     UnitPrice = od.UnitPrice,
@@ -76,7 +76,7 @@ public class OrderAdminController : Controller
             TotalAmount = order.TotalAmount,
             OrderDetails = order.OrderDetails.Select(od => new OrderDetailItemAdminModalDto
             {
-                ProductID = od.ProductID,
+                ProductId = od.ProductId,
                 ProductName = od.ProductName,
                 Quantity = od.Quantity,
                 UnitPrice = od.UnitPrice,
@@ -140,7 +140,7 @@ public class OrderAdminController : Controller
             TotalAmount = order.TotalAmount,
             OrderDetails = order.OrderDetails.Select(od => new OrderDetailItemAdminModalDto
             {
-                ProductID = od.ProductID,
+                ProductId = od.ProductId,
                 ProductName = od.ProductName,
                 Quantity = od.Quantity,
                 UnitPrice = od.UnitPrice,

@@ -2,27 +2,24 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ShoesShop.Crosscutting.Utilities.Attribute;
 using ShoesShop.Domain.Modules.User.Users.Dtos.Commands;
 using ShoesShop.Domain.Modules.User.Users.Enums;
 using ShoesShop.Domain.Modules.User.Users.Services;
 using ShoesShop.Web.Modules.Admins.Admin.Dtos;
 
-namespace ShoesShop.Web.Modules.Admin.Controllers
+namespace ShoesShop.Web.Modules.Admins.Admin.Controllers
 {
-    [AllowAnonymous]
     [Route("Admin")]
     public class AdminController : Controller
     {
-        private readonly IWebHostEnvironment _env;
         private readonly IUserService _userServices;
 
-        public AdminController(IWebHostEnvironment env, IUserService userServices)
+        public AdminController(IUserService userServices)
         {
-            _env = env;
             _userServices = userServices;
         }
 
+        [AllowAnonymous]
         [HttpGet("Login")]
         public IActionResult Login(string? returnUrl = null)
         {
@@ -30,25 +27,32 @@ namespace ShoesShop.Web.Modules.Admin.Controllers
             return View("~/Modules/Admins/Admin/Views/pages-login.cshtml");
         }
 
+        [AllowAnonymous]
         [HttpPost("Login")]
-        [ValidateModel("~/Modules/Admins/Admin/Views/pages-login.cshtml")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginAdminDto loginAdminModalDto, string? returnUrl = null)
         {
-            var loginCommandDto = new LoginCommandDto
+            if (!ModelState.IsValid)
+            {
+                return View("~/Modules/Admins/Admin/Views/pages-login.cshtml", loginAdminModalDto);
+            }
+
+            var result = await _userServices.LoginAsync(new LoginCommandDto
             {
                 UserName = loginAdminModalDto.UserName,
                 Password = loginAdminModalDto.Password
-            };
+            });
 
-            var result = await _userServices.LoginAsync(loginCommandDto);
             if (result == null)
             {
-                return RedirectToAction("Error404", "Admin", new { message = "Invalid username or password." });
+                ModelState.AddModelError(string.Empty, "Invalid username or password.");
+                return View("~/Modules/Admins/Admin/Views/pages-login.cshtml", loginAdminModalDto);
             }
-            
+
             if (result.Role != UserAccountRole.Admin)
             {
-                return RedirectToAction("Error404", "Admin", new { message = "Only admin can log in here." });
+                ModelState.AddModelError(string.Empty, "Only administrators can log in.");
+                return View("~/Modules/Admins/Admin/Views/pages-login.cshtml", loginAdminModalDto);
             }
 
             var claims = new List<Claim>
@@ -62,15 +66,14 @@ namespace ShoesShop.Web.Modules.Admin.Controllers
                 new("adminId", result.ID.ToString())
             };
 
-            var identity = new ClaimsIdentity(claims, "AdminScheme");
-            var principal = new ClaimsPrincipal(identity);
+            var principal = new ClaimsPrincipal(
+                new ClaimsIdentity(claims, "AdminScheme")
+            );
 
             await HttpContext.SignInAsync("AdminScheme", principal);
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-            {
                 return Redirect(returnUrl);
-            }
 
             return RedirectToAction("Index", "Admin");
         }

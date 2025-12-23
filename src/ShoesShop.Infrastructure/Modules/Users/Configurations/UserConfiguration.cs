@@ -18,10 +18,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(e => e.Role).HasField("_role").HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.Property(e => e.Gender).HasField("_gender").HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.Property(e => e.Status).HasField("_status").HasConversion<string>().HasMaxLength(20).IsRequired();
-        builder.Property(e => e.AvatarUrl).HasField("_avatarUrl").HasMaxLength(2048);
         
         builder.HasMany(e => e.Addresses).WithOne(e => e.User).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(e => e.Orders).WithOne(e => e.User).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(e => e.Carts).WithOne(e => e.User).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(e => e.Images)
+        .WithOne(x => x.User)
+        .HasForeignKey(i => i.OwnerId)
+        .OnDelete(DeleteBehavior.Cascade);
     }
 }

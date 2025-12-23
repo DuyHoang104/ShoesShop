@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ShoesShop.Domain.Modules.User.Products.Enums;
 using ShoesShop.Domain.Modules.User.Products.Services;
 
 namespace ShoesShop.Web.Modules.Users.Product.Components;
@@ -14,7 +15,8 @@ public class CategoryViewComponent : ViewComponent
 public async Task<IViewComponentResult> InvokeAsync()
 {
     var products = await _productService.GetAllCategoriesAsync();
-
+    products = products.Where(p => p.Status == ProductStatus.Active);
+    
     var categoryCounts = products
         .SelectMany(p => p.Categories)
         .GroupBy(c => c.Id)

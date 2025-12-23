@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loginBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelector('#login').style.backgroundColor = '#21264D';
+            document.querySelector('#login').style.backgroundColor = 'rgb(228 197 144)';
             document.querySelector('#register').style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
 
             loginForm.style.left = '50%';
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     registerBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelector('#login').style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-            document.querySelector('#register').style.backgroundColor = '#21264D';
+            document.querySelector('#register').style.backgroundColor = 'rgb(228 197 144)';
 
             loginForm.style.left = '-150%';
             registerForm.style.left = '50%';

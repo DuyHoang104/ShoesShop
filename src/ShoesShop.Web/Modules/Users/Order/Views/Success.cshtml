@@ -1,159 +1,158 @@
+@using ShoesShop.Domain.Modules.User.Orders.Enums
 @using ShoesShop.Web.Modules.Users.Order.Dtos.Commands
+@model OrderDetailModalDto
+@inject Microsoft.Extensions.Options.IOptions<CloudinarySettings> CloudinaryConfig
+
 @{
     Layout = "~/Modules/Users/Shares/Views/_Layout.cshtml";
-    @model OrderDetailModalDto
-    @inject Microsoft.Extensions.Options.IOptions<CloudinarySettings> CloudinaryConfig
+
     var subtotal = Model.OrderDetails.Sum(x => x.Subtotal);
-    var shipping = Model.ShippingCost;
+    var shipping = Model.ShippingCost ?? 0;
     var discountPercent = (Model.DiscountValue ?? 0) * 100;
     var discountAmount = subtotal * (Model.DiscountValue ?? 0);
     var total = subtotal + shipping - discountAmount;
+
+    var paymentBadgeClass = Model.PaymentStatus == PaymentStatus.Unpaid
+        ? "badge-unpaid"
+        : "badge-paid";
 }
 
 <link rel="stylesheet" href="~/assets/product/css/bootstrap.min.css" />
-<link rel="icon" href="img/favicon.png">
-<link rel="stylesheet" href="~/assets/product/css/style.css">
-<link rel="stylesheet" href="~/assets/css/share.css" asp-append-version="true" />
-
 
 <style>
-.confirmation_part { padding: 80px 0; }
-.confirmation_tittle { text-align: center; margin-bottom: 40px; }
-.confirmation_tittle span { font-size: 22px; font-weight: 600; color: #0d99ff; }
-.single_confirmation_details { background: #1a1a1a; border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; box-shadow: 0 4px 25px rgba(255, 255, 255, 0.05); transition: all 0.3s ease; }
-.single_confirmation_details:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255, 255, 255, 0.07); }
-.single_confirmation_details h4 { color: #fff; font-weight: 600; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; }
-.single_confirmation_details ul { list-style: none; padding-left: 0; }
-.single_confirmation_details ul li { display: flex; justify-content: space-between; border-bottom: 1px dashed #333; padding: 8px 0; font-size: 15px; }
-.single_confirmation_details ul li p { margin: 0; color: #bbb; }
-.single_confirmation_details ul li span { color: #fff; font-weight: 500; }
-.order_details_iner { background: #111; border-radius: 20px; box-shadow: 0 6px 25px rgba(255, 255, 255, 0.05); margin-top: 40px; }
-.order_details_iner h3 { color: #fff; font-weight: 700; font-size: 22px; border-bottom: 1px solid #222; padding-bottom: 15px; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; }
-.order_details_iner table { color: #eee; }
-.order_details_iner th { color: #bbb; font-weight: 500; text-transform: uppercase; border-bottom: 2px solid #222; padding-bottom: 10px; }
-.order_details_iner td { vertical-align: middle; border-bottom: 1px dashed #222; padding: 14px 10px; }
-.order_details_iner tr:hover td { background: #333; }
-.order_details_iner img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 1px solid #333; }
-.order_details_iner .text-danger { color: #e63946 !important; }
-.order_details_iner .fw-bold { font-weight: 600 !important; }
-.order_details_iner .text-end { text-align: right !important; }
-.total-highlight { color: #fff; font-weight: 700; font-size: 18px; }
-.table td:last-child {
-    text-align: center;
-    width: 160px !important; 
+<style>
+:root { --bg-main:#0e0f13; --bg-card:#161822; --bg-soft:#1f2230; --border-soft:#2b2f40; --text-main:#fff; --text-muted:#9aa0b4; --success:#22c55e; --warning:#f59e0b; --danger:#ef4444; }
+.container { margin-top:150px; }
+.order-dark { padding:70px 0; }
+.order-header { text-align:center; margin-bottom:50px; }
+.order-header h1 { font-size:32px; font-weight:800; }
+.order-header p { color:var(--text-muted); font-size:18px; }
+.dark-card { background:linear-gradient(180deg,#181c2b,#0f111c); border-radius:18px; padding:26px; border:1px solid var(--border-soft); box-shadow:0 20px 50px rgba(0,0,0,.45); }
+.dark-title { font-size:18px; font-weight:700; margin-bottom:18px; }
+.info-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed var(--border-soft); }
+.info-row:last-child { border-bottom:none; }
+.badge-status { padding:6px 14px; border-radius:999px; font-size:13px; }
+.badge-paid { background:rgba(34,197,94,.15); color:var(--success); }
+.badge-unpaid { background:rgba(245,158,11,.15); color:var(--warning); }
+.order-table { width:100%; table-layout:fixed; border-collapse:collapse; }
+.order-table th { color:var(--text-muted); font-size:12px; text-transform:uppercase; padding:14px 12px; border-bottom:1px solid var(--border-soft); text-align:left; }
+.order-table td { padding:18px 12px; font-size:14px; vertical-align:middle; }
+.order-table th:nth-child(1),
+.order-table td:nth-child(1) { width:10%; }
+.order-table th:nth-child(2),
+.order-table td:nth-child(2) { width:30%; }
+.order-table th:nth-child(3),
+.order-table td:nth-child(3) { width:10%; }
+.order-table th:nth-child(4),
+.order-table td:nth-child(4) { width:10%; text-align:center; }
+.order-table th:nth-child(5),
+.order-table td:nth-child(5),
+.order-table th:nth-child(6),
+.order-table td:nth-child(6) { width:20%; text-align:right; }
+.order-table img { width:72px; height:72px; border-radius:12px; object-fit:cover; border:1px solid var(--border-soft); }
+.product-name { font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.summary { margin-top:30px; padding-top:20px; border-top:1px solid var(--border-soft); }
+.summary-row { display:flex; justify-content:space-between; padding:8px 0; }
+.summary-total { font-size:20px; font-weight:800; }
+media (max-width:768px) {
+    .order-table th:nth-child(3),
+    .order-table td:nth-child(3) { display:none; }
 }
-media (max-width: 768px) { .order_details_iner table { font-size: 13px; } }
 </style>
 
-<section class="breadcrumb breadcrumb_bg">
+</style>
+
+<section class="order-dark">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="breadcrumb_iner">
-                    <div class="breadcrumb_iner_item">
-                        <h2>Order Confirmation</h2>
-                        <p>Home <span>-</span> Order Confirmation</p>
+
+        <div class="order-header">
+            <h1>Order Completed</h1>
+            <p>Your purchase has been successfully processed</p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="dark-card">
+                    <div class="dark-title">🧾 Order Information</div>
+
+                    <div class="info-row"><p>Order ID</p><span>#@Model.Id</span></div>
+                    <div class="info-row"><p>Date</p><span>@Model.OrderDate.ToString("MMM dd, yyyy")</span></div>
+                    <div class="info-row">
+                        <p>Payment</p>
+                        <span class="badge-status @paymentBadgeClass">@Model.PaymentStatus</span>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="confirmation_part">
-    <div class="container">
-        <div class="confirmation_tittle">
-            <span></span>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-lg-6">
-                <div class="single_confirmation_details">
-                    <h4>Order Info</h4>
-                    <ul>
-                        <li><p>Order Number</p><span>@Model.Id</span></li>
-                        <li><p>Date</p><span>@Model.OrderDate.ToString("MMM dd, yyyy")</span></li>
-                        <li><p>Total</p><span class="total-highlight">$@string.Format("{0:N2}", total)</span></li>
-                        <li><p>Payment Method</p><span>@Model.PaymentMethod</span></li>
-                        <li><p>Payment Status</p><span>@Model.PaymentStatus</span></li>
-                    </ul>
+                    <div class="info-row"><p>Method</p><span>@Model.PaymentMethod</span></div>
+                    <div class="info-row"><p>Total</p><span>@total.ToString("C")</span></div>
                 </div>
             </div>
 
             <div class="col-lg-6">
-                <div class="single_confirmation_details">
-                    <h4>Receiver Address</h4>
-                    <ul>
-                        <li><p>Full Name</p><span>@Model.ReceiverName</span></li>
-                        <li><p>Phone</p><span>@Model.ReceiverPhone</span></li>
-                        <li><p>Street</p><span>@Model.ReceiverAddress</span></li>
-                        <li><p>City</p><span>@Model.ReceiverCity</span></li>
-                        <li><p>Country</p><span>@Model.ReceiverCountry</span></li>
-                    </ul>
+                <div class="dark-card">
+                    <div class="dark-title">📦 Shipping Address</div>
+
+                    <div class="info-row"><p>Name</p><span>@Model.ReceiverName</span></div>
+                    <div class="info-row"><p>Phone</p><span>@Model.ReceiverPhone</span></div>
+                    <div class="info-row"><p>Address</p><span>@Model.ReceiverAddress</span></div>
+                    <div class="info-row"><p>City</p><span>@Model.ReceiverCity</span></div>
+                    <div class="info-row"><p>Country</p><span>@Model.ReceiverCountry</span></div>
                 </div>
             </div>
         </div>
 
-        <div class="order_details_iner">
-        <h3>Order Details</h3>
-        <table class="table table-borderless align-middle">
-            <thead>
-                <tr>
-                    <th>Image</th>
-                    <th>Product</th>
-                    <th>Size</th>
-                    <th class="text-center">Quantity</th>
-                    <th class="text-end">Unit Price</th>
-                    <th class="text-end">Subtotal</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.OrderDetails)
-                {
-                    var firstImageUrl = !string.IsNullOrEmpty(item.ProductImage)
-                        ? (item.ProductImage.StartsWith("http")
-                            ? item.ProductImage
-                            : $"{CloudinaryConfig.Value.BaseUrl}{item.ProductImage}")
-                        : "/images/default.png";
+        <div class="dark-card">
+            <div class="dark-title">🛒 Order Items</div>
 
-                    <tr>
-                        <td><img src="@firstImageUrl" alt="@item.ProductName" /></td>
-                        <td>@item.ProductName</td>
-                        <td>@item.Size</td>
-                        <td class="text-center">@item.Quantity</td>
-                        <td class="text-end">@item.UnitPrice.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
-                        <td class="text-end">@item.Subtotal.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
-                    </tr>
-                }
+            <div class="table-responsive">
+                <table class="order-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Product</th>
+                            <th>Size</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderDetails)
+                        {
+                            var img = !string.IsNullOrEmpty(item.ProductImage)
+                                ? (item.ProductImage.StartsWith("http")
+                                    ? item.ProductImage
+                                    : $"{CloudinaryConfig.Value.BaseUrl}{item.ProductImage}")
+                                : "/images/default.png";
 
-                <!-- Subtotal -->
-                <tr class="fw-bold border-top">
-                    <td colspan="5" class="text-end">Subtotal</td>
-                    <td colspan="1" class="text-end">@subtotal.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
-                </tr>
+                            <tr>
+                                <td><img src="@img" /></td>
+                                <td class="product-name">@item.ProductName</td>
+                                <td>@item.Size</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.UnitPrice.ToString("C")</td>
+                                <td>@item.Subtotal.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
-                <!-- Shipping -->
-                <tr>
-                    <td colspan="5" class="text-end">Shipping Fee</td>
-                    <td colspan="1" class="text-end">@shipping.GetValueOrDefault().ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
-                </tr>
+            <div class="summary">
+                <div class="summary-row"><p>Subtotal</p><span>@subtotal.ToString("C")</span></div>
+                <div class="summary-row"><p>Shipping</p><span>@shipping.ToString("C")</span></div>
 
-                <!-- Discount -->
                 @if (Model.DiscountValue > 0)
                 {
-                    <tr>
-                        <td colspan="5" class="text-end text-danger">Discount (@discountPercent.ToString("0.##")%)</td>
-                        <td colspan="1" class="text-end text-danger">-@discountAmount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
-                    </tr>
+                    <div class="summary-row text-danger">
+                        <p>Discount (@discountPercent.ToString("0.#")%)</p>
+                        <span>-@discountAmount.ToString("C")</span>
+                    </div>
                 }
 
-                <!-- Total -->
-                <tr class="fw-bold border-top">
-                    <td colspan="5" class="text-end">Total</td>
-                    <td colspan="1" class="text-end total-highlight">@total.GetValueOrDefault().ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+                <div class="summary-row summary-total">
+                    <p>Total</p>
+                    <span>@total.ToString("C")</span>
+                </div>
+            </div>
+        </div>
     </div>
 </section>

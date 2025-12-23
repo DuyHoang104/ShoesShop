@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShoesShop.Domain.Modules.Admin.Admin.Services;
-using ShoesShop.Domain.Modules.User.Products.Services;
 using ShoesShop.Web.Modules.Admins.Home.Dtos;
 
-namespace ShoesShop.Web.Modules.Admin.Controllers;
+namespace ShoesShop.Web.Modules.Admins.Home.Controllers;
 
 [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
 

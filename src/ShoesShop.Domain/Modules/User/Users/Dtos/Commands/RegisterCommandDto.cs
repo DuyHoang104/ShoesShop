@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using ShoesShop.Domain.Modules.User.Users.Enums;
 
 namespace ShoesShop.Domain.Modules.User.Users.Dtos.Commands
@@ -18,7 +19,7 @@ namespace ShoesShop.Domain.Modules.User.Users.Dtos.Commands
 
         public UserGender Gender { get; set; }
 
-        public string? AvatarUrl { get; set; }
+        public IFormFile? AvatarUrl { get; set; }
 
         public List<AddressDto> Addresses { get; set; } = new();
 
