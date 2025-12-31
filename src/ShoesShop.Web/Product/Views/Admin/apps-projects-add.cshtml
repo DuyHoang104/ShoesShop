@@ -1,0 +1,275 @@
+﻿@using ShoesShop.Web.Product.Model.Admin
+@model CreateProductAdminDto
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Create Product";
+    Layout = "~/Shares/Views/Admin/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid">
+    <h4 class="mb-3">Create Product</h4>
+
+    <form asp-action="AddProduct" asp-controller="Product" method="post" enctype="multipart/form-data" id="productForm">
+        <div class="row">
+
+            <!-- LEFT COLUMN -->
+            <div class="col-xl-7">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <!-- Product Name -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Product Name</label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter product name" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Price + Quantity -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Price</label>
+                                <input asp-for="Price" class="form-control" placeholder="Product price" />
+                                <span asp-validation-for="Price" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Quantity</label>
+                                <input asp-for="Quantity" type="number" class="form-control" />
+                                <span asp-validation-for="Quantity" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Brand + Color -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Brand</label>
+                                <input asp-for="Brand" class="form-control" placeholder="Brand" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Color</label>
+                                <input asp-for="Color" class="form-control" placeholder="Color" />
+                            </div>
+                        </div>
+
+                        <!-- Discount -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Discount (%)</label>
+                            <input asp-for="SaleOff" type="number" min="0" max="100" class="form-control" />
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Description</label>
+                            <textarea asp-for="Description" rows="4" class="form-control"
+                                placeholder="Enter description..."></textarea>
+                        </div>
+
+                        <!-- Sizes -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Available Sizes</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                @{
+                                    var sizes = new[] { "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46",
+                                                                "47" };
+                                }
+                                @foreach (var size in sizes)
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input size-checkbox" type="checkbox" value="@size"
+                                            id="size_@size" />
+                                        <label class="form-check-label" for="size_@size">@size</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="Sizes" id="SizesHidden" />
+
+                        <!-- Categories -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Categories</label>
+                            <select id="categorySelect" class="form-control select2" multiple>
+                                @foreach (var c in Model.Categories)
+                                {
+                                    <option value="@c.Id" data-name="@c.Name" data-desc="@c.Description">@c.Name</option>
+                                }
+                            </select>
+                            <div class="text-end mt-1">
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#addCategoryModal">
+                                    + Add Category
+                                </button>
+                            </div>
+                        </div>
+                        <div id="categoriesHidden"></div>
+
+                        <!-- Modal Add Category -->
+                        <div class="modal fade" id="addCategoryModal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Add Category</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Category Name</label>
+                                            <input type="text" id="newCategoryName" class="form-control" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Description</label>
+                                            <textarea id="newCategoryDesc" class="form-control" rows="2"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-light"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="button" id="saveCategoryBtn" class="btn btn-primary">Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="col-xl-5">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <!-- Product Images -->
+                        <label class="form-label fw-bold">Product Images</label>
+                        <input asp-for="ImageFiles" type="file" class="form-control" multiple id="imageInput" />
+                        <div id="imagePreview" class="d-flex flex-wrap gap-2 mt-3"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-50">Create</button>
+                    <a asp-action="Index" class="btn btn-light w-50">Cancel</a>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        // ===== Images preview =====
+        let selectedFiles = [];
+        const imageInput = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('imagePreview');
+
+        imageInput.addEventListener('change', (e) => {
+            const newFiles = Array.from(e.target.files);
+            selectedFiles = [...selectedFiles, ...newFiles];
+            renderPreviews();
+        });
+
+        function renderPreviews() {
+            previewContainer.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    wrapper.style.display = 'inline-block';
+
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '100px';
+                    img.style.height = '100px';
+                    img.style.objectFit = 'cover';
+                    img.style.border = '1px solid #ccc';
+                    img.style.borderRadius = '8px';
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.innerHTML = '×';
+                    removeBtn.style.position = 'absolute';
+                    removeBtn.style.top = '5px';
+                    removeBtn.style.right = '5px';
+                    removeBtn.style.background = 'red';
+                    removeBtn.style.color = 'white';
+                    removeBtn.style.border = 'none';
+                    removeBtn.style.borderRadius = '50%';
+                    removeBtn.style.width = '25px';
+                    removeBtn.style.height = '25px';
+                    removeBtn.style.cursor = 'pointer';
+                    removeBtn.addEventListener('click', () => { selectedFiles.splice(index, 1); renderPreviews(); });
+
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(removeBtn);
+                    previewContainer.appendChild(wrapper);
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ===== Categories Select2 + Modal =====
+        $(function () {
+            var $select = $('#categorySelect').select2({ placeholder: "-- Select categories --", width: '100%' });
+            var newCategories = [];
+
+            function renderHiddenInputs() {
+                $("#categoriesHidden").empty();
+                var ids = $select.val() || [];
+                var idx = 0;
+                ids.forEach(function (id) {
+                    var $opt = $("#categorySelect option[value='" + id + "']");
+                    var name = $opt.data("name");
+                    var desc = $opt.data("desc");
+                    if (id.startsWith("new_")) {
+                        var cat = newCategories.find(c => c.id === id);
+                        if (cat) {
+                            $("#categoriesHidden").append(`
+                                                    <input type="hidden" name="Categories[${idx}].Name" value="${cat.name}" />
+                                                    <input type="hidden" name="Categories[${idx}].Description" value="${cat.desc}" />
+                                                `);
+                            idx++;
+                        }
+                    } else {
+                        $("#categoriesHidden").append(`
+                                                <input type="hidden" name="Categories[${idx}].Id" value="${id}" />
+                                                <input type="hidden" name="Categories[${idx}].Name" value="${name}" />
+                                                <input type="hidden" name="Categories[${idx}].Description" value="${desc}" />
+                                            `);
+                        idx++;
+                    }
+                });
+            }
+
+            $select.on('change', renderHiddenInputs);
+
+            $("#saveCategoryBtn").on("click", function () {
+                var name = $("#newCategoryName").val().trim();
+                var desc = $("#newCategoryDesc").val().trim();
+                if (!name) { alert("Please enter category name"); return; }
+
+                var exists = false;
+                $("#categorySelect option").each(function () { if ($(this).data("name")?.toLowerCase() === name.toLowerCase()) { exists = true; return false; } });
+                if (exists) { alert("Category '" + name + "' already exists!"); return; }
+
+                var newId = "new_" + Date.now();
+                newCategories.push({ id: newId, name: name, desc: desc });
+                var newOption = new Option(name, newId, true, true);
+                $(newOption).attr("data-name", name).attr("data-desc", desc);
+                $select.append(newOption).trigger('change');
+
+                $("#newCategoryName").val(""); $("#newCategoryDesc").val("");
+                $("#addCategoryModal").modal("hide");
+            });
+        });
+
+        // ===== Submit form =====
+        const form = document.getElementById('productForm');
+        const sizesHidden = document.getElementById('SizesHidden');
+        form.addEventListener('submit', () => {
+            sizesHidden.value = Array.from(document.querySelectorAll('.size-checkbox:checked')).map(cb => cb.value).join(',');
+            const dt = new DataTransfer();
+            selectedFiles.forEach(f => dt.items.add(f));
+            imageInput.files = dt.files;
+        });
+    </script>
+}

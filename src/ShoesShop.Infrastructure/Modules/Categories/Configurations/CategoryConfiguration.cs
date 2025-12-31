@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ShoesShop.Domain.Modules.User.Categories.Entities;
+using ShoesShop.Domain.Categories.Entities;
 
 namespace ShoesShop.Infrastructure.Modules.Categories.Configurations;
 

@@ -1,0 +1,563 @@
+@using Microsoft.Extensions.Options
+@using ShoesShop.Domain.Products.Commands
+@using ShoesShop.Domain.Products.Enums
+@using ShoesShop.Domain.Shares.Image.Dtos
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model ProductDto
+@inject IOptions<CloudinarySettings> CloudinaryConfig
+
+@{
+    Layout = "~/Shares/Views/User/_Layout.cshtml";
+    ViewData["Title"] = "Detail";
+}
+
+<link rel="icon" href="~/assets/product/img/favicon.png">
+<link rel="stylesheet" href="~/assets/product/css/bootstrap.min.css">
+<link rel="stylesheet" href="~/assets/product/css/animate.css">
+<link rel="stylesheet" href="~/assets/product/css/owl.carousel.min.css">
+<link rel="stylesheet" href="~/assets/product/css/lightslider.min.css">
+<link rel="stylesheet" href="~/assets/product/css/all.css">
+<link rel="stylesheet" href="~/assets/product/css/flaticon.css">
+<link rel="stylesheet" href="~/assets/product/css/themify-icons.css">
+<link rel="stylesheet" href="~/assets/product/css/magnific-popup.css">
+<link rel="stylesheet" href="~/assets/product/css/style.css">
+<link rel="stylesheet" href="~/assets/css/share.css" asp-append-version="true" />
+
+ <section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="breadcrumb_iner">
+            <div class="breadcrumb_iner_item">
+              <h2>Shop Single</h2>
+              <p>Home <span>-</span> Shop Single</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!--================Single Product Area =================-->
+<div class="product_image_area section_padding">
+    <div class="container">
+      <div class="row s_product_inner justify-content-between">
+        <div class="col-lg-7 col-xl-7">
+          <div class="product_slider_img">
+            <div id="vertical">
+                @if (Model.Images != null && Model.Images.Any())
+                {
+                    foreach (ImageDto img in Model.Images)
+                    { 
+                        var fullUrl = img.Url.ToCloudinaryUrl(CloudinaryConfig.Value.BaseUrl);
+
+                        <div data-thumb="@fullUrl">
+                            <img src="@fullUrl"
+                                alt="@Model.Name"
+                                style="width:500px; height:410px; object-fit:cover; border-radius:10px;" />
+                        </div>
+                    }
+                }
+            </div>
+          </div>
+        </div>
+            <div class="col-lg-5 col-xl-4">
+        <div class="s_product_text">
+            <h3>@Model.Name</h3>
+            <h2>$@Model.Price</h2>
+
+            <ul class="list">
+                <li>
+                    <a class="active">
+                        <span>Categories</span> :
+                        @(Model.Categories != null && Model.Categories.Any()
+                            ? string.Join(separator: ", ", Model.Categories.Select(c => c.Name))
+                            : "No categories")
+                    </a>
+                </li>
+
+                <li>
+                    <a>
+                        <span>Availability</span> :
+                        @if (Model.StockStatus == ProductStockStatus.InStock)
+                        {
+                            <span class="text-success">In Stock</span>
+                        }
+                        else
+                        {
+                            <span class="text-danger">Out of Stock</span>
+                        }
+                    </a>
+
+                    <a>
+                        <span>Brand</span> :
+                        @(string.IsNullOrWhiteSpace(Model.Brand) ? "N/A" : Model.Brand)
+                    </a>
+                    <a>
+                        <span>Color</span> :
+                        @(string.IsNullOrWhiteSpace(Model.Color)
+                            ? "N/A"
+                            : string.Join(", ",
+                                Model.Color
+                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(c => c.Trim())))
+                    </a>
+                </li>
+            </ul>
+
+            <p class="card_area">@Model.Description</p>
+
+            <form method="post" asp-controller="Cart" asp-action="AddToCart" id="addToCartForm" data-id="@Model.Id">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="id" value="@Model.Id" />
+            <!-- ✅ Size options -->
+            <div class="mb-4 mt-4">
+            <h5 class="fw-bold mb-3" style="color: #ffb300;">Available Sizes:</h5>
+            <div class="d-flex flex-wrap justify-content-start gap-4">
+            @{
+                var allSizes = new[] { "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47"};
+                List<string>? availableSizes = (Model.Sizes ?? "")
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim())
+                    .ToList();
+            }
+
+            @foreach (var size in allSizes)
+            {
+                bool isAvailable = availableSizes.Contains(size);
+                <div class="position-relative size-box @(isAvailable ? "available" : "unavailable")" data-size="@size">
+                    <span>@size</span>
+                    @if (!isAvailable)
+                    {
+                        <span class="size-x">×</span>
+                    }
+                </div>
+            }
+            </div>
+
+                <input type="hidden" name="size" id="selectedSize" />
+                <div class="card_area d-flex justify-content-between align-items-center">
+                    <div class="product_count">
+                        <span class="inumber-decrement"> <i class="ti-minus"></i></span>
+                        <input class="input-number" type="number"  name="quantity" value="1" min="1" max="10" required>
+                        <span class="number-increment"> <i class="ti-plus"></i></span>
+                    </div>
+                    <button type="submit" class="btn_3">Add to cart</button>
+                    <a href="#" class="like_us"><i class="ti-heart"></i></a>
+                </div>
+
+                <div id="sizeError" class="text-danger mt-2" style="display:none;">
+                    Please select a size before adding to cart!
+                </div>
+            </div>
+            </form>
+        </div>
+    </div>
+  </div>
+<!--================End Single Product Area =================-->
+
+<!--================Product Description Area =================-->
+<section class="product_description_area">
+<div class="container">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+        aria-selected="true">Description</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile"
+        aria-selected="false">Specification</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" id="review-tab" data-toggle="tab" href="#review" role="tab" aria-controls="review"
+        aria-selected="false">Reviews</a>
+    </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <p>
+            @Model.Description
+        </p>
+    </div>
+        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <div class="table-responsive">
+            <table class="table">
+                <tbody>
+                <tr>
+                    <td>
+                    <h5>Width</h5>
+                    </td>
+                    <td>
+                    <h5>128mm</h5>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                    <h5>Height</h5>
+                    </td>
+                    <td>
+                    <h5>508mm</h5>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                    <h5>Depth</h5>
+                    </td>
+                    <td>
+                    <h5>85mm</h5>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                    <h5>Weight</h5>
+                    </td>
+                    <td>
+                    <h5>52gm</h5>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                    <h5>Quality checking</h5>
+                    </td>
+                    <td>
+                    <h5>yes</h5>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                    <h5>Freshness Duration</h5>
+                    </td>
+                    <td>
+                    <h5>03days</h5>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                    <h5>When packeting</h5>
+                    </td>
+                    <td>
+                    <h5>Without touch of hand</h5>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                    <h5>Each Box contains</h5>
+                    </td>
+                    <td>
+                    <h5>60pcs</h5>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+        
+        <div class="tab-pane fade show active" id="review" role="tabpanel" aria-labelledby="review-tab">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="row total_rate">
+                        <div class="col-6">
+                            <div class="box_total">
+                                <h5>Overall</h5>
+                                <h4>
+                                    @((Model.Reviews?.Any() ?? false)
+                                        ? Model.Reviews.Average(r => r.Rating).ToString("F1")
+                                        : "0")
+                                </h4>
+                                <h6>(@(Model.Reviews?.Count ?? 0) Reviews)</h6>
+                            </div>
+                        </div>
+
+                        <div class="col-6" style="line-height:2.4rem!important;">
+                            <div class="rating_list">
+                                <h3>Based on @(Model.Reviews?.Count ?? 0) Reviews</h3>
+                                <ul class="list">
+                                    @for (int star = 5; star >= 1; star--)
+                                    {
+                                        var count = Model.Reviews?.Count(r => r.Rating == star) ?? 0;
+                                        <li>
+                                            <a href="#">
+                                                @star Star
+                                                @for (int i = 0; i < star; i++)
+                                                {
+                                                    <i class="fa fa-star"></i>
+                                                }
+                                                @for (int i = star; i < 5; i++)
+                                                {
+                                                    <i class="fa fa-star-o"></i>
+                                                }
+                                                @count
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== REVIEW LIST ===== -->
+                    <div class="review_list">
+                        @if (Model.Reviews != null && Model.Reviews.Any())
+                        {
+                            foreach (var review in Model.Reviews)
+                            {
+                                var avatarUrl = review.User?.AvatarUrl;
+                                if (!string.IsNullOrEmpty(avatarUrl) && !avatarUrl.StartsWith("http"))
+                                {
+                                    avatarUrl = $"{CloudinaryConfig.Value.BaseUrl}{avatarUrl}";
+                                }
+
+                                <div class="review_item">
+                                    <div class="media">
+                                        <div class="d-flex">
+                                            <img src="@(avatarUrl ?? "/images/default-avatar.png")"
+                                                alt="User"
+                                                style="width:48px;height:48px;border-radius:50%;object-fit:cover;" />
+                                        </div>
+
+                                        <div class="media-body">
+                                            <h4>@(review.User?.UserName ?? "Anonymous")</h4>
+
+                                            @for (int i = 0; i < review.Rating; i++)
+                                            {
+                                                <i class="fa fa-star"></i>
+                                            }
+                                            @for (int i = review.Rating; i < 5; i++)
+                                            {
+                                                <i class="fa fa-star-o"></i>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <p>@review.Comment</p>
+
+                                    @if (review.ProductReview?.Any() == true)
+                                    {
+                                        var pr = review.ProductReview.First();
+
+                                        if (pr.ImageUrls?.Any() == true)
+                                        {
+                                            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                                                @foreach (var img in pr.ImageUrls)
+                                                {
+                                                    var fullUrl = img.ToCloudinaryUrl(CloudinaryConfig.Value.BaseUrl);
+
+                                                    <img src="@fullUrl"
+                                                        alt="Review image"
+                                                        onclick="openImgZoom('@fullUrl')"
+                                                        style="
+                                                            width:72px;
+                                                            height:72px;
+                                                            object-fit:cover;
+                                                            border-radius:8px;
+                                                            border:1px solid rgba(255,255,255,.1);
+                                                            cursor:zoom-in;
+                                                            background:#111;
+                                                            transition:transform .2s ease, box-shadow .2s ease;"
+                                                        onmouseover="this.style.transform='scale(1.08)';this.style.boxShadow='0 6px 16px rgba(0,0,0,.35)'"
+                                                        onmouseout="this.style.transform='scale(1)';this.style.boxShadow='none'" />
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p>No reviews yet.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== IMAGE ZOOM MODAL ===== -->
+        <div id="imgZoomModal"
+            onclick="closeImgZoom()"
+            style="
+                display:none;
+                position:fixed;
+                inset:0;
+                background:rgba(0,0,0,.85);
+                z-index:9999;
+                justify-content:center;
+                align-items:center;
+                cursor:zoom-out;">
+            <img id="imgZoomTarget"
+                style="
+                    max-width:90%;
+                    max-height:90%;
+                    border-radius:12px;
+                    box-shadow:0 20px 60px rgba(0,0,0,.6);
+                    animation:zoomIn .25s ease;" />
+        </div>
+    </div>
+</div>
+</section>
+
+<script src="~/assets/product/js/jquery-1.12.1.min.js"></script>
+<script src="~/assets/product/js/popper.min.js"></script>
+<script src="~/assets/product/js/bootstrap.min.js"></script>
+<script src="~/assets/product/js/jquery.magnific-popup.js"></script>
+<script src="~/assets/product/js/lightslider.min.js"></script>
+<script src="~/assets/product/js/masonry.pkgd.js"></script>
+<script src="~/assets/product/js/owl.carousel.min.js"></script>
+<script src="~/assets/product/js/jquery.nice-select.min.js"></script>
+<script src="~/assets/product/js/slick.min.js"></script>
+<script src="~/assets/product/js/swiper.jquery.js"></script>
+<script src="~/assets/product/js/jquery.counterup.min.js"></script>
+<script src="~/assets/product/js/waypoints.min.js"></script>
+<script src="~/assets/product/js/contact.js"></script>
+<script src="~/assets/product/js/jquery.ajaxchimp.min.js"></script>
+<script src="~/assets/product/js/jquery.form.js"></script>
+<script src="~/assets/product/js/jquery.validate.min.js"></script>
+<script src="~/assets/product/js/mail-script.js"></script>
+<script src="~/assets/product/js/stellar.js"></script>
+<script src="~/assets/product/js/theme.js"></script>
+<script src="~/assets/product/js/custom.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@* ==== IMAGE ZOOM STYLES & SCRIPTS ===== *@
+<style>
+        keyframes zoomIn {
+            from { transform:scale(.85); opacity:0 }
+            to   { transform:scale(1); opacity:1 }
+        }
+        </style>
+
+        <script>
+        function openImgZoom(src) {
+            document.getElementById("imgZoomTarget").src = src;
+            document.getElementById("imgZoomModal").style.display = "flex";
+        }
+
+        function closeImgZoom() {
+            document.getElementById("imgZoomModal").style.display = "none";
+        }
+        </script>
+<script>
+
+
+const isLoggedIn = @(User.Identity?.IsAuthenticated.ToString().ToLower() ?? "false");
+
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("addToCartForm");
+    const selectedSizeInput = document.getElementById("selectedSize");
+    const sizeBoxes = document.querySelectorAll(".size-box");
+
+    // Restore selected size after login
+    const savedSize = sessionStorage.getItem("selectedSize");
+    if (savedSize) {
+        const box = [...sizeBoxes].find(b => b.dataset.size === savedSize);
+        if (box) {
+            box.classList.add("selected");
+            selectedSizeInput.value = savedSize;
+        }
+        sessionStorage.removeItem("selectedSize");
+    }
+
+    // Size selection
+    sizeBoxes.forEach(box => {
+        box.addEventListener("click", () => {
+            if (!box.classList.contains("available")) return;
+
+            if (box.classList.contains("selected")) {
+                box.classList.remove("selected");
+                selectedSizeInput.value = "";
+                return;
+            }
+
+            sizeBoxes.forEach(b => b.classList.remove("selected"));
+            box.classList.add("selected");
+            selectedSizeInput.value = box.dataset.size;
+        });
+    });
+
+    // Submit handler
+    form.addEventListener("submit", async (e) => {
+        const size = selectedSizeInput.value;
+
+        // Missing size → Toast
+        if (!size) {
+            e.preventDefault();
+            Swal.fire({
+                toast: true,
+                position: "top-end",
+                icon: "info",
+                background: "#1f1f1f",
+                color: "#fff",
+                title: "Please select a size!",
+                showConfirmButton: false,
+                timer: 2000,
+                customClass: { popup: "toast-14" }
+            });
+            return;
+        }
+
+        // Not logged in → Toast + redirect
+        if (!isLoggedIn) {
+            e.preventDefault();
+
+            Swal.fire({
+                toast: true,
+                position: "top-end",
+                icon: "warning",
+                background: "#1f1f1f",
+                color: "#fff",
+                title: "Please login to continue",
+                showConfirmButton: true,
+                confirmButtonText: "Login",
+                confirmButtonColor: "#ffb300",
+                customClass: { popup: "toast-14" }
+            }).then(r => {
+                if (r.isConfirmed) {
+                    sessionStorage.setItem("selectedSize", size);
+                    const url = encodeURIComponent(window.location.pathname + window.location.search);
+                    window.location.href = `/User/Login?returnUrl=${url}`;
+                }
+            });
+
+            return;
+        }
+
+        // Confirm add to cart
+        e.preventDefault();
+
+        const confirmAdd = await Swal.fire({
+            icon: "question",
+            title: "<span style='font-size:14px; font-weight:600;'>Add this item to your cart?</span>",
+            html: "<div style='font-size:14px;'>Do you want to continue?</div>",
+            background: "#2a2a2a",
+            color: "#fff",
+            showCancelButton: true,
+            confirmButtonText: "<span style='font-size:14px;'>Yes</span>",
+            cancelButtonText: "<span style='font-size:14px;'>Cancel</span>",
+            confirmButtonColor: "#ffb300",
+            cancelButtonColor: "#d33"
+        });
+
+        if (confirmAdd.isConfirmed) {
+            form.removeEventListener("submit", arguments.callee);
+            form.submit();
+        }
+    });
+});
+
+// Inject custom CSS
+const style = document.createElement("style");
+style.innerHTML = `
+.toast-14 {
+    padding: 12px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35) !important;
+}
+.swal2-popup {
+    font-size: 12px !important;
+    border-radius: 10px !important;
+}
+`;
+document.head.appendChild(style);
+</script>

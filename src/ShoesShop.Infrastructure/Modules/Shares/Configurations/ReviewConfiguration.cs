@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ShoesShop.Domain.Modules.Shares.Review.Entity;
+using ShoesShop.Domain.Shares.Review.Entity;
 
 namespace ShoesShop.Infrastructure.Modules.Shares.Configurations
 {
@@ -53,7 +53,7 @@ namespace ShoesShop.Infrastructure.Modules.Shares.Configurations
             builder.Property(x => x.CreateBy).IsRequired();
             builder.Property(x => x.CreateTimeStamp).IsRequired();
             builder.Property(x => x.LastActionBy).IsRequired();
-            builder.Property(x => x.LastAction).IsRequired();
+            builder.Property(x => x.LastAction).HasConversion<string>().IsRequired();
             builder.Property(x => x.LastActionTimeStamp).IsRequired();
         }
     }

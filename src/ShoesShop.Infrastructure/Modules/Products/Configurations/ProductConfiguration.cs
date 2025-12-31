@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ShoesShop.Domain.Modules.User.Products.Entities;
+using ShoesShop.Domain.Products.Entities;
 
 namespace ShoesShop.Infrastructure.Modules.Products.Configurations;
 public class ProductConfiguration : IEntityTypeConfiguration<Product>
@@ -17,7 +17,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Brand).HasField("_brand").HasMaxLength(100).IsRequired();
         builder.Property(p => p.Color).HasField("_color").HasMaxLength(50).IsRequired();
         builder.Property(p => p.Sizes).HasField("_sizes").HasMaxLength(100).IsRequired();
-
+        builder.Ignore(p => p.StockStatus);
+        
         builder.Property(c => c.LastActionTimeStamp).IsRequired();
         builder.Property(c => c.LastAction).HasConversion<string>().IsRequired();
         builder.Property(c => c.CreateBy).IsRequired();

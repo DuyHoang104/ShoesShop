@@ -1,0 +1,349 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using ShoesShop.Domain.Categories.Dtos
+@using ShoesShop.Domain.Categories.Enums
+@using ShoesShop.Domain.Commons.Enums
+@model List<CategoryDto>
+@inject Microsoft.Extensions.Options.IOptions<CloudinarySettings> CloudinaryConfig
+
+@{
+    ViewData["Title"] = "Products";
+    Layout = "~/Shares/Views/Admin/_LayoutAdmin.cshtml";
+}
+
+<link href="~/assets/Admin/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css">
+<link href="~/assets/Admin/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css">
+
+<style>
+    .modal-dialog {
+        margin-top: 40px !important;
+    }
+
+    .modal-content {
+        border-radius: 14px !important;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: #2d508e;
+        color: white;
+        border-bottom: none;
+        padding: 18px 24px;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+
+    .modal-body {
+        padding: 20px 24px;
+    }
+
+    .modal-footer {
+        border-top: none;
+        padding: 16px 24px;
+    }
+</style>
+
+<div class="container-fluid">
+
+    <!-- page title -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="javascript: void(0);">Hyper</a></li>
+                        <li class="breadcrumb-item"><a href="javascript: void(0);">eCommerce</a></li>
+                        <li class="breadcrumb-item active">Products</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Products</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="row mb-2">
+                        <div class="col-sm-4">
+                            <a href="javascript:void(0);" class="btn btn-danger mb-2" data-bs-toggle="modal"
+                                data-bs-target="#addCategoryModal">
+                                <i class="mdi mdi-plus-circle me-2"></i> Add Categories
+                            </a>
+                        </div>
+                        <div class="col-sm-8 text-sm-end">
+                            <button type="button" class="btn btn-success mb-2 me-1"><i
+                                    class="mdi mdi-cog-outline"></i></button>
+                            <button type="button" class="btn btn-light mb-2 me-1">Import</button>
+                            <button type="button" class="btn btn-light mb-2">Export</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-centered w-100 dt-responsive nowrap" id="products-datatable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:20px;">
+                                        <div class="form-check"><input type="checkbox" class="form-check-input"></div>
+                                    </th>
+                                    <th>Categories</th>
+                                    <th>Description</th>
+                                    <th>Added Date</th>
+                                    <th>Last Action</th>
+                                    <th>Status</th>
+                                    <th style="width:85px;">Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var category in Model)
+                                {
+                                    <tr data-id="@category.Id">
+                                        <td>
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" value="@category.Id">
+                                            </div>
+                                        </td>
+                                        <td>@category.Name</td>
+                                        <td>@category.Description</td>
+                                        <td>@category.CreateTimeStamp.ToString("dd/MM/yyyy")</td>
+                                        <td>
+                                            @{
+                                                string actionClass;
+                                                string actionText;
+
+                                                switch (category.LastAction)
+                                                {
+                                                    case LastAction.Create:
+                                                        actionClass = "bg-primary";
+                                                        actionText = "Create";
+                                                        break;
+
+                                                    case LastAction.Update:
+                                                        actionClass = "bg-primary";
+                                                        actionText = "Update";
+                                                        break;
+                                                    default:
+                                                        actionClass = "bg-secondary";
+                                                        actionText = "Unknown";
+                                                        break;
+                                                }
+                                            }
+
+                                            <span class="badge @actionClass">@actionText</span>
+                                        </td>
+
+                                        <td>
+                                            @{
+                                                string badgeClass;
+                                                string badgeText;
+                                                switch (category.Status)
+                                                {
+                                                    case CategoryStatus.Active:
+                                                        badgeClass = "bg-success"; badgeText = "Active"; break;
+                                                    case CategoryStatus.Inactive:
+                                                        badgeClass = "bg-danger text-dark"; badgeText = "Inactive"; break;
+                                                    default:
+                                                        badgeClass = "bg-secondary"; badgeText = "Unknown"; break;
+                                                }
+                                            }
+                                            <span class="badge @badgeClass">@badgeText</span>
+                                        </td>
+                                        <td class="table-action">
+                                            <a href="javascript:void(0);" class="action-icon edit-category"><i
+                                                    class="mdi mdi-square-edit-outline"></i></a>
+                                            <a href="javascript:void(0);" class="action-icon text-danger delete-category"><i
+                                                    class="mdi mdi-delete"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Create -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+            <form id="createCategoryForm">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Add New Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Category Name</label>
+                        <input type="text" class="form-control" name="Name" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="Description"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Update -->
+<div class="modal fade" id="updateCategoryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+            <form id="updateCategoryForm">
+                <input type="hidden" name="Id" />
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Update Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Category Name</label>
+                        <input type="text" class="form-control" name="Name" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="Description"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="Status">
+                            <option value="10">Active</option>
+                            <option value="20">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/assets/Admin/js/vendor/jquery.dataTables.min.js"></script>
+    <script src="~/assets/Admin/js/vendor/dataTables.bootstrap5.js"></script>
+    <script src="~/assets/Admin/js/vendor/dataTables.responsive.min.js"></script>
+    <script src="~/assets/Admin/js/vendor/responsive.bootstrap5.min.js"></script>
+    <script src="~/assets/Admin/js/vendor/dataTables.checkboxes.min.js"></script>
+    <script src="~/assets/Admin/js/pages/demo.products.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // CREATE CATEGORY
+            $("#createCategoryForm").on("submit", function (e) {
+                e.preventDefault();
+                let formData = new FormData(this);
+
+                $.ajax({
+                    url: "/Admin/Categories/Create",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        $("#addCategoryModal").modal("hide");
+                        $("#createCategoryForm")[0].reset();
+                        Swal.fire({ icon: "success", title: "Success", text: res.message, timer: 1800, showConfirmButton: false, didClose: () => location.reload() });
+                    },
+                    error: function (err) {
+                        let msg = "An error occurred";
+                        if (err.responseJSON && err.responseJSON.message) msg = err.responseJSON.message;
+                        Swal.fire({ icon: "error", title: "Failed", text: msg });
+                    }
+                });
+            });
+
+            // OPEN UPDATE MODAL
+            $(".table").on("click", ".edit-category", function () {
+                const row = $(this).closest("tr");
+                const id = row.data("id");
+                const name = row.find("td:nth-child(2)").text().trim();
+                const description = row.find("td:nth-child(3)").text().trim();
+                const statusText = row.find("td:nth-child(5) .badge").text().trim();
+                let statusValue = 10;
+                if (statusText === "Inactive") statusValue = 20;
+                else if (statusText === "Deleted") statusValue = 30;
+
+                const form = $("#updateCategoryForm");
+                form.find("input[name=Id]").val(id);
+                form.find("input[name=Name]").val(name);
+                form.find("textarea[name=Description]").val(description);
+                form.find("select[name=Status]").val(statusValue);
+
+                $("#updateCategoryModal").modal("show");
+            });
+
+            // UPDATE CATEGORY
+            $("#updateCategoryForm").on("submit", function (e) {
+                e.preventDefault();
+                let formData = new FormData(this);
+
+                $.ajax({
+                    url: "/Admin/Categories/Update",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        $("#updateCategoryModal").modal("hide");
+                        Swal.fire({ icon: "success", title: "Updated!", text: res.message, timer: 1800, showConfirmButton: false, didClose: () => location.reload() });
+                    },
+                    error: function (err) {
+                        let msg = "Failed to update";
+                        if (err.responseJSON && err.responseJSON.message) msg = err.responseJSON.message;
+                        Swal.fire({ icon: "error", title: "Error", text: msg });
+                    }
+                });
+            });
+
+            // DELETE CATEGORY
+            $(".table").on("click", ".delete-category", function () {
+                const row = $(this).closest("tr");
+                const categoryId = row.data("id");
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/Admin/Categories/Delete?id=${categoryId}`,
+                            type: "POST",
+                            success: function (res) {
+                                Swal.fire({ icon: "success", title: "Deleted!", text: res.message, timer: 1800, showConfirmButton: false, didClose: () => location.reload() });
+                            },
+                            error: function (err) {
+                                let msg = "Failed to delete";
+                                if (err.responseJSON && err.responseJSON.message) msg = err.responseJSON.message;
+                                Swal.fire({ icon: "error", title: "Failed", text: msg });
+                            }
+                        });
+                    }
+                });
+            });
+
+        });
+    </script>
+}

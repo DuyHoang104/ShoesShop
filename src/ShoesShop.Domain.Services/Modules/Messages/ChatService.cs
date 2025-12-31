@@ -1,16 +1,18 @@
 using Microsoft.EntityFrameworkCore;
-using ShoesShop.Domain.Modules.Messages.Entity;
-using ShoesShop.Domain.Modules.Shares.Image.Entities;
-using ShoesShop.Domain.Modules.Shares.Image.Enums;
-using ShoesShop.Domain.Modules.Shares.Messages.Dtos;
-using ShoesShop.Domain.Modules.Shares.Messages.Services;
-using ShoesShop.Domain.Modules.User.Commons.Repositories;
-using ShoesShop.Domain.Modules.User.Orders.Dtos;
-using ShoesShop.Domain.Modules.User.Orders.Dtos.Commands;
-using ShoesShop.Domain.Modules.User.Orders.Entities;
-using ShoesShop.Domain.Modules.User.Users.Dtos;
+using ShoesShop.Domain.Commons.Repositories;
+using ShoesShop.Domain.Orders.Dtos;
+using ShoesShop.Domain.Orders.Dtos.Commands;
+using ShoesShop.Domain.Orders.Entities;
+using ShoesShop.Domain.Shares.Image.Entities;
+using ShoesShop.Domain.Shares.Image.Enums;
+using ShoesShop.Domain.Shares.Messages.Dtos;
+using ShoesShop.Domain.Shares.Messages.Entity;
+using ShoesShop.Domain.Shares.Messages.Services;
+using ShoesShop.Domain.Users.Dtos;
+using ShoesShop.Domain.Users.Entities;
 
 namespace ShoesShop.Domain.Services.Modules.Messages;
+
 public class ChatService : IChatService
 {
     private readonly IGenericRepository<Message, int> _messageRepository;
@@ -21,11 +23,11 @@ public class ChatService : IChatService
     private readonly IGenericRepository<ImageProduct, int> _imageProductRepository;
 
 
-    private readonly IGenericRepository<Domain.Modules.User.Users.Entities.User, int> _userRepository;
+    private readonly IGenericRepository<User, int> _userRepository;
 
     public ChatService(
         IGenericRepository<Message, int> messageRepository,
-        IGenericRepository<Domain.Modules.User.Users.Entities.User, int> userRepository,
+        IGenericRepository<User, int> userRepository,
         IGenericRepository<Order, int> orderRepository,
         IGenericRepository<Image, int> imageRepository,
         IGenericRepository<ImageUser, int> imageUserRepository,

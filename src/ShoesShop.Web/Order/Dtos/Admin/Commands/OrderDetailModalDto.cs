@@ -1,0 +1,25 @@
+using ShoesShop.Domain.Orders.Enums;
+using ShoesShop.Domain.Users.Dtos;
+
+namespace ShoesShop.Web.Order.Dtos.Admin.Commands;
+
+public class OrderDetailModalDto
+{
+    public int Id { get; set; }
+    public string? ReceiverName { get; set; } = null!;
+    public string? ReceiverPhone { get; set; } = null!;
+    public string? ReceiverAddress { get; set; } = null!;
+    public string? ReceiverCity { get; set; } = null!;
+    public string? ReceiverCountry { get; set; } = null!;
+    public AddressModalDto? Address { get; set; } = null!;
+    public string? Note { get; set; } = string.Empty;
+    public decimal? ShippingCost { get; set; }
+    public decimal? DiscountValue { get; set; }
+    public PaymentMethod? PaymentMethod { get; set; } = null!;
+    public PaymentStatus? PaymentStatus { get; set; } = null!;
+    public OrderStatus? Status { get; set; }
+    public DateTime OrderDate { get; set; }
+    public decimal TotalAmount { get; set; }
+    public List<OrderDetailItemModalDto> OrderDetails { get; set; } = [];
+    public UserDto User { get; set; } = null!;
+}

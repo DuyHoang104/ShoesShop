@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ShoesShop.Domain.Modules.Shares.Image.Entities;
-using ShoesShop.Domain.Modules.Shares.Image.Enums;
+using ShoesShop.Domain.Shares.Image.Entities;
+using ShoesShop.Domain.Shares.Image.Enums;
 
 namespace ShoesShop.Infrastructure.Modules.Shares.Configurations;
 

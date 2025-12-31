@@ -2,49 +2,49 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using ShoesShop.Crosscutting.Utilities.Exceptions;
 using System.Linq.Expressions;
-using ShoesShop.Domain.Modules.User.Commons.Repositories;
-using ShoesShop.Domain.Modules.User.Commons.Entities;
+using ShoesShop.Domain.Commons.Entities;
+using ShoesShop.Domain.Commons.Repositories;
 
 namespace ShoesShop.Infrastructure.Modules.Commons.Repositories
 {
     public class GenericRepository<TEntity> : IGenericRepository<TEntity>
         where TEntity : class, IBaseEntity
+    {
+        protected readonly DbContext _context;
+
+        protected readonly DbSet<TEntity> _dbSet;
+
+        public GenericRepository(DbContext context)
         {
-            protected readonly DbContext _context;
-
-            protected readonly DbSet<TEntity> _dbSet;
-
-            public GenericRepository(DbContext context)
-            {
-                _context = context;
-                _dbSet = _context.Set<TEntity>();
-            }
-
-            public virtual async Task DeleteAsync([Required] TEntity entity)
-            {
-                _dbSet.Remove(entity);
-            }
-
-            public virtual async Task<TEntity> InsertAsync([Required] TEntity entity)
-            {
-                await _dbSet.AddAsync(entity);
-                return entity;
-            }
-
-            public virtual async Task<TEntity> SaveAsync([Required] TEntity entity)
-            {
-                var existingEntity = await _dbSet.FindAsync(entity);
-                return existingEntity != null
-                ? await UpdateAsync(existingEntity)
-                : await InsertAsync(entity);
-            }
-
-            public virtual async Task<TEntity> UpdateAsync([Required] TEntity entity)
-            {
-                _dbSet.Update(entity);
-                return entity;
-            }
+            _context = context;
+            _dbSet = _context.Set<TEntity>();
         }
+
+        public virtual async Task DeleteAsync([Required] TEntity entity)
+        {
+            _dbSet.Remove(entity);
+        }
+
+        public virtual async Task<TEntity> InsertAsync([Required] TEntity entity)
+        {
+            await _dbSet.AddAsync(entity);
+            return entity;
+        }
+
+        public virtual async Task<TEntity> SaveAsync([Required] TEntity entity)
+        {
+            var existingEntity = await _dbSet.FindAsync(entity);
+            return existingEntity != null
+            ? await UpdateAsync(existingEntity)
+            : await InsertAsync(entity);
+        }
+
+        public virtual async Task<TEntity> UpdateAsync([Required] TEntity entity)
+        {
+            _dbSet.Update(entity);
+            return entity;
+        }
+    }
 
     public class GenericRepository<TEntity, TKey> : GenericRepository<TEntity>, IGenericRepository<TEntity, TKey>
         where TEntity : class, IBaseEntity<TKey>
@@ -70,29 +70,31 @@ namespace ShoesShop.Infrastructure.Modules.Commons.Repositories
             return await queryable.AnyAsync();
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>>? predicate = null,
-                                                Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null)
+        public async Task<IEnumerable<TEntity>> GetAllAsync(
+            Expression<Func<TEntity, bool>>? predicate = null,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null)
         {
             IQueryable<TEntity> query = _dbSet;
-
-            if (include != null)
-            {
-                query = include(query);
-            }
 
             if (predicate != null)
             {
                 query = query.Where(predicate);
             }
 
+            if (include != null)
+            {
+                query = include(query);
+            }
+
             return await query.ToListAsync();
         }
-        
+
+
         public async Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>>? predicate)
         {
             return await _dbSet.FirstOrDefaultAsync(predicate);
         }
-        
+
         public virtual async Task<TEntity?> GetByIdAsync([Required] TKey id)
         {
             return await _dbSet.FindAsync(id);

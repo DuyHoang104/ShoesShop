@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ShoesShop.Domain.Modules.User.Carts.Entities;
+using ShoesShop.Domain.Carts.Entities;
 
 namespace ShoesShop.Infrastructure.Modules.Carts.Configurations;
 

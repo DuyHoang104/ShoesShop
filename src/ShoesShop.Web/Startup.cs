@@ -1,38 +1,29 @@
 using ShoesShop.Crosscutting.Utilities.PayPal;
 using ShoesShop.Crosscutting.Utilities.VNpay;
-using ShoesShop.Domain.Collections;
-using ShoesShop.Domain.Modules.Admin.Admin.Services;
-using ShoesShop.Domain.Modules.Messages.Entity;
-using ShoesShop.Domain.Modules.Shares.Image.Entities;
-using ShoesShop.Domain.Modules.Shares.Messages.Hubs;
-using ShoesShop.Domain.Modules.Shares.Messages.Services;
-using ShoesShop.Domain.Modules.Shares.Review.Entity;
-using ShoesShop.Domain.Modules.Shares.Review.Services;
-using ShoesShop.Domain.Modules.User.Carts.Entities;
-using ShoesShop.Domain.Modules.User.Carts.Services;
-using ShoesShop.Domain.Modules.User.Categories.Entities;
-using ShoesShop.Domain.Modules.User.Categories.Services;
-using ShoesShop.Domain.Modules.User.Commons.Repositories;
-using ShoesShop.Domain.Modules.User.Orders.Entities;
-using ShoesShop.Domain.Modules.User.Orders.Services;
-using ShoesShop.Domain.Modules.User.Products.Entities;
-using ShoesShop.Domain.Modules.User.Products.Services;
-using ShoesShop.Domain.Modules.User.Shares.Entities;
-using ShoesShop.Domain.Modules.User.Users.Entities;
-using ShoesShop.Domain.Modules.User.Users.Services;
+using ShoesShop.Domain.Carts.Services;
+using ShoesShop.Domain.Categories.Entities;
+using ShoesShop.Domain.Categories.Services;
+using ShoesShop.Domain.Commons.Repositories;
+using ShoesShop.Domain.Orders.Services;
+using ShoesShop.Domain.Products.Services;
 using ShoesShop.Domain.Services.Modules.Admins.Admin;
 using ShoesShop.Domain.Services.Modules.Messages;
-using ShoesShop.Domain.Services.Modules.Users.Carts.Services;
-using ShoesShop.Domain.Services.Modules.Users.Categories.Services;
-using ShoesShop.Domain.Services.Modules.Users.Orders.Services;
-using ShoesShop.Domain.Services.Modules.Users.Products.Services;
-using ShoesShop.Domain.Services.Modules.Users.Reviews.Services;
-using ShoesShop.Domain.Services.Modules.Users.Users.Services;
-using ShoesShop.Infrastructure.Collections;
+using ShoesShop.Domain.Shares.Addresses.Entities;
+using ShoesShop.Domain.Shares.Image.Entities;
+using ShoesShop.Domain.Shares.Messages.Hubs;
+using ShoesShop.Domain.Shares.Messages.Services;
+using ShoesShop.Domain.Shares.Review.Services;
+using ShoesShop.Domain.Users.Services;
 using ShoesShop.Infrastructure.Data.Databases;
 using ShoesShop.Infrastructure.Data.UOW;
 using ShoesShop.Infrastructure.Modules;
 using ShoesShop.Web.BuilderAndServices;
+using ShoesShop.Domain.Services.Modules.Carts.Services;
+using ShoesShop.Domain.Services.Modules.Categories.Services;
+using ShoesShop.Domain.Services.Modules.Orders.Services;
+using ShoesShop.Domain.Services.Modules.Products.Services;
+using ShoesShop.Domain.Services.Modules.Reviews.Services;
+using ShoesShop.Domain.Services.Users.Services;
 
 namespace ShoesShop.Web
 {
@@ -55,15 +46,15 @@ namespace ShoesShop.Web
             services.AddHttpContextAccessor();
             services.AddControllersWithViews();
             services.AddSignalR();
-            
+
             services.AddCors(options =>
             {
                 options.AddPolicy("ClientPermission", policy =>
                 {
                     policy.AllowAnyHeader()
                           .AllowAnyMethod()
-                          .AllowCredentials() 
-                          .SetIsOriginAllowed(origin => true); 
+                          .AllowCredentials()
+                          .SetIsOriginAllowed(origin => true);
                 });
             });
 
@@ -80,16 +71,16 @@ namespace ShoesShop.Web
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IReviewService, ReviewService>();
 
-            services.AddScoped<IGenericRepository<User, int>>(serviceProvider =>
+            services.AddScoped<IGenericRepository<ShoesShop.Domain.Users.Entities.User, int>>(serviceProvider =>
             {
                 var repositoryCollection = serviceProvider.GetRequiredService<IRepositoryCollection>();
-                return repositoryCollection.GetRepository<User, int>();
+                return repositoryCollection.GetRepository<Domain.Users.Entities.User, int>();
             });
 
-            services.AddScoped<IGenericRepository<Product, int>>(serviceProvider =>
+            services.AddScoped<IGenericRepository<ShoesShop.Domain.Products.Entities.Product, int>>(serviceProvider =>
             {
                 var repositoryCollection = serviceProvider.GetRequiredService<IRepositoryCollection>();
-                return repositoryCollection.GetRepository<Product, int>();
+                return repositoryCollection.GetRepository<Domain.Products.Entities.Product, int>();
             });
 
             services.AddScoped<IGenericRepository<Category, int>>(serviceProvider =>
@@ -98,16 +89,16 @@ namespace ShoesShop.Web
                 return repositoryCollection.GetRepository<Category, int>();
             });
 
-            services.AddScoped<IGenericRepository<Cart, int>>(serviceProvider =>
+            services.AddScoped<IGenericRepository<ShoesShop.Domain.Carts.Entities.Cart, int>>(serviceProvider =>
             {
                 var repositoryCollection = serviceProvider.GetRequiredService<IRepositoryCollection>();
-                return repositoryCollection.GetRepository<Cart, int>();
+                return repositoryCollection.GetRepository<Domain.Carts.Entities.Cart, int>();
             });
 
-            services.AddScoped<IGenericRepository<Order, int>>(serviceProvider =>
+            services.AddScoped<IGenericRepository<ShoesShop.Domain.Orders.Entities.Order, int>>(serviceProvider =>
             {
                 var repositoryCollection = serviceProvider.GetRequiredService<IRepositoryCollection>();
-                return repositoryCollection.GetRepository<Order, int>();
+                return repositoryCollection.GetRepository<Domain.Orders.Entities.Order, int>();
             });
 
             services.AddScoped<IGenericRepository<Address, int>>(serviceProvider =>
@@ -115,11 +106,17 @@ namespace ShoesShop.Web
                 var repositoryCollection = serviceProvider.GetRequiredService<IRepositoryCollection>();
                 return repositoryCollection.GetRepository<Address, int>();
             });
-            
-            services.AddScoped<IGenericRepository<Message, int>>(serviceProvider =>
+
+            services.AddScoped<IGenericRepository<ShoesShop.Domain.Shares.Messages.Entity.Message, int>>(serviceProvider =>
             {
                 var repositoryCollection = serviceProvider.GetRequiredService<IRepositoryCollection>();
-                return repositoryCollection.GetRepository<Message, int>();
+                return repositoryCollection.GetRepository<Domain.Shares.Messages.Entity.Message, int>();
+            });
+
+            services.AddScoped<IGenericRepository<Image, int>>(serviceProvider =>
+            {
+                var repositoryCollection = serviceProvider.GetRequiredService<IRepositoryCollection>();
+                return repositoryCollection.GetRepository<Image, int>();
             });
 
             services.AddScoped<IGenericRepository<Image, int>>(serviceProvider =>
@@ -140,10 +137,10 @@ namespace ShoesShop.Web
                 return repositoryCollection.GetRepository<ImageProduct, int>();
             });
 
-            services.AddScoped<IGenericRepository<Review, int>>(serviceProvider =>
+            services.AddScoped<IGenericRepository<ShoesShop.Domain.Shares.Review.Entity.Review, int>>(serviceProvider =>
             {
                 var repositoryCollection = serviceProvider.GetRequiredService<IRepositoryCollection>();
-                return repositoryCollection.GetRepository<Review, int>();
+                return repositoryCollection.GetRepository<Domain.Shares.Review.Entity.Review, int>();
             });
 
             services.AddDistributedMemoryCache();
@@ -185,9 +182,9 @@ namespace ShoesShop.Web
             });
 
             services.AddScoped<IVnPayService, VnPayService>();
-            
+
             services.AddAuthorization();
-            
+
             services.Configure<CloudinarySettings>(Configuration.GetSection("Cloudinary"));
             services.AddSingleton<CloudinaryService>();
         }
@@ -208,18 +205,31 @@ namespace ShoesShop.Web
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
-            
-            app.UseCors("ClientPermission"); 
-            
+
+            app.UseCors("ClientPermission");
+
             app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path == "/")
+                {
+                    context.Response.Redirect("/User");
+                    return;
+                }
+
+                await next();
+            });
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHub<ChatHub>("/chatHub"); 
+                endpoints.MapHub<ChatHub>("/chatHub");
 
-                endpoints.MapRazorPages();
+                endpoints.MapControllerRoute(
+                    name: "areas",
+                    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");

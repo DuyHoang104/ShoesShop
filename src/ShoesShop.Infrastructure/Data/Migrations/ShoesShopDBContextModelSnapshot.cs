@@ -22,139 +22,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Messages.Entity.Message", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<bool>("IsRead")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReceiverId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SenderAvatar")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("SenderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SenderName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("SenderRole")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("SentAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("Messages", (string)null);
-                });
-
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Image.Entities.Image", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("OwnerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("OwnerType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Images", (string)null);
-
-                    b.HasDiscriminator<string>("OwnerType");
-
-                    b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Review.Entity.Review", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("CreateBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreateTimeStamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("LastAction")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LastActionBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("LastActionTimeStamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Metadata")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ParentId");
-
-                    b.ToTable("Reviews", (string)null);
-                });
-
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Carts.Entities.Cart", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Carts.Entities.Cart", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -184,7 +52,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("Carts", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Categories.Entities.Category", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Categories.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -226,7 +94,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("Categories", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Orders.Entities.Order", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Orders.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -290,7 +158,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("Orders", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Orders.Entities.OrderDetail", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Orders.Entities.OrderDetail", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -326,7 +194,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("OrderDetails", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Products.Entities.Product", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Products.Entities.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -396,7 +264,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Products.Entities.ProductCategory", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Products.Entities.ProductCategory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -419,7 +287,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("ProductCategories", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Shares.Entities.Address", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Addresses.Entities.Address", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -455,7 +323,95 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("Addresses", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Shares.Entities.ObjectChangeLog", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Image.Entities.Image", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OwnerType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Images", (string)null);
+
+                    b.HasDiscriminator<string>("OwnerType");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Messages.Entity.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderAvatar")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("SenderRole")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("SentAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("Messages", (string)null);
+                });
+
+            modelBuilder.Entity("ShoesShop.Domain.Shares.ObjectChangeLog.Entities.ObjectChangeLog", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -492,7 +448,52 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("ObjectChangeLogs", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Users.Entities.User", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Review.Entity.Review", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("CreateBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateTimeStamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastAction")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LastActionBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastActionTimeStamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("Reviews", (string)null);
+                });
+
+            modelBuilder.Entity("ShoesShop.Domain.Users.Entities.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -542,63 +543,42 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Image.Entities.ImageProduct", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Image.Entities.ImageProduct", b =>
                 {
-                    b.HasBaseType("ShoesShop.Domain.Modules.Shares.Image.Entities.Image");
+                    b.HasBaseType("ShoesShop.Domain.Shares.Image.Entities.Image");
 
                     b.HasIndex("OwnerId");
 
                     b.HasDiscriminator().HasValue("Product");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Image.Entities.ImageReview", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Image.Entities.ImageReview", b =>
                 {
-                    b.HasBaseType("ShoesShop.Domain.Modules.Shares.Image.Entities.Image");
+                    b.HasBaseType("ShoesShop.Domain.Shares.Image.Entities.Image");
 
                     b.HasIndex("OwnerId");
 
                     b.HasDiscriminator().HasValue("Review");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Image.Entities.ImageUser", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Image.Entities.ImageUser", b =>
                 {
-                    b.HasBaseType("ShoesShop.Domain.Modules.Shares.Image.Entities.Image");
+                    b.HasBaseType("ShoesShop.Domain.Shares.Image.Entities.Image");
 
                     b.HasIndex("OwnerId");
 
                     b.HasDiscriminator().HasValue("User");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Messages.Entity.Message", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Carts.Entities.Cart", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.User.Orders.Entities.Order", "Order")
-                        .WithMany("Messages")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Review.Entity.Review", b =>
-                {
-                    b.HasOne("ShoesShop.Domain.Modules.Shares.Review.Entity.Review", "Parent")
-                        .WithMany("Children")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Parent");
-                });
-
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Carts.Entities.Cart", b =>
-                {
-                    b.HasOne("ShoesShop.Domain.Modules.User.Products.Entities.Product", "Product")
+                    b.HasOne("ShoesShop.Domain.Products.Entities.Product", "Product")
                         .WithMany("Carts")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ShoesShop.Domain.Modules.User.Users.Entities.User", "User")
+                    b.HasOne("ShoesShop.Domain.Users.Entities.User", "User")
                         .WithMany("Carts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -609,15 +589,15 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Orders.Entities.Order", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Orders.Entities.Order", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.User.Shares.Entities.Address", "Address")
+                    b.HasOne("ShoesShop.Domain.Shares.Addresses.Entities.Address", "Address")
                         .WithMany("Orders")
                         .HasForeignKey("AddressId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ShoesShop.Domain.Modules.User.Users.Entities.User", "User")
+                    b.HasOne("ShoesShop.Domain.Users.Entities.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -628,15 +608,15 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Orders.Entities.OrderDetail", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Orders.Entities.OrderDetail", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.User.Orders.Entities.Order", "Order")
+                    b.HasOne("ShoesShop.Domain.Orders.Entities.Order", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ShoesShop.Domain.Modules.User.Products.Entities.Product", "Product")
+                    b.HasOne("ShoesShop.Domain.Products.Entities.Product", "Product")
                         .WithMany("OrderDetails")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -647,15 +627,15 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Products.Entities.ProductCategory", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Products.Entities.ProductCategory", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.User.Categories.Entities.Category", "Category")
+                    b.HasOne("ShoesShop.Domain.Categories.Entities.Category", "Category")
                         .WithMany("ProductCategories")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ShoesShop.Domain.Modules.User.Products.Entities.Product", "Product")
+                    b.HasOne("ShoesShop.Domain.Products.Entities.Product", "Product")
                         .WithMany("ProductCategories")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -666,9 +646,9 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Shares.Entities.Address", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Addresses.Entities.Address", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.User.Users.Entities.User", "User")
+                    b.HasOne("ShoesShop.Domain.Users.Entities.User", "User")
                         .WithMany("Addresses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -677,9 +657,20 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Shares.Entities.ObjectChangeLog", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Messages.Entity.Message", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.User.Users.Entities.User", "User")
+                    b.HasOne("ShoesShop.Domain.Orders.Entities.Order", "Order")
+                        .WithMany("Messages")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("ShoesShop.Domain.Shares.ObjectChangeLog.Entities.ObjectChangeLog", b =>
+                {
+                    b.HasOne("ShoesShop.Domain.Users.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -688,9 +679,19 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Image.Entities.ImageProduct", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Review.Entity.Review", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.User.Products.Entities.Product", "Product")
+                    b.HasOne("ShoesShop.Domain.Shares.Review.Entity.Review", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Image.Entities.ImageProduct", b =>
+                {
+                    b.HasOne("ShoesShop.Domain.Products.Entities.Product", "Product")
                         .WithMany("Images")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -699,9 +700,9 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Image.Entities.ImageReview", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Image.Entities.ImageReview", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.Shares.Review.Entity.Review", "Review")
+                    b.HasOne("ShoesShop.Domain.Shares.Review.Entity.Review", "Review")
                         .WithMany("Images")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -710,9 +711,9 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("Review");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Image.Entities.ImageUser", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Image.Entities.ImageUser", b =>
                 {
-                    b.HasOne("ShoesShop.Domain.Modules.User.Users.Entities.User", "User")
+                    b.HasOne("ShoesShop.Domain.Users.Entities.User", "User")
                         .WithMany("Images")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -721,26 +722,19 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.Shares.Review.Entity.Review", b =>
-                {
-                    b.Navigation("Children");
-
-                    b.Navigation("Images");
-                });
-
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Categories.Entities.Category", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Categories.Entities.Category", b =>
                 {
                     b.Navigation("ProductCategories");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Orders.Entities.Order", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Orders.Entities.Order", b =>
                 {
                     b.Navigation("Messages");
 
                     b.Navigation("OrderDetails");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Products.Entities.Product", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Products.Entities.Product", b =>
                 {
                     b.Navigation("Carts");
 
@@ -751,12 +745,19 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                     b.Navigation("ProductCategories");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Shares.Entities.Address", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Addresses.Entities.Address", b =>
                 {
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("ShoesShop.Domain.Modules.User.Users.Entities.User", b =>
+            modelBuilder.Entity("ShoesShop.Domain.Shares.Review.Entity.Review", b =>
+                {
+                    b.Navigation("Children");
+
+                    b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("ShoesShop.Domain.Users.Entities.User", b =>
                 {
                     b.Navigation("Addresses");
 

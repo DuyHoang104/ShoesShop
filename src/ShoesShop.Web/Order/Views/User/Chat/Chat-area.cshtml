@@ -1,0 +1,350 @@
+@using ShoesShop.Web.Modules.Users.Order.Dtos.Commands
+@model ChatModalDto
+@inject Microsoft.Extensions.Options.IOptions<CloudinarySettings> CloudinaryConfig
+
+@{
+    var baseUrl = CloudinaryConfig.Value.BaseUrl?.TrimEnd('/') + "/";
+    var currentUserId = User.FindFirst("userId")?.Value ?? "0";
+}
+
+<style>
+    /* 1. KHUNG CHỨA TỔNG THỂ */
+    .chat-container-inner {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        /* Chiếm trọn chiều cao của chat-main */
+        background: var(--black);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* 2. VÙNG HIỂN THỊ TIN NHẮN (Scrollable) */
+    #chatMessages {
+        flex: 1;
+        background: var(--black);
+        /* Tự động giãn rộng để đẩy input xuống */
+        overflow-y: auto;
+        padding: 25px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        scroll-behavior: smooth;
+    }
+
+    /* Tùy chỉnh thanh cuộn thanh mảnh */
+    #chatMessages::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #chatMessages::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+    }
+
+    /* 3. ĐỊNH DẠNG TIN NHẮN CHUNG */
+    .chat-message {
+        display: flex;
+        flex-direction: column;
+        max-width: 80%;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .message-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+    }
+
+    .avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        flex-shrink: 0;
+    }
+
+    .bubble {
+        padding: 12px 18px;
+        font-size: 14.5px;
+        line-height: 1.5;
+        word-break: break-word;
+        position: relative;
+    }
+
+    .chat-message-header {
+        font-size: 11px;
+        font-weight: 700;
+        color: #94a3b8;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .chat-message small {
+        font-size: 10px;
+        color: #64748b;
+        margin-top: 5px;
+    }
+
+    /* 4. ADMIN (SHOP): BÊN TRÁI - AVATAR TRƯỚC */
+    .chat-message.shop {
+        align-self: flex-start;
+    }
+
+    .chat-message.shop .message-row {
+        flex-direction: row;
+        /* Trật tự: Avatar -> Bubble */
+    }
+
+    .chat-message.shop .bubble {
+        background: #1e293b;
+        color: #f1f5f9;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 18px 18px 18px 4px;
+    }
+
+    .chat-message.shop .chat-message-header,
+    .chat-message.shop small {
+        margin-left: 50px;
+        /* Căn thẳng hàng với bubble */
+    }
+
+    /* 5. USER (BẠN): BÊN PHẢI - TIN NHẮN TRƯỚC */
+    .chat-message.user {
+        align-self: flex-end;
+    }
+
+    .chat-message.user .message-row {
+        flex-direction: row-reverse;
+        /* Đảo trật tự: Bubble -> Avatar */
+    }
+
+    .chat-message.user .bubble {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border-radius: 18px 18px 4px 18px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .chat-message.user .chat-message-header,
+    .chat-message.user small {
+        margin-right: 50px;
+        /* Căn thẳng hàng với bubble */
+        text-align: right;
+    }
+
+    /* 6. KHU VỰC NHẬP TIN NHẮN (Luôn cố định ở đáy) */
+    .chat-input-area {
+        flex-shrink: 0;
+        /* Không cho phép bị co lại */
+        padding: 20px;
+        background: var(--black);
+        backdrop-filter: blur(15px);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .chat-input-wrapper {
+        display: flex;
+        gap: 12px;
+        background: rgba(15, 23, 42, 0.8);
+        padding: 8px 15px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        align-items: center;
+    }
+
+    .chat-input-wrapper textarea {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: white;
+        padding: 8px 0;
+        resize: none;
+        height: 40px;
+        font-size: 14px;
+        outline: none;
+    }
+
+    .btn-send {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 8px 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-send:hover {
+        background: #2563eb;
+        transform: scale(1.05);
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="chat-container-inner">
+    <input type="hidden" id="orderId" value="@Model.OrderId" />
+
+    <div id="chatMessages">
+        @foreach (var msg in Model.Message.OrderBy(m => m.SentAt))
+        {
+            bool isAdmin = msg.SenderRole?.StartsWith("Admin") == true;
+            string cssClass = isAdmin ? "shop" : "user";
+
+            string avatarUrl = isAdmin
+            ? Url.Content("~/assets/images/admin-default.jpg")
+            : (!string.IsNullOrWhiteSpace(msg.SenderAvatar)
+            ? (msg.SenderAvatar.StartsWith("http") ? msg.SenderAvatar : $"{baseUrl}{msg.SenderAvatar}")
+            : Url.Content("~/assets/images/user-default.png"));
+
+            string senderDisplayName = isAdmin ? "CC" : (msg.SenderName ?? "You");
+            var vnTime = msg.SentAt.AddHours(7);
+
+            <div class="chat-message @cssClass">
+                <span class="chat-message-header">@senderDisplayName</span>
+                <div class="message-row">
+                    <img src="@avatarUrl" class="avatar" alt="avatar" />
+                    <div class="bubble">@msg.Content</div>
+                </div>
+                <small>@vnTime.ToString("HH:mm")</small>
+            </div>
+        }
+    </div>
+
+    <div class="chat-input-area">
+        <form id="chatForm" class="chat-input-wrapper">
+            <textarea name="Content" placeholder="Enter your message..." required></textarea>
+            <button type="submit" class="btn-send">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+<script>
+    const orderId = parseInt(document.getElementById("orderId").value);
+    const senderId = parseInt('@currentUserId');
+    const chatMessages = document.getElementById("chatMessages");
+    const chatForm = document.getElementById("chatForm");
+    const chatTextarea = chatForm.querySelector('textarea[name="Content"]');
+    const baseUrl = '@baseUrl';
+
+    // Luôn cuộn xuống cuối khi mới load
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Gửi tin nhắn bằng phím Enter (không kèm Shift)
+    chatTextarea.addEventListener("keydown", e => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event("submit"));
+        }
+    });
+
+    function getAvatarUrl(msg) {
+        const isAdmin = msg.senderRole === "Admin" || (msg.SenderRole && msg.SenderRole.startsWith("Admin"));
+        if (isAdmin) return '@Url.Content("~/assets/images/admin-default.jpg")';
+
+        const avatar = msg.senderAvatar || msg.SenderAvatar;
+        if (avatar) return avatar.startsWith("http") ? avatar : `${baseUrl}${avatar}`;
+        return '@Url.Content("~/assets/images/user-default.png")';
+    }
+
+    function appendMessage(msg) {
+        const isAdmin = msg.senderRole === "Admin" || (msg.SenderRole && msg.SenderRole.startsWith("Admin"));
+        const cssClass = isAdmin ? "shop" : "user";
+        const avatarUrl = getAvatarUrl(msg);
+        const displayName = isAdmin ? "Hỗ trợ viên" : (msg.senderName || msg.SenderName || "Bạn");
+
+        const sentDate = msg.sentAt ? new Date(msg.sentAt) : new Date();
+        const timeStr = sentDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+        const div = document.createElement("div");
+        div.className = `chat-message ${cssClass}`;
+        if (msg.tempId || msg.TempId) div.dataset.tempId = msg.tempId || msg.TempId;
+
+        div.innerHTML = `
+            <span class="chat-message-header">${displayName}</span>
+            <div class="message-row">
+                <img src="${avatarUrl}" class="avatar" />
+                <div class="bubble">${msg.content || msg.Content}</div>
+            </div>
+            <small>${timeStr}</small>
+        `;
+
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Kết nối SignalR
+    if (!window.chatHubConnection) {
+        window.chatHubConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+    }
+
+    const connection = window.chatHubConnection;
+
+    async function safeStart() {
+        if (connection.state === "Disconnected") {
+            try {
+                await connection.start();
+                await connection.invoke("JoinOrderGroup", orderId);
+            } catch (err) { console.error(err); }
+        }
+    }
+
+    connection.on("ReceiveMessage", msg => {
+        const msgOrderId = parseInt(msg.orderId || msg.OrderId || 0);
+        if (msgOrderId !== orderId) return;
+
+        // Xóa bubble tạm thời nếu là tin nhắn của chính mình vừa gửi xong
+        if (msg.senderId === senderId && (msg.tempId || msg.TempId)) {
+            const tempEl = document.querySelector(`[data-temp-id='${msg.tempId || msg.TempId}']`);
+            if (tempEl) tempEl.remove();
+        }
+        appendMessage(msg);
+    });
+
+    chatForm.addEventListener("submit", async e => {
+        e.preventDefault();
+        const content = chatTextarea.value.trim();
+        if (!content) return;
+
+        const tempId = Math.random().toString(36).substring(2, 9);
+
+        // Hiện tin nhắn "giả" ngay lập tức để người dùng không phải chờ
+        appendMessage({
+            senderRole: "User",
+            content: content,
+            tempId: tempId,
+            sentAt: new Date()
+        });
+
+        chatTextarea.value = "";
+
+        try {
+            await connection.invoke("SendMessage", -1, content, orderId, tempId);
+        } catch (err) { console.error(err); }
+    });
+
+    safeStart();
+</script>

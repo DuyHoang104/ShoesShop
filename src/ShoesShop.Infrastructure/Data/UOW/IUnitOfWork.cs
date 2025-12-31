@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore.Storage;
-using ShoesShop.Domain.Collections;
 
 namespace ShoesShop.Infrastructure.Data.UOW
 {

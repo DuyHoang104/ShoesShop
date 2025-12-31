@@ -4115,7 +4115,7 @@ ul {
 /* line 848, ../../01 cl html template/03_jun 2019/188_Aranoz shop_html/sass/_product.scss */
 .product_description_area .tab-content .total_rate .rating_list h3 {
   font-size: 18px;
-  color: #2a2a2a;
+  color: #fff;
   font-weight: 700;
   margin-bottom: 10px;
 }

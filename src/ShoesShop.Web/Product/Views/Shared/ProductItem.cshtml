@@ -1,0 +1,141 @@
+@model IEnumerable<ProductDto>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Options
+@using ShoesShop.Domain.Products.Commands
+@using ShoesShop.Domain.Products.Enums
+
+@inject IOptions<CloudinarySettings> CloudinaryConfig
+
+@{
+    var cloudBase = CloudinaryConfig.Value.BaseUrl;
+}
+
+<style>
+    .single_product_item {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform .2s ease;
+    }
+
+    .single_product_item:hover {
+        transform: translateY(-3px);
+    }
+
+    .single_product_item img {
+        width: 100%;
+        display: block;
+    }
+
+    .product-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .stock-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        border-radius: 12px;
+        color: #fff;
+        z-index: 6;
+        text-transform: uppercase;
+    }
+
+    .stock-in {
+        background: #16a34a;
+    }
+
+    .stock-out {
+        background: #dc2626;
+    }
+
+    .sold-out-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 5;
+        pointer-events: none;
+    }
+
+    .sold-out-overlay span {
+        color: #fff;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .disabled-product img {
+        filter: grayscale(100%);
+        opacity: 0.85;
+    }
+
+    .disabled-product {
+        cursor: not-allowed;
+    }
+</style>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="col-12 text-center py-5">
+        <h2 style="font-size:14px;font-weight:600;color:#999;">Not found product</h2>
+    </div>
+}
+else
+{
+    foreach (var item in Model)
+    {
+        string? firstImagePath = item.Images?.FirstOrDefault()?.Url;
+        var firstImage = !string.IsNullOrEmpty(firstImagePath)
+        ? $"{cloudBase}{firstImagePath.TrimStart('/')}"
+        : "/images/default.png";
+
+        bool isOutOfStock = item.StockStatus == ProductStockStatus.OutOfStock;
+
+        <div class="col-lg-4 col-sm-6 mb-4">
+
+            @if (isOutOfStock)
+            {
+                <div class="single_product_item disabled-product">
+
+                    <span class="stock-badge stock-out">Out of stock</span>
+
+                    <div class="sold-out-overlay">
+                        <span>SOLD OUT</span>
+                    </div>
+
+                    <img src="@firstImage" alt="@item.Name" />
+
+                    <div class="single_product_text">
+                        <h4>@item.Name</h4>
+                        <h3>@item.Price.ToString("C")</h3>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <a class="product-link" asp-controller="Product" asp-action="Detail" asp-route-id="@item.Id">
+
+                    <div class="single_product_item">
+
+                        <span class="stock-badge stock-in">In stock</span>
+
+                        <img src="@firstImage" alt="@item.Name" />
+
+                        <div class="single_product_text">
+                            <h4>@item.Name</h4>
+                            <h3>@item.Price.ToString("C")</h3>
+                        </div>
+                    </div>
+
+                </a>
+            }
+        </div>
+    }
+}

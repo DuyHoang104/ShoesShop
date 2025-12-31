@@ -1,0 +1,325 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using ShoesShop.Domain.Orders.Enums
+@using ShoesShop.Web.Order.Dtos.Admin.Commands
+@model IEnumerable<OrderModalDto>
+
+@{
+    ViewData["Title"] = "Orders";
+    Layout = "~/Shares/Views/Admin/_LayoutAdmin.cshtml";
+}
+
+<!-- Start Content-->
+<div class="container-fluid">
+
+    <!-- start page title -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="javascript: void(0);">Hyper</a></li>
+                        <li class="breadcrumb-item"><a href="javascript: void(0);">eCommerce</a></li>
+                        <li class="breadcrumb-item active">Orders</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Orders</h4>
+            </div>
+        </div>
+    </div>
+    <!-- end page title -->
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-xl-8">
+                            <form
+                                class="row gy-2 gx-2 align-items-center justify-content-xl-start justify-content-between">
+                                <div class="col-auto">
+                                    <label for="inputPassword2" class="visually-hidden">Search</label>
+                                    <input type="search" class="form-control" id="inputPassword2"
+                                        placeholder="Search...">
+                                </div>
+                                <div class="col-auto">
+                                    <div class="d-flex align-items-center">
+                                        <label for="status-select" class="me-2">Status</label>
+                                        <select class="form-select" id="status-select">
+                                            <option selected="">Choose...</option>
+                                            @foreach (var status in Enum.GetValues(typeof(OrderStatus)))
+                                            {
+                                                var statusStr = status.ToString();
+                                                <option value="@statusStr">@statusStr</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-xl-4">
+                            <div class="text-xl-end mt-xl-0 mt-2">
+                                <button type="button" class="btn btn-danger mb-2 me-2"><i
+                                        class="mdi mdi-basket me-1"></i> Refresh</button>
+                                <button type="button" class="btn btn-light mb-2">Export</button>
+                            </div>
+                        </div><!-- end col-->
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-centered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 20px;">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="customCheck1">
+                                            <label class="form-check-label" for="customCheck1">&nbsp;</label>
+                                        </div>
+                                    </th>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Payment Status</th>
+                                    <th>Total</th>
+                                    <th>Payment Method</th>
+                                    <th>Order Status</th>
+                                    <th style="width: 125px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" id="customCheck2">
+                                                <label class="form-check-label" for="customCheck2">&nbsp;</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a asp-area="Admin" asp-action="Details" asp-route-id="@order.Id"
+                                                asp-controller="Orders" class="text-body fw-bold">#@order.Id</a>
+                                        </td>
+                                        <td>
+                                            @order.OrderDate.ToString("MMMM dd yyyy")
+                                            <small class="text-muted">@order.OrderDate.ToString("hh:mm tt")</small>
+                                        </td>
+                                        <td>
+                                            <h5>
+                                                <span class="badge badge-success-lighten">
+                                                    <i class="mdi mdi-coin"></i> @order.PaymentStatus
+                                                </span>
+                                            </h5>
+                                        </td>
+                                        <td>
+                                            $@order.TotalAmount.ToString("F2")
+                                        </td>
+                                        <td>
+                                            @order.PaymentMethod
+                                        </td>
+                                        <td>
+                                            <h5>
+                                                <span class="badge @(GetBadgeClass(order.Status))">
+                                                    @order.Status
+                                                </span>
+                                            </h5>
+                                        </td>
+                                        <td>
+                                            <a asp-area="Admin" asp-action="Details" asp-route-id="@order.Id"
+                                                asp-controller="Orders" class="action-icon">
+                                                <i class="mdi mdi-eye"></i>
+                                            </a>
+                                            <a href="javascript:void(0);" class="action-icon edit-status-btn"
+                                                data-order-id="@order.Id" data-current-status="@order.Status">
+                                                <i class="mdi mdi-square-edit-outline"></i>
+                                            </a>
+                                            <a href="javascript:void(0);" class="action-icon">
+                                                <i class="mdi mdi-delete"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div> <!-- end card-body-->
+            </div> <!-- end card-->
+        </div> <!-- end col -->
+    </div>
+    <!-- end row -->
+
+</div> <!-- container -->
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const editButtons = document.querySelectorAll(".edit-status-btn");
+
+        // Tạo option từ enum OrderStatus
+        let optionsHtml = '';
+    @foreach (var status in Enum.GetValues(typeof(OrderStatus)))
+            {
+                var statusStr = status.ToString();
+                <text>optionsHtml += `<option value="@statusStr">@statusStr</option>`;</text>
+        }
+
+            editButtons.forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const orderId = this.getAttribute("data-order-id");
+                    const currentStatus = this.getAttribute("data-current-status");
+                    const row = this.closest("tr");
+
+                    Swal.fire({
+                        title: 'Edit Order Status',
+                        html: `
+                    <select id="swal-status" class="swal2-input-small mb-3">
+                        ${optionsHtml}
+                    </select>
+                    <div class="d-flex justify-content-between">
+                        <button id="swal-save-btn" class="btn btn-primary btn-sm">Save</button>
+                        <button id="swal-cancel-btn" class="btn btn-secondary btn-sm">Cancel</button>
+                    </div>
+                `,
+                        didOpen: () => {
+                            document.getElementById('swal-status').value = currentStatus;
+
+                            // Save button
+                            document.getElementById('swal-save-btn').addEventListener('click', () => {
+                                const newStatus = document.getElementById('swal-status').value;
+
+                                const formData = new FormData();
+                                formData.append("newStatus", newStatus);
+
+                                fetch(`/Admin/Orders/UpdateStatus/${orderId}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                                    },
+                                    body: formData
+                                })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            Swal.close();
+
+                                            // Cập nhật badge: text + class
+                                            const badge = row.querySelector("td:nth-child(7) span");
+                                            badge.textContent = newStatus;
+                                            badge.className = `badge ${getBadgeClassJS(newStatus)}`;
+
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'Updated!',
+                                                text: data.message,
+                                                customClass: {
+                                                    title: 'swal2-title-small',
+                                                    content: 'swal2-text-small',
+                                                    popup: 'swal2-popup-small swal-shadow-popup'
+                                                },
+                                                timer: 1200,
+                                                showConfirmButton: false
+                                            });
+                                        } else {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Error!',
+                                                text: data.message,
+                                                customClass: {
+                                                    title: 'swal2-title-small',
+                                                    content: 'swal2-text-small',
+                                                    popup: 'swal2-popup-small swal-shadow-popup'
+                                                },
+                                                showConfirmButton: true
+                                            });
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        Swal.fire('Error', 'Something went wrong.', 'error');
+                                    });
+                            });
+
+                            // Cancel button
+                            document.getElementById('swal-cancel-btn').addEventListener('click', () => Swal.close());
+                        },
+                        showConfirmButton: false,
+                        width: 350
+                    });
+                });
+            });
+
+        // JS map status → class
+        function getBadgeClassJS(status) {
+            switch (status) {
+                case 'Processing': return 'badge-warning-lighten';
+                case 'Cancelled': return 'badge-danger-lighten';
+                case 'Completed': return 'badge-success-lighten';
+                case 'Pending': return 'badge-info-lighten';
+                default: return 'badge-secondary-lighten';
+            }
+        }
+    });
+</script>
+
+@functions {
+    private string GetBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Processing => "badge badge-warning-lighten",
+            OrderStatus.Cancelled => "badge badge-danger-lighten",
+            OrderStatus.Completed => "badge badge-success-lighten",
+            OrderStatus.Pending => "badge badge-info-lighten",
+            _ => "badge badge-secondary-lighten"
+        };
+    }
+}
+
+<style>
+    .swal2-title-small {
+        font-size: 0.85rem !important;
+        font-weight: 600;
+    }
+
+    .swal2-text-small {
+        font-size: 0.8rem !important;
+    }
+
+    .swal2-popup-small {
+        font-size: 0.85rem !important;
+    }
+
+    .swal2-input-small {
+        font-size: 0.8rem !important;
+        padding: 0.3em;
+        width: 100%;
+        border-radius: 0.25rem;
+        border: 1px solid #ced4da;
+    }
+
+    .swal-shadow-popup {
+        border-radius: 0.6rem !important;
+        box-shadow: 0 0.7rem 1.5rem rgba(0, 0, 0, 0.2);
+    }
+
+    .swal-gradient-header {
+        background: #fff;
+        color: #000;
+        padding: 0.5rem;
+        border-radius: 0.5rem 0.5rem 0 0;
+        font-size: 0.85rem;
+    }
+
+    td span.badge-info-lighten {
+        font-size: 0.75rem;
+        padding: 0.2em 0.5em;
+        min-width: 80px;
+        display: inline-block;
+        text-align: center;
+        border-radius: 0.25rem;
+    }
+
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+</style>
