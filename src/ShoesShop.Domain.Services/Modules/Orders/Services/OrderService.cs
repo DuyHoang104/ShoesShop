@@ -11,43 +11,38 @@ using ShoesShop.Domain.Orders.Enums;
 using ShoesShop.Domain.Orders.Services;
 using ShoesShop.Domain.Products.Entities;
 using ShoesShop.Domain.Shares.Addresses.Entities;
-using ShoesShop.Domain.Shares.Review.Entity;
 using ShoesShop.Domain.Users.Dtos;
-using ShoesShop.Domain.Users.Entities;
 using ShoesShop.Infrastructure.Data.UOW;
 
 namespace ShoesShop.Domain.Services.Modules.Orders.Services;
 
 public class OrderService : IOrderService
 {
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IGenericRepository<Order, int> _orderRepository;
     private readonly IGenericRepository<User, int> _userRepository;
     private readonly IGenericRepository<Address, int> _addressRepository;
     private readonly IGenericRepository<Cart, int> _cartRepository;
-    private readonly IGenericRepository<Review, int> _reviewRepository = null!;
     private readonly IGenericRepository<Product, int> _productRepository = null!;
     private readonly ICartService _cartService;
+    private readonly IUnitOfWorkManager _unitOfWorkManager;
+
 
     public OrderService(
         IGenericRepository<Order, int> orderRepository,
         IGenericRepository<User, int> userRepository,
         IGenericRepository<Address, int> addressRepository,
         IGenericRepository<Cart, int> cartRepository,
-        IGenericRepository<Review, int> reviewRepository,
         IGenericRepository<Product, int> productRepository,
         ICartService cartService,
-        IUnitOfWork unitOfWork
-    )
+        IUnitOfWorkManager unitOfWorkManager)
     {
         _orderRepository = orderRepository;
         _userRepository = userRepository;
         _addressRepository = addressRepository;
         _cartRepository = cartRepository;
         _cartService = cartService;
-        _reviewRepository = reviewRepository;
-        _unitOfWork = unitOfWork;
         _productRepository = productRepository;
+        _unitOfWorkManager = unitOfWorkManager;
     }
 
     public async Task<List<OrderDto>> GetAllOrderAsync(int? userId)
@@ -94,143 +89,141 @@ public class OrderService : IOrderService
 
         return orderDtos;
     }
-    
-    public async Task<OrderDetailDto> CreateOrderAsync(OrderCheckoutDto orderDto, int userId)
+
+    public async Task<OrderDetailDto> CreateOrderAsync(
+    OrderCheckoutDto orderDto,
+    int userId,
+    CancellationToken cancellationToken = default)
     {
-        await using var transaction = await _unitOfWork.BeginTransactionAsync();
-
-        try
+        using (var uow = await _unitOfWorkManager.RentAsync(cancellationToken))
         {
-            var user = await _userRepository.GetByIdAsync(userId)
-                ?? throw new InvalidOperationException("User not found");
-
-            Address address;
-
-            if (orderDto.SameAddress)
+            using(var transaction = await uow.BeginTransactionAsync(cancellationToken))
             {
-                address = (await _addressRepository.GetAllAsync(
-                        a => a.UserId == userId && a.IsDefault))
-                    .FirstOrDefault()
-                    ?? throw new InvalidOperationException("Default address not found");
+                try
+                {
+                    var user = await _userRepository.GetByIdAsync(userId)
+                        ?? throw new InvalidOperationException("User not found");
 
-                orderDto.ReceiverAddress = address.AddressLine1;
-                orderDto.ReceiverName = user.UserName;
-                orderDto.ReceiverPhone = user.Phone;
-            }
-            else
-            {
-                address = new Address(
-                    user,
-                    orderDto.ReceiverAddress ?? string.Empty,
-                    orderDto.City,
-                    orderDto.Country,
-                    isDefault: false
-                );
-            }
+                    Address address;
+                    if (orderDto.SameAddress)
+                    {
+                        address = (await _addressRepository.GetAllAsync(
+                            a => a.UserId == userId && a.IsDefault))
+                            .FirstOrDefault()
+                            ?? throw new InvalidOperationException("Default address not found");
 
-            var order = new Order(
-                user: user,
-                address: address,
-                paymentMethod: orderDto.PaymentMethod,
-                paymentStatus: orderDto.PaymentStatus,
-                receiverName: orderDto.ReceiverName ?? user.UserName,
-                receiverPhone: orderDto.ReceiverPhone ?? user.Phone,
-                receiverAddress: orderDto.ReceiverAddress ?? address.AddressLine1,
-                note: orderDto.Note,
-                shippingFee: orderDto.ShippingFee,
-                discount: orderDto.Discount
-            );
+                        orderDto.ReceiverAddress = address.AddressLine1;
+                        orderDto.ReceiverName = user.UserName;
+                        orderDto.ReceiverPhone = user.Phone;
+                    }
+                    else
+                    {
+                        address = new Address(
+                            user,
+                            orderDto.ReceiverAddress ?? string.Empty,
+                            orderDto.City,
+                            orderDto.Country,
+                            isDefault: false
+                        );
 
-            var carts = (await _cartRepository.GetAllAsync(
-                    c => c.UserId == userId,
-                    include: q => q.Include(c => c.Product)
-                                .ThenInclude(p => p.Images)
-                )).ToList();
+                        await _addressRepository.InsertAsync(address);
+                    }
 
-            if (!carts.Any())
-                throw new InvalidOperationException("Your cart is empty.");
+                    var carts = (await _cartRepository.GetAllAsync(c => c.UserId == userId)).ToList();
+                    if (!carts.Any())
+                        throw new InvalidOperationException("Your cart is empty.");
 
-            decimal subtotal = 0;
-
-            foreach (var item in carts)
-            {
-                if (item.Product == null)
-                    throw new InvalidOperationException("Cart item missing product.");
-
-                // ✅ check stock
-                if (item.Product.Quantity < item.Quantity)
-                    throw new InvalidOperationException(
-                        $"Product '{item.Product.Name}' does not have enough stock."
+                    var order = new Order(
+                        user,
+                        address,
+                        orderDto.PaymentMethod,
+                        orderDto.PaymentStatus,
+                        orderDto.ReceiverName ?? user.UserName,
+                        orderDto.ReceiverPhone ?? user.Phone,
+                        orderDto.ReceiverAddress ?? address.AddressLine1,
+                        orderDto.Note,
+                        orderDto.ShippingFee,
+                        orderDto.Discount
                     );
 
-                // ✅ trừ tồn kho
-                item.Product.Quantity -= item.Quantity;
+                    decimal subtotal = 0;
 
-                var subtotalItem = item.Product.Price * item.Quantity;
-                subtotal += subtotalItem;
+                    foreach (var item in carts)
+                    {
+                        var product = (await _productRepository.GetAllAsync(
+                            p => p.Id == item.ProductId,
+                            include: q => q.Include(p => p.Images)))
+                            .FirstOrDefault()
+                            ?? throw new InvalidOperationException("Product not found");
 
-                order.AddOrderDetail(new OrderDetail(
-                    order: order,
-                    product: item.Product,
-                    quantity: item.Quantity,
-                    subtotal: subtotalItem,
-                    size: item.Size
-                ));
-            }
+                        if (product.Quantity < item.Quantity)
+                            throw new InvalidOperationException(
+                                $"Product '{product.Name}' is out of stock.");
 
-            // ✅ clear cart
-            foreach (var item in carts)
-            
-            await _cartRepository.DeleteAsync(item);
-            await _orderRepository.InsertAsync(order);
-            await _productRepository.SaveChangesAsync();
-            await _orderRepository.SaveChangesAsync();
-            await _cartRepository.SaveChangesAsync();
+                        product.Quantity -= item.Quantity;
 
-            await transaction.CommitAsync();
+                        var subtotalItem = product.Price * item.Quantity;
+                        subtotal += subtotalItem;
 
-            var totalAmount =
-                (subtotal + (orderDto.ShippingFee ?? 0)) *
-                (1 - (orderDto.Discount ?? 0));
+                        order.AddOrderDetail(new OrderDetail(
+                            order,
+                            product,
+                            item.Quantity,
+                            subtotalItem,
+                            item.Size
+                        ));
+                    }
 
-            return new OrderDetailDto
-            {
-                Id = order.Id,
-                ReceiverName = order.ReceiverName,
-                ReceiverPhone = order.ReceiverPhone,
-                ReceiverAddress = order.ReceiverAddress,
-                ReceiverCity = address.City,
-                ReceiverCountry = address.Country,
-                Note = order.Note,
-                ShippingCost = order.ShippingFee ?? 0,
-                DiscountValue = order.Discount ?? 0,
-                PaymentMethod = order.PaymentMethod,
-                PaymentStatus = order.PaymentStatus,
-                OrderDate = order.OrderDate,
-                TotalAmount = totalAmount,
-                OrderDetails = order.OrderDetails.Select(d => new OrderDetailItemDto
-                {
-                    ProductName = d.Product?.Name ?? "Unknown",
-                    Quantity = d.Quantity,
-                    UnitPrice = d.UnitPrice,
-                    Subtotal = d.Subtotal,
-                    ProductImage =
-                        d.Product?.Images?.FirstOrDefault()?.Url
-                        ?? "/images/default.png"
-                }).ToList(),
-                Address = new AddressDto
-                {
-                    AddressLine1 = address.AddressLine1,
-                    City = address.City,
-                    Country = address.Country,
-                    IsDefault = address.IsDefault
+                    foreach (var item in carts)
+                        await _cartRepository.DeleteAsync(item);
+
+                    await _orderRepository.InsertAsync(order);
+                    await _productRepository.SaveChangesAsync(cancellationToken);
+                    await uow.CommitAsync(cancellationToken);
+
+                    var totalAmount =
+                        (subtotal + (orderDto.ShippingFee ?? 0)) *
+                        (1 - (orderDto.Discount ?? 0));
+
+                    return new OrderDetailDto
+                    {
+                        Id = order.Id,
+                        ReceiverName = order.ReceiverName,
+                        ReceiverPhone = order.ReceiverPhone,
+                        ReceiverAddress = order.ReceiverAddress,
+                        ReceiverCity = address.City,
+                        ReceiverCountry = address.Country,
+                        Note = order.Note,
+                        ShippingCost = order.ShippingFee ?? 0,
+                        DiscountValue = order.Discount ?? 0,
+                        PaymentMethod = order.PaymentMethod,
+                        PaymentStatus = order.PaymentStatus,
+                        OrderDate = order.OrderDate,
+                        TotalAmount = totalAmount,
+                        OrderDetails = order.OrderDetails.Select(d => new OrderDetailItemDto
+                        {
+                            ProductName = d.Product!.Name,
+                            Quantity = d.Quantity,
+                            UnitPrice = d.UnitPrice,
+                            Subtotal = d.Subtotal,
+                            ProductImage =
+                                d.Product.Images.FirstOrDefault()?.Url
+                                ?? "/images/default.png"
+                        }).ToList(),
+                        Address = new AddressDto
+                        {
+                            AddressLine1 = address.AddressLine1,
+                            City = address.City,
+                            Country = address.Country,
+                            IsDefault = address.IsDefault
+                        }
+                    };
                 }
-            };
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
+                catch
+                {
+                    throw;
+                }
+            }
         }
     }
 
@@ -249,7 +242,7 @@ public class OrderService : IOrderService
             ?? throw new BusinessException("Order not found");
 
         decimal total = order.OrderDetails.Sum(d => d.Subtotal);
-                
+
         return new OrderDetailDto
         {
             Id = order.Id,

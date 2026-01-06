@@ -43,12 +43,6 @@ public class CartController : Controller
             return View("Detail");
         }
 
-        if (quantity > 10)
-        {
-            ModelState.AddModelError("", "You cannot add more than 10 items of the same product.");
-            return View("Detail");
-        }
-
         await _cartService.AddToCartAsync(id, quantity, size, GetUserIdFromClaims());
         return RedirectToAction("Index", "Cart");
     }

@@ -61,7 +61,10 @@ namespace ShoesShop.Web
             services.AddMVCService();
 
             services.AddScoped<IRepositoryCollection, RepositoryCollection>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<IUnitOfWorkManager>().Create());
+
+            services.AddSingleton<IUnitOfWorkManager, UnitOfWorkManager>();
+
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();

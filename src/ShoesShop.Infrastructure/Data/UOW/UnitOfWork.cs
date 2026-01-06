@@ -17,12 +17,15 @@ namespace ShoesShop.Infrastructure.Data.UOW
 
         public async Task CommitAsync(CancellationToken cancellationToken = default)
         {
-            if (Transaction == null)
-            {
-                throw new InvalidOperationException("No active transaction to commit.");
-            }
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await Transaction!.CommitAsync(cancellationToken);
+            if (Transaction == null)
+                throw new InvalidOperationException("No active transaction to commit.");
+
+            await Transaction.CommitAsync(cancellationToken);
+            await Transaction.DisposeAsync();
+
+            Transaction = null;
         }
 
         protected virtual void Dispose(bool disposing)

@@ -9,7 +9,6 @@
     <meta charset="utf-8" />
     <title>Log In | Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link rel="shortcut icon" href="~/assets/Admin/images/favicon.ico">
     <link href="~/assets/Admin/css/icons.min.css" rel="stylesheet" />
     <link href="~/assets/Admin/css/app.min.css" rel="stylesheet" id="light-style" />
@@ -17,7 +16,6 @@
 </head>
 
 <body class="loading authentication-bg">
-
     <div class="account-pages pt-2 pt-sm-5 pb-4 pb-sm-5">
         <div class="container">
             <div class="row justify-content-center">
@@ -25,7 +23,7 @@
                     <div class="card">
 
                         <div class="card-header pt-4 pb-4 text-center bg-primary">
-                            <img src="~/assets/Admin/images/logo.png" height="18" />
+                            <img src="~/assets/images/logo.png" height="95" />
                         </div>
 
                         <div class="card-body p-4">
@@ -42,14 +40,12 @@
                             <form asp-action="Login" asp-controller="Admin" method="POST">
                                 @Html.AntiForgeryToken()
 
-                                <!-- Username -->
                                 <div class="mb-3">
                                     <label asp-for="UserName" class="form-label"></label>
                                     <input asp-for="UserName" class="form-control" />
                                     <span asp-validation-for="UserName" class="text-danger"></span>
                                 </div>
 
-                                <!-- Password -->
                                 <div class="mb-3">
                                     <label asp-for="Password" class="form-label"></label>
                                     <div class="input-group input-group-merge">
@@ -84,5 +80,4 @@
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
 </body>
-
 </html>

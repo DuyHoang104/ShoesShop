@@ -34,11 +34,6 @@ public class AdminController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginDto loginModalDto, string? returnUrl = null)
     {
-        if (!ModelState.IsValid)
-        {
-            return View("~/Modules/Admins/Admin/Views/pages-login.cshtml", loginModalDto);
-        }
-
         var result = await _userService.LoginAsync(new LoginCommandDto
         {
             UserName = loginModalDto.UserName,

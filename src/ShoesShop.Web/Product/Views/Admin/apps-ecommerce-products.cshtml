@@ -13,7 +13,6 @@
 <link href="~/assets/Admin/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css">
 
 <div class="container-fluid">
-    <!-- start page title -->
     <div class="row">
         <div class="col-12">
             <div class="page-title-box">
@@ -28,7 +27,6 @@
             </div>
         </div>
     </div>
-    <!-- end page title -->
 
     <div class="row">
         <div class="col-12">
@@ -108,12 +106,12 @@
                                         <td>@product.Quantity</td>
                                         <td>
                                             @(
-                                                                                    product.SaleOff.HasValue
-                                                                                    ? (product.SaleOff % 1 == 0
-                                                                                    ? ((int)product.SaleOff.Value).ToString()
-                                                                                    : product.SaleOff.Value.ToString("0.##")) + "%"
-                                                                                    : ""
-                                                                                    )
+                                                product.SaleOff.HasValue
+                                                ? (product.SaleOff % 1 == 0
+                                                ? ((int)product.SaleOff.Value).ToString()
+                                                : product.SaleOff.Value.ToString("0.##")) + "%"
+                                                : ""
+                                            )
                                         </td>
                                         <td>@product.LastAction.ToString()</td>
                                         <td>
@@ -155,7 +153,6 @@
     </div>
 </div>
 
-<!-- Modal Update Product -->
 <div class="modal fade" id="updateProductModal" tabindex="-1" aria-labelledby="updateProductModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -211,122 +208,122 @@
 </div>
 
 @section Scripts {
-    <script src="~/assets/Admin/js/vendor/jquery.dataTables.min.js"></script>
-    <script src="~/assets/Admin/js/vendor/dataTables.bootstrap5.js"></script>
-    <script src="~/assets/Admin/js/vendor/dataTables.responsive.min.js"></script>
-    <script src="~/assets/Admin/js/vendor/responsive.bootstrap5.min.js"></script>
-    <script src="~/assets/Admin/js/vendor/dataTables.checkboxes.min.js"></script>
-    <script src="~/assets/Admin/js/pages/demo.products.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="~/assets/Admin/js/vendor/jquery.dataTables.min.js"></script>
+<script src="~/assets/Admin/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="~/assets/Admin/js/vendor/dataTables.responsive.min.js"></script>
+<script src="~/assets/Admin/js/vendor/responsive.bootstrap5.min.js"></script>
+<script src="~/assets/Admin/js/vendor/dataTables.checkboxes.min.js"></script>
+<script src="~/assets/Admin/js/pages/demo.products.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        $(document).ready(function () {
-            // Khởi tạo DataTable
-            window.productTable = $('#products-datatable').DataTable();
+<script>
+$(document).ready(function () {
+    // Khởi tạo DataTable
+    window.productTable = $('#products-datatable').DataTable();
 
-            // Xoá sản phẩm
-            $(".table").on("click", ".delete-product", function () {
-                const row = $(this).closest("tr");
-                const productId = row.data("id");
+    // Xoá sản phẩm
+    $(".table").on("click", ".delete-product", function () {
+        const row = $(this).closest("tr");
+        const productId = row.data("id");
 
-                Swal.fire({
-                    title: "Are you sure?",
-                    text: "You won't be able to revert this!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#d33",
-                    cancelButtonColor: "#3085d6",
-                    confirmButtonText: "Yes, delete it!"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: `/Admin/Products/Delete/${productId}`,
-                            type: "POST",
-                            success: function (res) {
-                                Swal.fire({
-                                    icon: "success",
-                                    title: "Deleted!",
-                                    text: res.message,
-                                    timer: 1800,
-                                    showConfirmButton: false,
-                                    didClose: () => location.reload()
-                                });
-                            },
-                            error: function (err) {
-                                let msg = "Failed to delete";
-                                if (err.responseJSON && err.responseJSON.message) msg = err.responseJSON.message;
-                                Swal.fire({ icon: "error", title: "Failed", text: msg });
-                            }
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/Admin/Products/Delete/${productId}`,
+                    type: "POST",
+                    success: function (res) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Deleted!",
+                            text: res.message,
+                            timer: 1800,
+                            showConfirmButton: false,
+                            didClose: () => location.reload()
                         });
+                    },
+                    error: function (err) {
+                        let msg = "Failed to delete";
+                        if (err.responseJSON && err.responseJSON.message) msg = err.responseJSON.message;
+                        Swal.fire({ icon: "error", title: "Failed", text: msg });
                     }
                 });
-            });
-
-            // Edit Product
-            $(".edit-product").click(function () {
-                const row = $(this).closest("tr");
-                const productId = row.data("id");
-
-                $.get(`/Admin/Products/GetProduct/${productId}`, function (response) {
-                    const product = response.product;
-                    const allCategories = response.allCategories;
-
-                    $("#ProductId").val(product.id);
-                    $("#ProductName").val(product.name);
-                    $("#ProductPrice").val(product.price);
-                    $("#ProductQuantity").val(product.quantity);
-                    $("#ProductSaleOff").val(product.saleOff);
-                    $("#ProductStatus").val(product.status);
-
-                    let html = "";
-                    allCategories.forEach(c => {
-                        const isChecked = product.categories.some(pc => pc.id === c.id) ? "checked" : "";
-                        html += `<div class="form-check form-check-inline">
-                                                                    <input class="form-check-input category-checkbox" type="checkbox" value="${c.id}" ${isChecked}>
-                                                                    <label class="form-check-label">${c.name}</label>
-                                                                 </div>`;
-                    });
-                    $("#CategoryList").html(html);
-
-                    $("#updateProductModal").modal("show");
-                });
-            });
-
-            // Submit Update Product
-            $("#updateProductForm").submit(function (e) {
-                e.preventDefault();
-
-                const productId = $("#ProductId").val();
-                const categories = [];
-                $(".category-checkbox:checked").each(function () {
-                    categories.push(parseInt($(this).val()));
-                });
-
-                const data = {
-                    Name: $("#ProductName").val(),
-                    Price: parseFloat($("#ProductPrice").val()),
-                    Quantity: parseInt($("#ProductQuantity").val()),
-                    SaleOff: $("#ProductSaleOff").val() ? parseFloat($("#ProductSaleOff").val()) : null,
-                    Status: parseInt($("#ProductStatus").val()),
-                    Categories: categories
-                };
-
-                $.ajax({
-                    url: `/Admin/Products/Update/${productId}`,
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(data),
-                }).done(function (res) {
-                    Swal.fire({ icon: "success", title: "Updated!", text: res.message, timer: 1500, showConfirmButton: false });
-                }).fail(function (err) {
-                    Swal.fire({ icon: "error", title: "Failed", text: err.responseJSON?.message || "Update failed" });
-                }).always(function () {
-                    $("#updateProductModal").modal("hide");
-                    $("#updateProductForm")[0].reset();
-                    $("#CategoryList").empty();
-                    window.location.reload(); // reload bảng để chắc chắn
-                });
-            });
+            }
         });
-    </script>
+    });
+
+    // Edit Product
+    $(".edit-product").click(function () {
+        const row = $(this).closest("tr");
+        const productId = row.data("id");
+
+        $.get(`/Admin/Products/GetProduct/${productId}`, function (response) {
+            const product = response.product;
+            const allCategories = response.allCategories;
+
+            $("#ProductId").val(product.id);
+            $("#ProductName").val(product.name);
+            $("#ProductPrice").val(product.price);
+            $("#ProductQuantity").val(product.quantity);
+            $("#ProductSaleOff").val(product.saleOff);
+            $("#ProductStatus").val(product.status);
+
+            let html = "";
+            allCategories.forEach(c => {
+                const isChecked = product.categories.some(pc => pc.id === c.id) ? "checked" : "";
+                html += `<div class="form-check form-check-inline">
+                                                            <input class="form-check-input category-checkbox" type="checkbox" value="${c.id}" ${isChecked}>
+                                                            <label class="form-check-label">${c.name}</label>
+                                                            </div>`;
+            });
+            $("#CategoryList").html(html);
+
+            $("#updateProductModal").modal("show");
+        });
+    });
+
+    // Submit Update Product
+    $("#updateProductForm").submit(function (e) {
+        e.preventDefault();
+
+        const productId = $("#ProductId").val();
+        const categories = [];
+        $(".category-checkbox:checked").each(function () {
+            categories.push(parseInt($(this).val()));
+        });
+
+        const data = {
+            Name: $("#ProductName").val(),
+            Price: parseFloat($("#ProductPrice").val()),
+            Quantity: parseInt($("#ProductQuantity").val()),
+            SaleOff: $("#ProductSaleOff").val() ? parseFloat($("#ProductSaleOff").val()) : null,
+            Status: parseInt($("#ProductStatus").val()),
+            Categories: categories
+        };
+
+        $.ajax({
+            url: `/Admin/Products/Update/${productId}`,
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+        }).done(function (res) {
+            Swal.fire({ icon: "success", title: "Updated!", text: res.message, timer: 1500, showConfirmButton: false });
+        }).fail(function (err) {
+            Swal.fire({ icon: "error", title: "Failed", text: err.responseJSON?.message || "Update failed" });
+        }).always(function () {
+            $("#updateProductModal").modal("hide");
+            $("#updateProductForm")[0].reset();
+            $("#CategoryList").empty();
+            window.location.reload(); // reload bảng để chắc chắn
+        });
+    });
+});
+</script>
 }

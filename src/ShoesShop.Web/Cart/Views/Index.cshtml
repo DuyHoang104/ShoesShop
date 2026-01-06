@@ -104,7 +104,7 @@
                                             <div class="product_count">
                                                 <span class="input-number-decrement"><i class="ti-angle-down"></i></span>
                                                 <input class="input-number" type="number" name="items[@index].Quantity"
-                                                    value="@item.Quantity" min="1" max="10">
+                                                    value="@item.Quantity" min="1" max="@item.Product.Quantity" />
                                                 <span class="input-number-increment"><i class="ti-angle-up"></i></span>
                                             </div>
                                         </td>

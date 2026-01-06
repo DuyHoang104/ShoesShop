@@ -17,16 +17,16 @@ namespace ShoesShop.Crosscutting.Utilities.VNpay
             var tick = DateTime.Now.Ticks.ToString();
             var vnpay = new VnpayLibrary();
 
-            // 🔹 Dữ liệu cơ bản
+            //Dữ liệu cơ bản
             vnpay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"]);
             vnpay.AddRequestData("vnp_Command", _configuration["Vnpay:Command"]);
             vnpay.AddRequestData("vnp_TmnCode", _configuration["Vnpay:Vnp_TmnCode"]);
 
-            // 🔹 Số tiền (VNPay yêu cầu *100)
+            //Số tiền (VNPay yêu cầu *100)
             var amount = Math.Round(model.Amount, 0) * 100;
             vnpay.AddRequestData("vnp_Amount", amount.ToString());
 
-            // 🔹 Thông tin đơn hàng
+            // Thông tin đơn hàng
             vnpay.AddRequestData("vnp_CreateDate", model.CreatedDate.ToString("yyyyMMddHHmmss"));
             vnpay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"] ?? "VND");
             vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(context));
@@ -36,7 +36,7 @@ namespace ShoesShop.Crosscutting.Utilities.VNpay
             vnpay.AddRequestData("vnp_ReturnUrl", _configuration["Vnpay:ReturnUrl"]);
             vnpay.AddRequestData("vnp_TxnRef", tick);
 
-            // 🔹 Tạo URL thanh toán
+            // Tạo URL thanh toán
             var baseUrl = _configuration["Vnpay:BaseUrl"];
             var hashSecret = _configuration["Vnpay:HashSecret"];
 

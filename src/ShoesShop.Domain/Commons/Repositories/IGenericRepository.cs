@@ -5,7 +5,7 @@ using ShoesShop.Domain.Commons.Entities;
 namespace ShoesShop.Domain.Commons.Repositories;
 
 public interface IRepository
-{}
+{ }
 
 public interface IGenericRepository<TEntity> : IRepository
     where TEntity : IBaseEntity

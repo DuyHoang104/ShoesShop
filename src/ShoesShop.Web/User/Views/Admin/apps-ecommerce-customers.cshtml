@@ -126,7 +126,6 @@
     <script src="~/assets/Admin/js/vendor/dataTables.checkboxes.min.js"></script>
     <script src="~/assets/Admin/js/pages/demo.customers.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const editButtons = document.querySelectorAll(".edit-status-btn");
@@ -146,15 +145,16 @@
 
                         Swal.fire({
                             title: 'Edit User Status',
-                            html: `
-                                                                            <select id="swal-status" class="swal2-input-small mb-3">
-                                                                                ${optionsHtml}
-                                                                            </select>
-                                                                            <div class="d-flex justify-content-between">
-                                                                                <button id="swal-save-btn" class="btn btn-primary btn-sm">Save</button>
-                                                                                <button id="swal-cancel-btn" class="btn btn-secondary btn-sm">Cancel</button>
-                                                                            </div>
-                                                                        `,
+                            html: 
+                            `
+                                <select id="swal-status" class="swal2-input-small mb-3">
+                                    ${optionsHtml}
+                                </select>
+                                <div class="d-flex justify-content-between">
+                                    <button id="swal-save-btn" class="btn btn-primary btn-sm">Save</button>
+                                    <button id="swal-cancel-btn" class="btn btn-secondary btn-sm">Cancel</button>
+                                </div>
+                            `,
                             didOpen: () => {
                                 document.getElementById('swal-status').value = currentStatus;
 
@@ -235,45 +235,12 @@
         };
     }
 }
-
 <style>
-    .swal2-title-small {
-        font-size: 0.85rem !important;
-        font-weight: 600;
-    }
-
-    .swal2-text-small {
-        font-size: 0.8rem !important;
-    }
-
-    .swal2-popup-small {
-        font-size: 0.85rem !important;
-    }
-
-    .swal2-input-small {
-        font-size: 0.8rem !important;
-        padding: 0.3em;
-        width: 100%;
-        border-radius: 0.25rem;
-        border: 1px solid #ced4da;
-    }
-
-    .swal-shadow-popup {
-        border-radius: 0.6rem !important;
-        box-shadow: 0 0.7rem 1.5rem rgba(0, 0, 0, 0.2);
-    }
-
-    td span.badge {
-        font-size: 0.75rem;
-        padding: 0.2em 0.5em;
-        min-width: 80px;
-        display: inline-block;
-        text-align: center;
-        border-radius: 0.25rem;
-    }
-
-    .btn-sm {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-    }
+.swal2-title-small { font-size: 0.85rem !important; font-weight: 600; }
+.swal2-text-small { font-size: 0.8rem !important; }
+.swal2-popup-small { font-size: 0.85rem !important; }
+.swal2-input-small { font-size: 0.8rem !important; padding: 0.3em; width: 100%; border-radius: 0.25rem; border: 1px solid #ced4da; }
+.swal-shadow-popup { border-radius: 0.6rem !important; box-shadow: 0 0.7rem 1.5rem rgba(0,0,0,0.2); }
+td span.badge { font-size: 0.75rem; padding: 0.2em 0.5em; min-width: 80px; display: inline-block; text-align: center; border-radius: 0.25rem; }
+.btn-sm { font-size: 0.75rem; padding: 0.25rem 0.5rem; }
 </style>

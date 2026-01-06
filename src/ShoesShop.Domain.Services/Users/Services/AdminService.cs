@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ShoesShop.Domain.Commons.Repositories;
 using ShoesShop.Domain.Orders.Entities;
 using ShoesShop.Domain.Products.Commands;
+using ShoesShop.Domain.Products.Commands.Dtos;
 using ShoesShop.Domain.Products.Entities;
 using ShoesShop.Domain.Shares.Image.Dtos;
 using ShoesShop.Domain.Shares.Image.Entities;
@@ -45,13 +46,29 @@ public class AdminService : IAdminService
         int userCount = users.Count(u => u.Role != UserAccountRole.Admin);
 
         var orders = await _orderRepository.GetAllAsync(
-            include: q => q.Include(o => o.OrderDetails)
-                        .Include(o => o.User)
+            include: q => q
+                .Include(o => o.OrderDetails)
+                .Include(o => o.User)
         );
 
-        var filteredOrders = orders.Where(o => o.User.Role != UserAccountRole.Admin);
-        int orderCount = filteredOrders.Count();
+        var filteredOrders = orders
+            .Where(o => o.User.Role != UserAccountRole.Admin)
+            .ToList();
 
+        int orderCount = filteredOrders.Count;
+
+        // Orders by date (chart)
+        var ordersByDate = filteredOrders
+            .GroupBy(o => o.OrderDate.Date)
+            .Select(g => new OrderByDateDto
+            {
+                Date = g.Key,
+                Total = g.Count()
+            })
+            .OrderBy(x => x.Date)
+            .ToList();
+
+        // TOTAL REVENUE
         decimal orderRevenue = filteredOrders.Sum(o =>
         {
             var subtotal = o.OrderDetails.Sum(od => od.Subtotal);
@@ -60,11 +77,38 @@ public class AdminService : IAdminService
             return Math.Max(subtotal - (subtotal * discount) + shippingFee, 0);
         });
 
+        // TODAY REVENUE
+        var today = DateTime.Today;
+
+        decimal todayRevenue = filteredOrders
+            .Where(o => o.OrderDate.Date == today)
+            .Sum(o =>
+            {
+                var subtotal = o.OrderDetails.Sum(od => od.Subtotal);
+                var discount = o.Discount ?? 0m;
+                var shippingFee = o.ShippingFee ?? 0m;
+                return Math.Max(subtotal - (subtotal * discount) + shippingFee, 0);
+            });
+
+        // ORDERS BY LOCATION
+        var ordersByLocation = filteredOrders
+            .Where(o => !string.IsNullOrWhiteSpace(o.ReceiverAddress))
+            .GroupBy(o => o.ReceiverAddress.Trim())
+            .Select(g => new OrdersByLocationDto
+            {
+                Location = g.Key,
+                TotalOrders = g.Count()
+            })
+            .OrderByDescending(x => x.TotalOrders)
+            .Take(5)
+            .ToList();
+
+        // Products
         var productIds = products.Select(p => p.Id).ToList();
 
         var images = await _imageProductRepository.GetAllAsync(
             i => i.OwnerType == OwnerType.Product
-            && productIds.Contains(i.OwnerId)
+              && productIds.Contains(i.OwnerId)
         );
 
         var productDtos = products.Select(p => new ProductDto
@@ -94,8 +138,10 @@ public class AdminService : IAdminService
             Products = productDtos,
             UserCount = userCount,
             OrderCount = orderCount,
-            OrderRevenue = orderRevenue
+            OrderRevenue = orderRevenue,
+            TodayRevenue = todayRevenue,
+            OrdersByDate = ordersByDate,
+            OrdersByLocation = ordersByLocation
         };
     }
-
 }

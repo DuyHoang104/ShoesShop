@@ -12,19 +12,15 @@
 
     <form asp-action="AddProduct" asp-controller="Product" method="post" enctype="multipart/form-data" id="productForm">
         <div class="row">
-
-            <!-- LEFT COLUMN -->
             <div class="col-xl-7">
                 <div class="card mb-3">
                     <div class="card-body">
-                        <!-- Product Name -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">Product Name</label>
                             <input asp-for="Name" class="form-control" placeholder="Enter product name" />
                             <span asp-validation-for="Name" class="text-danger small"></span>
                         </div>
 
-                        <!-- Price + Quantity -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Price</label>
@@ -38,7 +34,6 @@
                             </div>
                         </div>
 
-                        <!-- Brand + Color -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Brand</label>
@@ -50,20 +45,17 @@
                             </div>
                         </div>
 
-                        <!-- Discount -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">Discount (%)</label>
                             <input asp-for="SaleOff" type="number" min="0" max="100" class="form-control" />
                         </div>
 
-                        <!-- Description -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">Description</label>
                             <textarea asp-for="Description" rows="4" class="form-control"
                                 placeholder="Enter description..."></textarea>
                         </div>
 
-                        <!-- Sizes -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">Available Sizes</label>
                             <div class="d-flex flex-wrap gap-3">
@@ -84,7 +76,6 @@
 
                         <input type="hidden" name="Sizes" id="SizesHidden" />
 
-                        <!-- Categories -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">Categories</label>
                             <select id="categorySelect" class="form-control select2" multiple>
@@ -102,7 +93,6 @@
                         </div>
                         <div id="categoriesHidden"></div>
 
-                        <!-- Modal Add Category -->
                         <div class="modal fade" id="addCategoryModal" tabindex="-1">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -133,11 +123,9 @@
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN -->
             <div class="col-xl-5">
                 <div class="card mb-3">
                     <div class="card-body">
-                        <!-- Product Images -->
                         <label class="form-label fw-bold">Product Images</label>
                         <input asp-for="ImageFiles" type="file" class="form-control" multiple id="imageInput" />
                         <div id="imagePreview" class="d-flex flex-wrap gap-2 mt-3"></div>

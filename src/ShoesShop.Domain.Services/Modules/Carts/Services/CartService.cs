@@ -80,7 +80,8 @@ public class CartService : ICartService
                 Id = c.Product.Id,
                 Name = c.Product.Name,
                 Price = c.Product.Price,
-                Images = c.Product.Images?.Select(i => new ImageDto { Url = i.Url }).ToList() ?? []
+                Images = c.Product.Images?.Select(i => new ImageDto { Url = i.Url }).ToList() ?? [],
+                Quantity = c.Product.Quantity,
             }
         }).ToList();
     }

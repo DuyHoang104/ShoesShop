@@ -1,0 +1,114 @@
+@using ShoesShop.Domain.Products.Commands.Dtos
+@using ShoesShop.Web.Home.Dtos.Admin
+@using System.Text.Json
+
+@{
+    var ordersByDateVm = ViewData["OrdersByDate"] as List<OrderByDateDto> ?? new();
+}
+
+<h4 class="header-title mb-3">Orders by Weekday</h4>
+
+<div dir="ltr">
+    <div id="orders-by-weekday-chart" style="height:320px;"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // 1️⃣ Data from backend
+        const ordersData = @Html.Raw(JsonSerializer.Serialize(ordersByDateVm));
+        console.log("Orders data:", ordersData);
+
+        if (!ordersData || ordersData.length === 0) return;
+
+        // 2️⃣ Weekday names (English)
+        const weekdayNames = [
+            'Sunday',
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday'
+        ];
+
+        // 3️⃣ Init map (all weekdays = 0)
+        const weekMap = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+
+        // 4️⃣ Fill data (ISO DateTime from backend)
+        ordersData.forEach(x => {
+            const dateObj = new Date(x.Date); // VD: 2025-12-31T10:00:00
+            if (!isNaN(dateObj)) {
+                weekMap[dateObj.getDay()] += x.Total;
+            }
+        });
+
+        // 5️⃣ Build arrays (Monday → Saturday)
+        const categories = [];
+        const seriesData = [];
+
+        for (let i = 1; i <= 6; i++) {
+            categories.push(weekdayNames[i]);
+            seriesData.push(weekMap[i]);
+        }
+
+        // 6️⃣ Calculate max value for clean Y-axis
+        const maxValue = Math.max(...seriesData, 1);
+
+        // 7️⃣ Destroy old chart
+        if (window.ordersWeekdayChart) {
+            window.ordersWeekdayChart.destroy();
+        }
+
+        // 8️⃣ Chart config (FIX Y-AXIS INTEGER)
+        const options = {
+            chart: {
+                type: 'bar',
+                height: 320,
+                toolbar: { show: false }
+            },
+            series: [{
+                name: 'Order Count',
+                data: seriesData
+            }],
+            xaxis: {
+                categories: categories,
+                title: {
+                    text: 'Weekday'
+                }
+            },
+            yaxis: {
+                min: 0,
+                max: maxValue,
+                tickAmount: maxValue,
+                forceNiceScale: false,
+                decimalsInFloat: 0,
+                title: {
+                    text: 'Order Count'
+                },
+                labels: {
+                    formatter: val => Number.isInteger(val) ? val : ''
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: val => val
+            },
+            tooltip: {
+                y: {
+                    formatter: val => val + ' orders'
+                }
+            }
+        };
+
+        // 9️⃣ Render
+        window.ordersWeekdayChart = new ApexCharts(
+            document.querySelector("#orders-by-weekday-chart"),
+            options
+        );
+
+        window.ordersWeekdayChart.render();
+    });
+</script>

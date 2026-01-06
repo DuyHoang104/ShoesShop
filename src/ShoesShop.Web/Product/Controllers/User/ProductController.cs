@@ -31,16 +31,16 @@ public class ProductController : Controller
         {
             products = products.Where(p =>
                 p.Categories.Any(c =>
-                    c.Id == searchDto.CategoryId.Value &&
-                    c.Status == CategoryStatus.Active
+                    c.Id == searchDto.CategoryId.Value
                 ));
         }
 
         if (!string.IsNullOrEmpty(searchDto.Brand))
         {
             products = products.Where(p =>
+                !string.IsNullOrEmpty(p.Brand) &&
                 p.Brand.Equals(searchDto.Brand, StringComparison.OrdinalIgnoreCase)
-                );
+            );
         }
 
         if (!string.IsNullOrEmpty(searchDto.Color))
@@ -48,46 +48,54 @@ public class ProductController : Controller
             products = products.Where(p =>
                 !string.IsNullOrEmpty(p.Color) &&
                 p.Color.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Any(c => c.Trim().Equals(searchDto.Color, StringComparison.OrdinalIgnoreCase)));
+                    .Any(c => c.Trim().Equals(searchDto.Color, StringComparison.OrdinalIgnoreCase))
+            );
         }
 
         if (searchDto.MinPrice.HasValue && searchDto.MaxPrice.HasValue)
         {
             products = products.Where(p =>
                 p.Price >= searchDto.MinPrice &&
-                p.Price <= searchDto.MaxPrice);
+                p.Price <= searchDto.MaxPrice
+            );
         }
 
         products = searchDto.SortBy switch
         {
-            "name" => products.OrderBy(p => p.Name),
+            "name"  => products.OrderBy(p => p.Name),
             "price" => products.OrderBy(p => p.Price),
             "brand" => products.OrderBy(p => p.Brand),
-            _ => products
+            _       => products
         };
 
-        if (searchDto.Sizes != null && searchDto.Sizes.Count != 0)
+        if (searchDto.Sizes != null && searchDto.Sizes.Any())
         {
             products = products.Where(p =>
                 !string.IsNullOrEmpty(p.Sizes) &&
                 searchDto.Sizes.All(selectedSize =>
-                    p.Sizes
-                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    p.Sizes.Split(',', StringSplitOptions.RemoveEmptyEntries)
                         .Select(s => s.Trim())
                         .Contains(selectedSize)
                 ));
         }
 
         ViewBag.SelectedSizes = searchDto.Sizes ?? [];
+
+        if (!string.IsNullOrWhiteSpace(searchDto.Query))
+        {
+            products = products.Where(p =>
+                p.Name.Contains(searchDto.Query, StringComparison.OrdinalIgnoreCase) ||
+                (!string.IsNullOrEmpty(p.Brand) &&
+                p.Brand.Contains(searchDto.Query, StringComparison.OrdinalIgnoreCase))
+            );
+        }
+
+        if (Request.Headers.XRequestedWith == "XMLHttpRequest")
+        {
+            return PartialView("~/Product/Views/Shared/ProductItem.cshtml", products.ToList());
+        }
+
         return View("~/Product/Views/User/Index.cshtml", products.ToList());
-    }
-
-    [HttpPost("Search")]
-    public async Task<IActionResult> Search(string? query)
-    {
-        var products = await _productService.SearchAsync(query);
-
-        return View("~/Product/Views/User/Index.cshtml", products);
     }
 
     [HttpGet("Detail/{id}")]

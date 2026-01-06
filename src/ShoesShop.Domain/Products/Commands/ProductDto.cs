@@ -5,8 +5,11 @@ using ShoesShop.Domain.Orders.Dtos.Commands;
 using ShoesShop.Domain.Products.Enums;
 using ShoesShop.Domain.Shares.Image.Dtos;
 using ShoesShop.Domain.Shares.Review.Dtos;
+using ShoesShop.Domain.Users.Dtos;
+using ShoesShop.Domain.Users.Entities;
 
 namespace ShoesShop.Domain.Products.Commands;
+
 public class ProductDto
 {
     public int Id { get; set; }
@@ -26,7 +29,7 @@ public class ProductDto
         Quantity <= 0
             ? ProductStockStatus.OutOfStock
             : ProductStockStatus.InStock;
-            
+
     public string Brand { get; set; } = string.Empty;
 
     public string Color { get; set; } = string.Empty;
@@ -41,7 +44,7 @@ public class ProductDto
 
     public int LastActionBy { get; set; }
 
-    public LastAction LastAction { get; set; }    
+    public LastAction LastAction { get; set; }
 
     public List<CategoryDto> Categories { get; set; } = [];
 

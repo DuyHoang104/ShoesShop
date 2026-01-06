@@ -1,15 +1,35 @@
 ﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @using System.Security.Claims
+@using ShoesShop.Domain.Users.Dtos
+@using ShoesShop.Domain.Users.Services
+@inject IUserService _userService
+
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@inject Microsoft.Extensions.Options.IOptions<CloudinarySettings> CloudinaryConfig
 
 @{
   var currentPath = Context.Request.Path.Value?.ToLower() ?? "";
   var userId = User.FindFirst("userId")?.Value;
+  UserDto? currentUser = null;
+  if (User.Identity != null && User.Identity.IsAuthenticated)
+  {
+    var userIdClaim = User.FindFirst("userId")?.Value;
+    if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out var userIdInt))
+    {
+      currentUser = await _userService.GetUserByIdAsync(userIdInt);
+    }
+  }
+  string avatarUrl = "~/assets/images/default-avatar.png";
+  if (currentUser != null && !string.IsNullOrEmpty(currentUser.AvatarUrl))
+  {
+    avatarUrl = currentUser.AvatarUrl.StartsWith("http")
+    ? currentUser.AvatarUrl
+    : $"{CloudinaryConfig.Value.BaseUrl}{currentUser.AvatarUrl}";
+  }
 }
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -23,10 +43,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Forum&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="~/assets/css/styles.css">
-
-  <!-- 
-    - preload images
-  -->
   <link rel="preload" as="image" href="~/assets/images/hero-slider-1.jpg">
   <link rel="preload" as="image" href="~/assets/images/hero-slider-2.jpg">
   <link rel="preload" as="image" href="~/assets/images/hero-slider-3.jpg">
@@ -35,18 +51,10 @@
 
 <body id="top">
 
-  <!-- 
-    - #PRELOADER
-  -->
-
   <div class="preload" data-preaload>
     <div class="circle"></div>
     <p class="text">Arrisd</p>
   </div>
-
-  <!-- 
-    - #TOP BAR
-  -->
 
   <div class="topbar">
     <div class="cw-container">
@@ -92,10 +100,6 @@
     </div>
   </div>
 
-  <!-- 
-    - #HEADER
-  -->
-
   <header class="cw-header" data-header>
     <div class="cw-container">
       <a class="logo" asp-action="Index" asp-controller="Home">
@@ -130,7 +134,6 @@
             }
           </li>
 
-          <!-- SHOP -->
           <li class="navbar-item">
             @if (currentPath.Contains("/home") || currentPath == "/")
             {
@@ -148,7 +151,6 @@
             }
           </li>
 
-          <!-- ABOUT US -->
           <li class="navbar-item">
             @if (currentPath.Contains("/home") || currentPath == "/")
             {
@@ -166,7 +168,6 @@
             }
           </li>
 
-          <!-- CONTACT -->
           <li class="navbar-item">
             @if (currentPath.Contains("/home") || currentPath == "/")
             {
@@ -184,7 +185,6 @@
             }
           </li>
 
-          <!-- CART -->
           <li class="navbar-item">
             <a asp-controller="Cart" asp-action="Index" class="navbar-link hover-underline">
               <div class="separator"></div>
@@ -192,7 +192,6 @@
             </a>
           </li>
 
-          <!-- Order -->
           <li class="navbar-item">
             <a asp-controller="Order" asp-action="Index" class="navbar-link hover-underline">
               <div class="separator"></div>
@@ -224,12 +223,27 @@
         </div>
 
       </nav>
-      @if (User.Identity != null && User.Identity.IsAuthenticated)
+      @if (User.Identity?.IsAuthenticated == true)
       {
-        <a class="cw-btn btn-secondary" asp-action="Logout" asp-controller="User">
-          <span class="text text-1">Logout</span>
-          <span class="text text-2" aria-hidden="true" data-text="Logout">Logout</span>
-        </a>
+        <div class="user-dropdown">
+          <img src="@avatarUrl" alt="@currentUser?.UserName" class="user-avatar" id="userAvatar" />
+          <div class="user-menu" id="userMenu">
+            <div class="user-info">
+              <img src="@avatarUrl" class="menu-avatar" />
+              <div class="user-details">
+                <div class="username">@currentUser?.UserName</div>
+                <small>My Account</small>
+              </div>
+            </div>
+
+            <a asp-controller="User" asp-action="Profile">Profile</a>
+            <a asp-controller="User" asp-action="ChangePassword">Change Password</a>
+
+            <div class="divider"></div>
+
+            <a asp-controller="User" asp-action="Logout" class="logout">Logout</a>
+          </div>
+        </div>
       }
       else
       {
@@ -252,7 +266,7 @@
   @RenderBody()
 
   <footer class="footer section has-bg-image cw-text-center"
-    style="background-image: url('./assets/images/footer-bg.png'); margin-top: 50px;">
+    style="background-image: url('./assets/images/footer-bg.png'); margin-top: 50px; background-color: #121212;">
     <div class="cw-container">
 
       <div class="footer-top grid-list">
@@ -376,5 +390,39 @@
 
   @RenderSection("Scripts", required: false)
 </body>
-
 </html>
+<style>
+.user-dropdown { position: relative; display: inline-block; }
+.user-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #2c2c2c; transition: transform 0.2s, box-shadow 0.2s; }
+.user-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 2px #555; }
+.user-menu { position: absolute; right: 0; top: 54px; width: 230px; background: #1e1e1e; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,.8); display: none; z-index: 9999; overflow: hidden; animation: fadeIn 0.2s ease; }
+@@keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+.user-info { display: flex; gap: 12px; padding: 14px; border-bottom: 1px solid #2f2f2f; }
+.menu-avatar { width: 38px; height: 38px; border-radius: 50%; }
+.user-details .username { color: #fff; font-weight: 600; }
+.user-details small { color: #aaa; }
+.user-menu a { display: block; padding: 12px 16px; color: #ddd; text-decoration: none; font-size: 14px; transition: background 0.2s, color 0.2s; }
+.user-menu a:hover { background: #2a2a2a; color: #fff; }
+.divider { height: 1px; background: #2f2f2f; margin: 6px 0; }
+.user-menu .logout { color: #ff5c5c; font-weight: 600; }
+.user-menu .logout:hover { background: rgba(255,92,92,0.15); }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const avatar = document.getElementById("userAvatar");
+    const menu = document.getElementById("userMenu");
+
+    if (!avatar || !menu) return;
+
+    avatar.addEventListener("click", e => {
+      e.stopPropagation();
+      menu.style.display =
+        menu.style.display === "block" ? "none" : "block";
+    });
+
+    document.addEventListener("click", () => {
+      menu.style.display = "none";
+    });
+  });
+</script>

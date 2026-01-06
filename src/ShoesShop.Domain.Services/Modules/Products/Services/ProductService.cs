@@ -16,7 +16,6 @@ using ShoesShop.Domain.Shares.Image.Dtos;
 using ShoesShop.Domain.Shares.Review.Dtos;
 using ShoesShop.Domain.Shares.Review.Entity;
 using ShoesShop.Domain.Users.Dtos;
-using ShoesShop.Domain.Users.Entities;
 using ShoesShop.Infrastructure.Data.UOW;
 
 namespace ShoesShop.Domain.Services.Modules.Products.Services;
@@ -30,9 +29,9 @@ public class ProductService : IProductService
     private readonly IGenericRepository<User, int> _userRepository;
     private readonly CloudinaryService _cloudinaryService;
 
-    public ProductService(IGenericRepository<Product, int> productRepository, IGenericRepository<Category, int> categoryRepository, 
-        CloudinaryService cloudinaryService, IUnitOfWork unitOfWork, IGenericRepository<Review, int> reviewRepository, 
-        IGenericRepository<User, int> userRepository )
+    public ProductService(IGenericRepository<Product, int> productRepository, IGenericRepository<Category, int> categoryRepository,
+        CloudinaryService cloudinaryService, IUnitOfWork unitOfWork, IGenericRepository<Review, int> reviewRepository,
+        IGenericRepository<User, int> userRepository)
     {
         _productRepository = productRepository;
         _categoryRepository = categoryRepository;
@@ -113,7 +112,7 @@ public class ProductService : IProductService
 
         return result;
     }
-    
+
     public async Task<ProductDto?> GetByIdAsync(int productId)
     {
         var product = (await _productRepository.GetAllAsync(
@@ -204,7 +203,6 @@ public class ProductService : IProductService
             Color = product.Color,
             Status = product.Status,
             Sizes = product.Sizes,
-
             Categories = product.ProductCategories?
                 .Select(pc => new CategoryDto
                 {
@@ -258,7 +256,7 @@ public class ProductService : IProductService
                     Id = pc.Category.Id,
                     Name = pc.Category.Name
                 }).ToList() ?? [],
-            
+
                 Images = p.Images.Select(i => new ImageDto
                 {
                     Id = i.Id,

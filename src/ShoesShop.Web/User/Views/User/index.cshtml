@@ -78,7 +78,7 @@
                         <i class="bx bxl-google"></i>
                     </div>
                 </div>
-                <!-- register form Container -->
+
                 <div class="register-form">
                     <div class="form-title">
                         <span>Sign Up</span>
@@ -178,102 +178,102 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 <script>
-    $(document).ready(function () {
+$(document).ready(function () {
 
-        // --- Toast thông báo ---
-        function showToast(message, type = 'success', redirectUrl = null) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: type,
-                title: message,
-                showConfirmButton: false,
-                timer: 2500,
-                timerProgressBar: true,
-                background: '#1f1f1f',
-                color: '#fff',
-                didClose: () => {
-                    if (redirectUrl && type === 'success') {
-                        window.location.href = redirectUrl;
+    // --- Toast thông báo ---
+    function showToast(message, type = 'success', redirectUrl = null) {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: type,
+            title: message,
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true,
+            background: '#1f1f1f',
+            color: '#fff',
+            didClose: () => {
+                if (redirectUrl && type === 'success') {
+                    window.location.href = redirectUrl;
+                }
+            }
+        });
+    }
+
+    // --- Loading spinner ---
+    function showLoading(message = 'Processing...') {
+        Swal.fire({
+            title: message,
+            background: '#1f1f1f',
+            color: '#fff',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => Swal.showLoading()
+        });
+    }
+
+    // --- Hiển thị validation errors từ server ---
+    function showValidationErrors(errors) {
+        let html = '<div style="text-align:left">';
+        Object.keys(errors).forEach(key => {
+            errors[key].forEach(msg => {
+                html += `<div>• ${msg}</div>`;
+            });
+        });
+        html += '</div>';
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            html: html,
+            background: '#1f1f1f',
+            color: '#fff'
+        });
+    }
+
+    // --- AJAX submit form ---
+    function ajaxFormSubmit(formSelector, urlSuccessRedirect) {
+        $(formSelector).on('submit', function (e) {
+            e.preventDefault();
+
+            const form = $(this);
+            const isMultipart = form.attr('enctype') === 'multipart/form-data';
+            const formData = isMultipart ? new FormData(this) : form.serialize();
+
+            showLoading();
+
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: formData,
+                contentType: isMultipart ? false : 'application/x-www-form-urlencoded; charset=UTF-8',
+                processData: !isMultipart,
+
+                success: function (response) {
+                    Swal.close();
+                    if (response.success) {
+                        showToast(response.message, 'success', urlSuccessRedirect);
+                    } else {
+                        showToast(response.message || 'Operation failed!', 'error');
                     }
+                },
+
+                error: function (xhr) {
+                    Swal.close();
+                    if (xhr.status === 400 && xhr.responseJSON?.errors) {
+                        showValidationErrors(xhr.responseJSON.errors);
+                        return;
+                    }
+
+                    // fallback
+                    showToast("An unexpected error occurred!", 'error');
                 }
             });
-        }
+        });
+    }
 
-        // --- Loading spinner ---
-        function showLoading(message = 'Processing...') {
-            Swal.fire({
-                title: message,
-                background: '#1f1f1f',
-                color: '#fff',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                didOpen: () => Swal.showLoading()
-            });
-        }
-
-        // --- Hiển thị validation errors từ server ---
-        function showValidationErrors(errors) {
-            let html = '<div style="text-align:left">';
-            Object.keys(errors).forEach(key => {
-                errors[key].forEach(msg => {
-                    html += `<div>• ${msg}</div>`;
-                });
-            });
-            html += '</div>';
-
-            Swal.fire({
-                icon: 'error',
-                title: 'Validation Error',
-                html: html,
-                background: '#1f1f1f',
-                color: '#fff'
-            });
-        }
-
-        // --- AJAX submit form ---
-        function ajaxFormSubmit(formSelector, urlSuccessRedirect) {
-            $(formSelector).on('submit', function (e) {
-                e.preventDefault();
-
-                const form = $(this);
-                const isMultipart = form.attr('enctype') === 'multipart/form-data';
-                const formData = isMultipart ? new FormData(this) : form.serialize();
-
-                showLoading();
-
-                $.ajax({
-                    type: form.attr('method'),
-                    url: form.attr('action'),
-                    data: formData,
-                    contentType: isMultipart ? false : 'application/x-www-form-urlencoded; charset=UTF-8',
-                    processData: !isMultipart,
-
-                    success: function (response) {
-                        Swal.close();
-                        if (response.success) {
-                            showToast(response.message, 'success', urlSuccessRedirect);
-                        } else {
-                            showToast(response.message || 'Operation failed!', 'error');
-                        }
-                    },
-
-                    error: function (xhr) {
-                        Swal.close();
-                        if (xhr.status === 400 && xhr.responseJSON?.errors) {
-                            showValidationErrors(xhr.responseJSON.errors);
-                            return;
-                        }
-
-                        // fallback
-                        showToast("An unexpected error occurred!", 'error');
-                    }
-                });
-            });
-        }
-
-        // --- Apply ---
-        ajaxFormSubmit(".register-form form", "/User/Login");
-        ajaxFormSubmit(".login-form form", "/");
-    });
+    // --- Apply ---
+    ajaxFormSubmit(".register-form form", "/User/Login");
+    ajaxFormSubmit(".login-form form", "/");
+});
 </script>

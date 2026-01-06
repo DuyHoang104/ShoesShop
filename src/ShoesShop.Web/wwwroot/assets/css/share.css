@@ -91,12 +91,6 @@ textarea.form-control {
   transform: scale(1.05);
 }
 
-.size-filter-option input:checked + span {
-  color: #ffb300;
-  border-color: #ffb300;
-  border-radius: 5px;
-}
-
 .toggle-icon {
   margin-top: 14px;
   font-size: 18px;

@@ -29,18 +29,15 @@
 
 <body class="loading"
     data-layout-config='{"leftSideBarTheme":"dark","layoutBoxed":false, "leftSidebarCondensed":false, "leftSidebarScrollable":false,"darkMode":false, "showRightSidebarOnStart": true}'>
-    <!-- Begin page -->
     <div class="wrapper">
-        <!-- ========== Left Sidebar Start ========== -->
         <div class="leftside-menu">
 
-            <!-- LOGO -->
             <a asp-action="Index" asp-controller="Home" class="logo text-center logo-light">
                 <span class="logo-lg">
-                    <img src="~/assets/Admin/images/logo.png" alt="" height="16">
+                    <img src="~/assets/images/logo.png" alt="" height="75">
                 </span>
                 <span class="logo-sm">
-                    <img src="~/assets/Admin/images/logo_sm.png" alt="" height="16">
+                    <img src="~/assets/images/logo_sm.png" alt="" height="75">
                 </span>
             </a>
 
@@ -65,31 +62,19 @@
                         <a data-bs-toggle="collapse" href="#sidebarDashboards" aria-expanded="false"
                             aria-controls="sidebarDashboards" class="side-nav-link">
                             <i class="uil-home-alt"></i>
-                            <span class="badge bg-success float-end">2</span>
+                            <span class="badge bg-success float-end">1</span>
                             <span> Dashboards </span>
                         </a>
                         <div class="collapse" id="sidebarDashboards">
                             <ul class="side-nav-second-level">
                                 <li>
-                                    <a asp-controller="Home" asp-action="DashboardCRM">
-                                        CRM Dashboard
-                                    </a>
-                                </li>
-                                <li>
-                                    <a asp-action="Index" asp-controller="Home">Ecommerce</a>
+                                    <a asp-area="Admin" asp-action="Index" asp-controller="Home">Ecommerce</a>
                                 </li>
                             </ul>
                         </div>
                     </li>
 
                     <li class="side-nav-title side-nav-item">Apps</li>
-
-                    <li class="side-nav-item">
-                        <a asp-action="Calendar" asp-controller="Admin" class="side-nav-link">
-                            <i class="uil-calender"></i>
-                            <span> Calendar </span>
-                        </a>
-                    </li>
 
                     <li class="side-nav-item">
                         <a asp-action="Index" asp-controller="MessageAdmin" class="side-nav-link">
@@ -127,18 +112,9 @@
                 <div class="clearfix"></div>
 
             </div>
-            <!-- Sidebar -left -->
-
         </div>
-        <!-- Left Sidebar End -->
-
-        <!-- ============================================================== -->
-        <!-- Start Page Content here -->
-        <!-- ============================================================== -->
-
         <div class="content-page">
             <div class="content">
-                <!-- Topbar Start -->
                 <div class="navbar-custom">
                     <ul class="list-unstyled topbar-menu float-end mb-0">
                         <li class="dropdown notification-list d-lg-none">
@@ -163,25 +139,21 @@
                             </a>
                             <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu">
 
-                                <!-- item-->
                                 <a href="javascript:void(0);" class="dropdown-item notify-item">
                                     <img src="~/assets/Admin/images/flags/germany.jpg" alt="user-image" class="me-1"
                                         height="12"> <span class="align-middle">German</span>
                                 </a>
 
-                                <!-- item-->
                                 <a href="javascript:void(0);" class="dropdown-item notify-item">
                                     <img src="~/assets/Admin/images/flags/italy.jpg" alt="user-image" class="me-1"
                                         height="12"> <span class="align-middle">Italian</span>
                                 </a>
 
-                                <!-- item-->
                                 <a href="javascript:void(0);" class="dropdown-item notify-item">
                                     <img src="~/assets/Admin/images/flags/spain.jpg" alt="user-image" class="me-1"
                                         height="12"> <span class="align-middle">Spanish</span>
                                 </a>
 
-                                <!-- item-->
                                 <a href="javascript:void(0);" class="dropdown-item notify-item">
                                     <img src="~/assets/Admin/images/flags/russia.jpg" alt="user-image" class="me-1"
                                         height="12"> <span class="align-middle">Russian</span>
@@ -197,8 +169,6 @@
                                 <span class="noti-icon-badge"></span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg">
-
-                                <!-- item-->
                                 <div class="dropdown-item noti-title">
                                     <h5 class="m-0">
                                         <span class="float-end">
@@ -210,7 +180,6 @@
                                 </div>
 
                                 <div style="max-height: 230px;" data-simplebar="">
-                                    <!-- item-->
                                     <a href="javascript:void(0);" class="dropdown-item notify-item">
                                         <div class="notify-icon bg-primary">
                                             <i class="mdi mdi-comment-account-outline"></i>
@@ -220,7 +189,6 @@
                                         </p>
                                     </a>
 
-                                    <!-- item-->
                                     <a href="javascript:void(0);" class="dropdown-item notify-item">
                                         <div class="notify-icon bg-info">
                                             <i class="mdi mdi-account-plus"></i>
@@ -230,7 +198,6 @@
                                         </p>
                                     </a>
 
-                                    <!-- item-->
                                     <a href="javascript:void(0);" class="dropdown-item notify-item">
                                         <div class="notify-icon">
                                             <img src="~/assets/Admin/images/users/avatar-2.jpg"
@@ -242,7 +209,6 @@
                                         </p>
                                     </a>
 
-                                    <!-- item-->
                                     <a href="javascript:void(0);" class="dropdown-item notify-item">
                                         <div class="notify-icon bg-primary">
                                             <i class="mdi mdi-comment-account-outline"></i>
@@ -252,7 +218,6 @@
                                         </p>
                                     </a>
 
-                                    <!-- item-->
                                     <a href="javascript:void(0);" class="dropdown-item notify-item">
                                         <div class="notify-icon">
                                             <img src="~/assets/Admin/images/users/avatar-4.jpg"
@@ -264,7 +229,6 @@
                                         </p>
                                     </a>
 
-                                    <!-- item-->
                                     <a href="javascript:void(0);" class="dropdown-item notify-item">
                                         <div class="notify-icon bg-info">
                                             <i class="mdi mdi-heart"></i>
@@ -276,7 +240,6 @@
                                     </a>
                                 </div>
 
-                                <!-- All-->
                                 <a href="javascript:void(0);"
                                     class="dropdown-item text-center text-primary notify-item notify-all">
                                     View All
@@ -333,9 +296,8 @@
                                                 <span>G Suite</span>
                                             </a>
                                         </div>
-                                    </div> <!-- end row-->
+                                    </div>
                                 </div>
-
                             </div>
                         </li>
 
@@ -358,43 +320,38 @@
                             </a>
                             <div
                                 class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
-                                <!-- item-->
+                                
                                 <div class=" dropdown-header noti-title">
                                     <h6 class="text-overflow m-0">Welcome !</h6>
                                 </div>
 
-                                <!-- item-->
+                                
                                 <a asp-action="Profile" asp-controller="Admin" class="dropdown-item notify-item">
                                     <i class="mdi mdi-account-circle me-1"></i>
                                     <span>My Account</span>
                                 </a>
 
-                                <!-- item-->
                                 <a href="javascript:void(0);" class="dropdown-item notify-item">
                                     <i class="mdi mdi-account-edit me-1"></i>
                                     <span>Settings</span>
                                 </a>
 
-                                <!-- item-->
                                 <a href="javascript:void(0);" class="dropdown-item notify-item">
                                     <i class="mdi mdi-lifebuoy me-1"></i>
                                     <span>Support</span>
                                 </a>
 
-                                <!-- item-->
                                 <a href="javascript:void(0);" class="dropdown-item notify-item">
                                     <i class="mdi mdi-lock-outline me-1"></i>
                                     <span>Lock Screen</span>
                                 </a>
 
-                                <!-- item-->
                                 <a asp-action="Logout" asp-controller="Admin" class="dropdown-item notify-item">
                                     <i class="mdi mdi-logout me-1"></i>
                                     <span>Logout</span>
                                 </a>
                             </div>
                         </li>
-
                     </ul>
                     <button class="button-menu-mobile open-left">
                         <i class="mdi mdi-menu"></i>
@@ -410,36 +367,32 @@
                         </form>
 
                         <div class="dropdown-menu dropdown-menu-animated dropdown-lg" id="search-dropdown">
-                            <!-- item-->
+                            
                             <div class="dropdown-header noti-title">
                                 <h5 class="text-overflow mb-2">Found <span class="text-danger">17</span> results</h5>
                             </div>
 
-                            <!-- item-->
+                            
                             <a href="javascript:void(0);" class="dropdown-item notify-item">
                                 <i class="uil-notes font-16 me-1"></i>
                                 <span>Analytics Report</span>
                             </a>
 
-                            <!-- item-->
                             <a href="javascript:void(0);" class="dropdown-item notify-item">
                                 <i class="uil-life-ring font-16 me-1"></i>
                                 <span>How can I help you?</span>
                             </a>
 
-                            <!-- item-->
                             <a href="javascript:void(0);" class="dropdown-item notify-item">
                                 <i class="uil-cog font-16 me-1"></i>
                                 <span>User profile settings</span>
                             </a>
 
-                            <!-- item-->
                             <div class="dropdown-header noti-title">
                                 <h6 class="text-overflow mb-2 text-uppercase">Users</h6>
                             </div>
 
                             <div class="notification-list">
-                                <!-- item-->
                                 <a href="javascript:void(0);" class="dropdown-item notify-item">
                                     <div class="d-flex">
                                         <img class="d-flex me-2 rounded-circle"
@@ -452,7 +405,6 @@
                                     </div>
                                 </a>
 
-                                <!-- item-->
                                 <a href="javascript:void(0);" class="dropdown-item notify-item">
                                     <div class="d-flex">
                                         <img class="d-flex me-2 rounded-circle"
@@ -468,16 +420,8 @@
                         </div>
                     </div>
                 </div>
-                <!-- end Topbar -->
-
-                <!-- Start Content-->
                 @RenderBody()
-                <!-- container -->
-
             </div>
-            <!-- content -->
-
-            <!-- Footer Start -->
             <footer class="footer">
                 <div class="container-fluid">
                     <div class="row">
@@ -494,21 +438,9 @@
                     </div>
                 </div>
             </footer>
-            <!-- end Footer -->
-
         </div>
-
-        <!-- ============================================================== -->
-        <!-- End Page content -->
-        <!-- ============================================================== -->
-
-
     </div>
-    <!-- END wrapper -->
-
-    <!-- Right Sidebar -->
     <div class="end-bar">
-
         <div class="rightbar-title">
             <a href="javascript:void(0);" class="end-bar-toggle float-end">
                 <i class="dripicons-cross noti-icon"></i>
@@ -522,8 +454,6 @@
                 <div class="alert alert-warning" role="alert">
                     <strong>Customize </strong> the overall color scheme, sidebar menu, etc.
                 </div>
-
-                <!-- Settings -->
                 <h5 class="mt-3">Color Scheme</h5>
                 <hr class="mt-1">
 
@@ -539,8 +469,6 @@
                     <label class="form-check-label" for="dark-mode-check">Dark Mode</label>
                 </div>
 
-
-                <!-- Width -->
                 <h5 class="mt-4">Width</h5>
                 <hr class="mt-1">
                 <div class="form-check form-switch mb-1">
@@ -554,8 +482,6 @@
                     <label class="form-check-label" for="boxed-check">Boxed</label>
                 </div>
 
-
-                <!-- Left Sidebar-->
                 <h5 class="mt-4">Left Sidebar</h5>
                 <hr class="mt-1">
                 <div class="form-check form-switch mb-1">
@@ -598,14 +524,11 @@
                     <a href="../../product/hyper-responsive-admin-dashboard-template/index.htm"
                         class="btn btn-danger mt-3" target="_blank"><i class="mdi mdi-basket me-1"></i> Purchase Now</a>
                 </div>
-            </div> <!-- end padding-->
-
+            </div>
         </div>
     </div>
 
     <div class="rightbar-overlay"></div>
-    <!-- /End-bar -->
-
     <script src="~/assets/Admin/js/vendor.min.js"></script>
     <script src="~/assets/Admin/js/app.min.js"></script>
     <script src="~/assets/Admin/js/vendor/apexcharts.min.js"></script>
@@ -613,7 +536,5 @@
     <script src="~/assets/Admin/js/vendor/jquery-jvectormap-world-mill-en.js"></script>
     <script src="~/assets/Admin/js/pages/demo.dashboard.js"></script>
     @RenderSection("Scripts", required: false)
-
 </body>
-
 </html>

@@ -271,7 +271,7 @@
         const isAdmin = msg.senderRole === "Admin" || (msg.SenderRole && msg.SenderRole.startsWith("Admin"));
         const cssClass = isAdmin ? "shop" : "user";
         const avatarUrl = getAvatarUrl(msg);
-        const displayName = isAdmin ? "Hỗ trợ viên" : (msg.senderName || msg.SenderName || "Bạn");
+        const displayName = isAdmin ? "CC" : (msg.senderName || msg.SenderName || "Bạn");
 
         const sentDate = msg.sentAt ? new Date(msg.sentAt) : new Date();
         const timeStr = sentDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });

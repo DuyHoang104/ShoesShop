@@ -10,59 +10,11 @@ Layout = "~/Shares/Views/Admin/_LayoutAdmin.cshtml";
 }
 
 <style>
-/* Base style for sizes */
-.size-option {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    padding: 8px 14px;
-    border-radius: 50%;
-    border: 2px solid #007bff;
-    background-color: #f8f9ff;
-    color: #007bff;
-    font-weight: 500;
-    cursor: pointer;
-    user-select: none;
-    width: 45px;
-    height: 45px;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-/* Hover effect */
-.size-option:hover:not(.disabled) {
-    background-color: #007bff;
-    color: white;
-    transform: scale(1.1);
-}
-
-/* Selected style */
-.size-option.selected {
-    background-color: #007bff;
-    color: white;
-    box-shadow: 0 0 10px rgba(0,123,255,0.6);
-    transform: scale(1.1);
-}
-
-/* Disabled style */
-.size-option.disabled {
-    background-color: #e0e0e0;
-    color: #007bff;
-    cursor: not-allowed;
-}
-
-/* Cross for unavailable sizes */
-.size-option.disabled .cross {
-    position: absolute;
-    font-size: 12px;
-    color: red;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-}
+.size-option { display:inline-flex; justify-content:center; align-items:center; position:relative; padding:8px 14px; border-radius:50%; border:2px solid #007bff; background-color:#f8f9ff; color:#007bff; font-weight:500; cursor:pointer; user-select:none; width:45px; height:45px; font-size:14px; transition:all 0.3s ease; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
+.size-option:hover:not(.disabled) { background-color:#007bff; color:white; transform:scale(1.1); }
+.size-option.selected { background-color:#007bff; color:white; box-shadow:0 0 10px rgba(0,123,255,0.6); transform:scale(1.1); }
+.size-option.disabled { background-color:#e0e0e0; color:#007bff; cursor:not-allowed; }
+.size-option.disabled .cross { position:absolute; font-size:12px; color:red; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; }
 </style>
 
 <script>
@@ -78,10 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-<!-- Start Content-->
-<div class="container-fluid">
 
-<!-- start page title -->
+<div class="container-fluid">
 <div class="row">
     <div class="col-12">
         <div class="page-title-box">
@@ -96,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     </div>
 </div>     
-<!-- end page title --> 
 
 <div class="row">
     <div class="col-12">
@@ -104,16 +53,13 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="card-body">
                 <div class="row">
                     <div class="col-lg-5">
-                        <!-- Product image -->
                         @if (Model.Images != null && Model.Images.Any())
                         {
-                            <!-- Main Image: hiển thị ảnh đầu tiên -->
                             <a href="javascript:void(0);" class="text-center d-block mb-4">
                                 <img src="@Model.Images.First().Url.ToCloudinaryUrl(CloudinaryConfig.Value.BaseUrl)" 
                                     class="img-fluid" style="max-width: 280px;" alt="Product-img">
                             </a>
 
-                            <!-- Thumbnails -->
                             <div class="d-lg-flex d-none justify-content-center flex-wrap gap-2">
                                 @for (int i = 0; i < Model.Images.Count; i++)
                                 {
@@ -129,11 +75,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             <p>No images available.</p>
                         }
 
-                    </div> <!-- end col -->
+                    </div>
                     <div class="col-lg-7">
                         <form class="ps-lg-4">
-                            <!-- Product title -->
-                            <h3 class="mt-0">@Model.Name <a href="javascript: void(0);" class="text-muted"><i class="mdi mdi-square-edit-outline ms-2"></i></a> </h3>
+                            <h3 class="mt-0">@Model.Name <a href="javascript: void(0);" class="text-muted"></a> </h3>
                             <p class="mb-1">Added Date: 2025</p>
                             <p class="font-16">
                                 <span class="text-warning mdi mdi-star"></span>
@@ -143,18 +88,15 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <span class="text-warning mdi mdi-star"></span>
                             </p>
 
-                            <!-- Product stock -->
                             <div class="mt-3">
                                 <h4><span class="badge badge-success-lighten">@Model.Status</span></h4>
                             </div>
 
-                            <!-- Product description -->
                             <div class="mt-4">
                                 <h6 class="font-14">Retail Price:</h6>
                                 <h3> $@Model.Price</h3>
                             </div>
                 
-                            <!-- Product description -->
                             <div class="mt-4">
                                 <h6 class="font-14">Description:</h6>
                                 <p>@Model.Description</p>
@@ -189,7 +131,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </div>
                             </div>
 
-                            <!-- Product information -->
                             <div class="mt-4">
                                 <div class="row">
                                     <div class="col-md-4">
@@ -213,8 +154,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             </div>
 
                         </form>
-                    </div> <!-- end col -->
-                </div> <!-- end row-->
+                    </div>
+                </div>
 
                 <div class="table-responsive mt-4">
                     <table class="table table-bordered table-centered mb-0">
@@ -281,13 +222,11 @@ document.addEventListener('DOMContentLoaded', function () {
                             </tr>
                         </tbody>
                     </table>
-                </div> <!-- end table-responsive-->
+                </div>
                 
-            </div> <!-- end card-body-->
-        </div> <!-- end card-->
-    </div> <!-- end col-->
+            </div>
+        </div>
+    </div>
 </div>
-<!-- end row-->
-
-</div> <!-- container -->
+</div>
 

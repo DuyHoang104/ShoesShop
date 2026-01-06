@@ -9,5 +9,6 @@ namespace ShoesShop.Web.Product.Model.User
         public decimal? MaxPrice { get; set; }
         public List<string>? Sizes { get; set; }
         public string? SortBy { get; set; }
+        public string? Query { get; set; }
     }
 }

@@ -1,28 +1,47 @@
 @using ShoesShop.Domain.Products.Commands
 @model IEnumerable<ProductDto>
-
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 @{
     var counts = ViewData["CategoryCounts"] as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var selectedCategory = Context.Request.Query["categoryId"].ToString();
+    var selectedBrand = Context.Request.Query["brand"].ToString();
+    var selectedColor = Context.Request.Query["color"].ToString();
 }
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ion-rangeslider@2.3.1/css/ion.rangeSlider.min.css"/>
 <link rel="stylesheet" href="~/assets/css/share.css" asp-append-version="true" />
-<link rel="stylesheet" href="~/assets/product/css/style.css">
+<link rel="stylesheet" href="~/assets/product/css/style.css"/>
+<style>
+.filter-link.selected { color:red !important; font-weight:bold; }
+.p_filter_widgets { margin-bottom:15px !important; }
+.l_w_title { margin-bottom:10px !important; }
+#filterSizes { margin-top:0 !important; padding-top:0 !important; }
+.widgets_inner { margin:0 !important; padding:0 !important; }
+.col-lg-3 { position:relative; width:100%; padding-right:25px; padding-left:25px; }
+.col-lg-12 { position:relative; width:100%; padding-right:25px; padding-left:25px; }
+.latest_product_inner { position:relative; width:100%; padding-right:25px; padding-left:25px; }
+.flex-wrap-default { flex-wrap:wrap !important; gap:5px; }
+@@media (max-width:576px) {.flex-wrap { row-gap:15px; column-gap:42px; }}
+#sizeFilterForm { display:flex; flex-wrap:wrap; gap:18px; margin-top:5px; }
+.size-filter-option { display:inline-flex; align-items:center; justify-content:center; width:45px; height:45px; border:1px solid #ccc; border-radius:8px; cursor:pointer; transition:all .2s; font-weight:500; color:#fff; background-color:#000; user-select:none; }
+.size-filter-option.selected { color:#ff4d4f; border-color:#ff4d4f; }
+.size-filter-option:hover { color:#ff4d4f; border-color:#ff4d4f; }
+.size-filter-option input { display:none; }
+@@media (max-width:576px) {#sizeFilterForm { gap:8px; } .size-filter-option { width:38px; height:38px; font-size:14px; }}
+</style>
 
+<!-- Categories Filter -->
 <aside class="left_widgets p_filter_widgets">
-    <div class="l_w_title">
-        <h3>Browse Categories</h3>
-    </div>
+    <div class="l_w_title"><h3>Browse Categories</h3></div>
     <div class="widgets_inner">
         <ul class="list">
             @foreach (var category in Model.SelectMany(p => p.Categories).DistinctBy(c => c.Id))
             {
+                var isSelected = selectedCategory == category.Id.ToString();
                 <li>
-                    <a asp-action="Index" asp-controller="Product" asp-route-categoryId="@category.Id">
-                        @category.Name
-                    </a>
-                    <span class="filter-count" style="margin-left: 5px; color: red">
+                    <a href="@Url.Action("Index","Product", new { categoryId = category.Id })" class="filter-link @(isSelected ? "selected" : "")">@category.Name</a>
+                    <span class="filter-count" style="margin-left:5px;color:red">
                         @(counts.ContainsKey(category.Id) ? counts[category.Id] : 0)
                     </span>
                 </li>
@@ -31,27 +50,19 @@
     </div>
 </aside>
 
+<!-- Brand Filter -->
 <aside class="left_widgets p_filter_widgets">
-    <div class="l_w_title">
-        <h3>Brand filters</h3>
-    </div>
+    <div class="l_w_title"><h3>Brand filters</h3></div>
     <div class="widgets_inner">
         <ul class="list">
-            @foreach (var brand in Model
-                .Where(p => !string.IsNullOrWhiteSpace(p.Brand))
-                .Select(p => p.Brand.Trim())
-                .Distinct())
+            @foreach (var brand in Model.Where(p => !string.IsNullOrWhiteSpace(p.Brand))
+                .Select(p => p.Brand.Trim()).Distinct())
             {
+                var isSelected = selectedBrand.Equals(brand, StringComparison.OrdinalIgnoreCase);
                 <li>
-                    <a asp-action="Index"
-                    asp-controller="Product"
-                    asp-route-brand="@brand">
-                        @brand
-                    </a>
+                    <a href="@Url.Action("Index","Product", new { brand = brand })" class="filter-link @(isSelected ? "selected" : "")">@brand</a>
                     <span class="filter-count" style="margin-left:5px;color:red">
-                        @Model.Count(p =>
-                            !string.IsNullOrWhiteSpace(p.Brand) &&
-                            p.Brand.Trim().Equals(brand, StringComparison.OrdinalIgnoreCase))
+                        @Model.Count(p => !string.IsNullOrWhiteSpace(p.Brand) && p.Brand.Trim().Equals(brand, StringComparison.OrdinalIgnoreCase))
                     </span>
                 </li>
             }
@@ -59,42 +70,31 @@
     </div>
 </aside>
 
+<!-- Color Filter -->
 <aside class="left_widgets p_filter_widgets">
-    <div class="l_w_title">
-        <h3>Color Filter</h3>
-    </div>
+    <div class="l_w_title"><h3>Color Filter</h3></div>
     <div class="widgets_inner">
         <ul class="list">
             @foreach (var color in Model
                 .Where(p => !string.IsNullOrWhiteSpace(p.Color))
-                .SelectMany(p => p.Color
-                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(c => c.Trim()))
-                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .SelectMany(p => p.Color.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim()))
                 .Distinct()
                 .Take(4))
             {
+                var isSelected = selectedColor.Equals(color, StringComparison.OrdinalIgnoreCase);
                 <li>
-                    <a asp-action="Index"
-                    asp-controller="Product"
-                    asp-route-color="@color">
-                        @color
-                    </a>
+                    <a href="@Url.Action("Index","Product", new { color = color })" class="filter-link @(isSelected ? "selected" : "")">@color</a>
                     <span class="filter-count" style="margin-left:5px;color:red">
-                        @Model.Count(p =>
-                            !string.IsNullOrWhiteSpace(p.Color) &&
-                            p.Color.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                .Select(c => c.Trim())
-                                .Contains(color))
+                        @Model.Count(p => !string.IsNullOrWhiteSpace(p.Color) &&
+                            p.Color.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim()).Contains(color))
                     </span>
                 </li>
             }
-
         </ul>
     </div>
 </aside>
 
-<!-- ✅ SỬA PHẦN NÀY -->
+<!-- Size Filter -->
 <aside class="left_widgets p_filter_widgets">
     <div class="l_w_title d-flex justify-content-between align-items-center mb-3" 
          data-bs-toggle="collapse" data-bs-target="#filterSizes" style="cursor: pointer;">
@@ -104,43 +104,38 @@
 
     <div id="filterSizes" class="collapse show">
         <div class="widgets_inner" style="color: #bdafaf;">
-            <form asp-action="Index" asp-controller="Product" method="get" id="sizeFilterForm" class="m-0">
+            <form id="sizeFilterForm">
                 <input type="hidden" name="categoryId" value="@Context.Request.Query["categoryId"]" />
                 <input type="hidden" name="brand" value="@Context.Request.Query["brand"]" />
                 <input type="hidden" name="color" value="@Context.Request.Query["color"]" />
                 <input type="hidden" name="sortBy" value="@Context.Request.Query["sortBy"]" />
-                <div class="d-flex flex-wrap-default gap-2">
-                    @{
-                        var allSizes = new[] { "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47" };
-                        var selectedSizes = ViewBag.SelectedSizes as List<string> ?? new List<string>();
-                    }
 
-                    @foreach (var size in allSizes)
-                    {
-                        var isChecked = selectedSizes.Contains(size);
-                        <label class="size-filter-option">
-                            <input type="checkbox" name="sizes" value="@size" @(isChecked ? "checked" : "") onchange="document.getElementById('sizeFilterForm').submit()" />
-                            <span>@size</span>
-                        </label>
-                    }
-                </div>
+                @{
+                    var allSizes = new[] { "36","37","38","39","40","41","42","43","44","45","46","47" };
+                    var selectedSizes = ViewBag.SelectedSizes as List<string> ?? new List<string>();
+                }
+
+                @foreach (var size in allSizes)
+                {
+                    var isChecked = selectedSizes.Contains(size);
+                    <label class="size-filter-option @(isChecked ? "selected" : "")">
+                        <input type="checkbox" name="sizes" value="@size" class="js-size-filter" @(isChecked ? "checked" : "") /> 
+                        <span>@size</span>
+                    </label>
+                }
             </form>
         </div>
     </div>
 </aside>
 
+<!-- Price Filter -->
 <aside class="left_widgets p_filter_widgets price_rangs_aside">
-    <div class="l_w_title">
-        <h3>Price Filter</h3>
-    </div>
+    <div class="l_w_title"><h3>Price Filter</h3></div>
     <div class="widgets_inner">
         <div class="range_item">
             <input type="text" class="js-range-slider" value="" />
-
-            <div class="d-flex" style="color: #bdafaf;">
-                <div class="price_text">
-                    <p style="color: #bdafaf;">Price :</p>
-                </div>
+            <div class="d-flex" style="color:#bdafaf;">
+                <div class="price_text"><p style="color:#bdafaf;">Price :</p></div>
                 <div class="price_value d-flex justify-content-center">
                     <input type="text" class="js-input-from" readonly />
                     <span>to</span>
@@ -148,50 +143,189 @@
                 </div>
             </div>
         </div>
-
-        <form asp-action="Index" asp-controller="Product" method="get" 
-              style="display: flex; justify-content: center; margin-top: 18px;">
+        <form id="priceFilterForm">
             <input type="hidden" name="minPrice" class="js-input-from" />
             <input type="hidden" name="maxPrice" class="js-input-to" />
-            <button type="submit" class="cw-btn btn-secondary">
-                <span class="text text-1">Filter</span>
-                <span class="text text-2" aria-hidden="true" data-text="Filter">Filter</span>
-            </button>
+            <button type="button" id="btnPriceFilter" class="cw-btn btn-secondary mt-2">Filter</button>
         </form>
     </div>
 </aside>
 
-<style>
-.p_filter_widgets { margin-bottom: 15px !important; }
-.l_w_title { margin-bottom: 10px !important; }
-#filterSizes { margin-top: 0 !important; padding-top: 0 !important; }
-.widgets_inner { margin: 0 !important; padding: 0 !important; }
-.col-lg-3 {
-    position: relative;
-    width: 100%;
-    padding-right: 25px;
-    padding-left: 25px;
-}
-.col-lg-12 {
-    position: relative;
-    width: 100%;
-    padding-right: 25px;
-    padding-left: 25px;
-}
-.latest_product_inner {
-    padding-right: 25px;
-    padding-left: 25px;
-}
-
-.flex-wrap-default { flex-wrap:wrap!important }
-
-media (max-width: 576px) {
-    .flex-wrap {
-        row-gap: 15px;
-        column-gap: 42px;
-    }
-}
-</style>
-
 <script src="https://cdn.jsdelivr.net/npm/ion-rangeslider@2.3.1/js/ion.rangeSlider.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    @* 
+        1. lấy toàn bộ query string hiện tại (phần sau ?)-> gán vào params
+        2. duyệt qua từng thẻ a có class filter-link
+        3. lấy query string từ thẻ a được duyệt (Query String có sẵn khi render ra html) -> linkParams
+        4. duyệt qua từng cặp key/value trong linkParams
+        - nếu params có cặp key/value giống hệt → matched = true
+        5. thêm hoặc xóa class selected cho thẻ a dựa trên biến matched
+    *@
+
+    function syncSelectedFilters() {
+        const params = new URLSearchParams(window.location.search);
+        document.querySelectorAll('.filter-link').forEach(link => {
+            const linkParams = new URL(link.href).searchParams;
+            let matched = false;
+            linkParams.forEach((value, key) => {
+                if (params.get(key) === value) {
+                    matched = true;
+                }
+            });
+
+            link.classList.toggle('selected', matched);
+        });
+    }
+    @* 
+       1. gửi Request AJax đến URL được truyền vào
+       2. nhận về HTML từ server
+       3. Tìm thẻ có id product-list
+       4. thay thế nội dung bên trong thẻ product-list bằng HTML nhận được
+       5. Cập nhật số lượng sản phẩm tìm thấy vào thẻ có id productFound
+       6. Cập nhật URL trình duyệt mà không reload trang
+       7. Đồng bộ lại trạng thái các bộ lọc đã chọn
+    *@
+    function loadAjax(url) {
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.text())
+        .then(html => {
+            const box = document.getElementById('product-list');
+            if (!box) return;
+
+            box.innerHTML = html;
+
+            const count = box.querySelectorAll('.single_product_item').length;
+            const found = document.getElementById('productFound');
+            if (found) found.textContent = count;
+
+            history.pushState(null, '', url);
+
+            syncSelectedFilters();
+        });
+    }
+    @* 
+       1, lấy toàn bộ thẻ a có class filter-link
+       2. gán sự kiện click cho từng thẻ a
+         3. ngăn chặn hành vi chuyển trang mặc định
+            4. lấy toàn bộ query string hiện tại (phần sau ?) -> params
+            5. lấy query string từ thẻ a được click (Query String có sẵn khi render ra html) -> clicked
+            6. duyệt qua từng cặp key/value trong clicked
+               - nếu params có cặp key/value giống hệt → xóa cặp key/value khỏi params
+               - nếu params không có cặp key/value giống hệt → thêm cặp key/value vào params
+            7. gọi hàm loadAjax với URL mới được tạo từ pathname và params đã cập nhật
+    *@
+    document.querySelectorAll('.filter-link').forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+
+            const params = new URLSearchParams(window.location.search);
+            const clicked = new URL(link.href).searchParams;
+
+            clicked.forEach((value, key) => {
+                params.get(key) === value
+                    ? params.delete(key)
+                    : params.set(key, value);
+            });
+
+            loadAjax(window.location.pathname + '?' + params.toString());
+        });
+    });
+
+    @* 
+        1. Lấy thẻ form có id sizeFilterForm
+        2. Duyệt qua từng checkbox có class js-size-filter trong form
+        3. Cập nhật class selected cho label chứa checkbox dựa trên trạng thái checked của checkbox
+        4. Gán sự kiện change cho từng checkbox
+           - Cập nhật class selected cho label chứa checkbox dựa trên trạng thái checked của checkbox
+           - Lấy toàn bộ query string hiện tại (phần sau ?) -> params
+           - Xóa tất cả tham số sizes khỏi params
+           - Duyệt qua tất cả checkbox được chọn và thêm tham số sizes vào params
+           - Gọi hàm loadAjax với URL mới được tạo từ pathname và params đã cập nhật
+    *@
+    const sizeForm = document.getElementById('sizeFilterForm');
+    if (sizeForm) {
+        sizeForm.querySelectorAll('.js-size-filter').forEach(cb => {
+            cb.closest('label').classList.toggle('selected', cb.checked);
+            cb.addEventListener('change', () => {
+                cb.closest('label').classList.toggle('selected', cb.checked);
+
+                const params = new URLSearchParams(window.location.search);
+                params.delete('sizes');
+                sizeForm.querySelectorAll('.js-size-filter:checked')
+                    .forEach(i => params.append('sizes', i.value));
+
+                loadAjax(window.location.pathname + '?' + params.toString());
+            });
+        });
+    }
+
+    @* 
+        Xử lý sự kiện click nút lọc giá
+        1. Lấy thẻ button có id btnPriceFilter
+        2. Gán sự kiện click cho thẻ button
+           - Lấy thẻ form có id priceFilterForm
+           - Lấy toàn bộ query string hiện tại (phần sau ?) -> params
+           - Lấy dữ liệu từ form và cập nhật vào params
+           - Gọi hàm loadAjax với URL mới được tạo từ pathname và params đã cập nhật
+     *@
+    const priceBtn = document.getElementById('btnPriceFilter');
+    if (priceBtn) {
+        priceBtn.addEventListener('click', () => {
+            const priceForm = document.getElementById('priceFilterForm');
+            const params = new URLSearchParams(window.location.search);
+            new FormData(priceForm).forEach((v, k) => params.set(k, v));
+            loadAjax(window.location.pathname + '?' + params.toString());
+        });
+    }
+
+    @* 
+        Xử lý sự kiện nhập liệu trong ô tìm kiếm
+        1. Ngăn chặn hành vi submit form mặc định
+        2. Thiết lập bộ đếm thời gian (timer) với độ trễ 400ms
+        3. Mỗi khi người dùng nhập liệu:
+        - Xóa bộ đếm thời gian hiện tại
+        - Thiết lập lại bộ đếm thời gian mới
+        4. Khi bộ đếm thời gian kết thúc (người dùng ngừng nhập liệu trong 400ms):
+        - Lấy toàn bộ query string hiện tại (phần sau ?) -> params
+        - Lấy giá trị tìm kiếm từ ô input, loại bỏ khoảng trắng thừa -> q
+        - Nếu q không rỗng → thêm tham số `query` vào params
+        - Nếu q rỗng → xóa tham số `query` khỏi params
+        - Gọi hàm loadAjax với URL mới được tạo từ pathname và params đã cập nhậ
+    *@
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+
+    if (searchForm && searchInput) {
+        let timer;
+        const delay = 400;
+
+        searchForm.addEventListener('submit', e => e.preventDefault());
+
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                const params = new URLSearchParams(window.location.search);
+                const q = searchInput.value.trim();
+
+                q ? params.set('query', q) : params.delete('query');
+
+                loadAjax(window.location.pathname + '?' + params.toString());
+            }, delay);
+        });
+    }
+    @* 
+        Xử lý sự kiện quay lại/tiến tới trang (back/forward)
+        1. Lắng nghe sự kiện popstate trên window
+        2. Khi sự kiện xảy ra, gọi hàm loadAjax với URL hiện tại
+     *@
+    window.addEventListener('popstate', () => {
+        loadAjax(location.pathname + location.search);
+    });
+
+    syncSelectedFilters();
+});
+</script>

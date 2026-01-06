@@ -1,0 +1,41 @@
+@using ShoesShop.Domain.Products.Commands.Dtos
+@using ShoesShop.Domain.Users.Dtos
+
+@{
+    var locations = ViewData["OrdersByLocation"] as List<OrdersByLocationDto> ?? new();
+    var maxOrders = locations.Any() ? locations.Max(x => x.TotalOrders) : 1;
+}
+
+<h4 class="header-title">Orders by Location</h4>
+
+<div class="mb-4 mt-4">
+    <div id="world-map-markers" style="height:224px"></div>
+</div>
+
+@if (!locations.Any())
+{
+    <p class="text-muted">No shipping data available</p>
+}
+else
+{
+    @foreach (var item in locations)
+    {
+        var percent = (item.TotalOrders * 100) / maxOrders;
+
+        <h5 class="mb-1 mt-3 fw-normal">
+            @item.Location
+        </h5>
+
+        <div class="progress-w-percent">
+            <span class="progress-value fw-bold">
+                @item.TotalOrders
+            </span>
+
+            <div class="progress progress-sm">
+                <div class="progress-bar" role="progressbar" style="width:@percent%" aria-valuenow="@percent" aria-valuemin="0"
+                    aria-valuemax="100">
+                </div>
+            </div>
+        </div>
+    }
+}

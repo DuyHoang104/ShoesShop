@@ -1,0 +1,132 @@
+@using System.Globalization
+
+@{
+    decimal todayRevenue = ViewData["TodayRevenue"] as decimal? ?? 0;
+    decimal totalRevenue = ViewData["OrderRevenue"] as decimal? ?? 0;
+}
+
+<div class="card-body">
+
+    <!-- ===== HEADER ===== -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="header-title mb-0">Revenue</h4>
+
+        <div class="dropdown">
+            <a href="#" class="dropdown-toggle arrow-none" data-bs-toggle="dropdown">
+                <i class="mdi mdi-dots-vertical"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end">
+                <a class="dropdown-item" href="#">Sales Report</a>
+                <a class="dropdown-item" href="#">Export</a>
+                <a class="dropdown-item" href="#">Profit</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SUMMARY ===== -->
+    <div class="row text-center mb-4">
+
+        <div class="col-6 border-end">
+            <p class="text-muted mb-1">Total Revenue</p>
+            <h3 class="fw-semibold text-primary mb-0">
+                @totalRevenue.ToString("N0", CultureInfo.InvariantCulture) $
+            </h3>
+        </div>
+
+        <div class="col-6">
+            <p class="text-muted mb-1">Today</p>
+            <h3 class="fw-semibold text-success mb-0">
+                @todayRevenue.ToString("N0", CultureInfo.InvariantCulture) $
+            </h3>
+        </div>
+
+    </div>
+
+    <hr class="my-3" />
+
+    <!-- ===== CHART ZONE (RIÊNG HẲN) ===== -->
+    <div class="pt-2">
+        <div id="revenue-line-chart" data-total="@totalRevenue" data-today="@todayRevenue" style="height:280px;">
+        </div>
+    </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    (function () {
+
+        const el = document.querySelector("#revenue-line-chart");
+        if (!el) return;
+
+        const total = Number(el.dataset.total || 0);
+        const today = Number(el.dataset.today || 0);
+
+        if (window.revenueChart) {
+            window.revenueChart.destroy();
+        }
+
+        const options = {
+            chart: {
+                type: 'area',
+                height: 280,
+                toolbar: { show: false }
+            },
+
+            series: [{
+                name: 'Today Revenue',
+                data: [0, today]
+            }],
+
+            xaxis: {
+                categories: ['Start of Day', 'Now']
+            },
+
+            yaxis: {
+                min: 0,
+                max: total,
+                labels: {
+                    formatter: v => v.toLocaleString()
+                },
+                title: {
+                    text: 'Revenue ($)'
+                }
+            },
+
+            annotations: {
+                yaxis: [{
+                    y: total,
+                    borderColor: '#727cf5',
+                    label: {
+                        text: 'Total Revenue',
+                        style: {
+                            background: '#727cf5',
+                            color: '#fff'
+                        }
+                    }
+                }]
+            },
+
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    opacityFrom: 0.4,
+                    opacityTo: 0.05
+                }
+            },
+
+            dataLabels: {
+                enabled: false
+            },
+
+            colors: ['#0acf97']
+        };
+
+        window.revenueChart = new ApexCharts(el, options);
+        window.revenueChart.render();
+    })();
+</script>
