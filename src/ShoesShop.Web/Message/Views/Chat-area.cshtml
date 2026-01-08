@@ -38,13 +38,12 @@
 <div class="col-xxl-6 col-xl-12 order-xl-2 d-flex">
     <div class="card flex-fill">
         <div class="card-body">
-            
             @if(orderInfo != null)
             {
                 <div class="order-box mb-4">
                     <div class="d-flex align-items-center mb-2">
                         <a asp-action="Details"
-                           asp-controller="OrderAdmin"
+                           asp-controller="Order"
                            asp-route-id="@orderInfo.orderId"
                            class="d-flex align-items-center text-dark text-decoration-none">
                             <i class="uil uil-receipt-alt me-2" style="font-size:22px; color:#ff7b00;"></i>
@@ -111,44 +110,121 @@
     </div>
 </div>
 
-@if (orderInfo != null && orderInfo.orderId > 0)
-{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-
 <script>
-    console.log("[ADMIN] Chat script loaded for order:", "@orderInfo.orderId");
-
-    const orderId      = parseInt(document.getElementById("orderId").value || 0);
-    const receiverId   = parseInt(document.getElementById("receiverId").value || 0);
-    const senderId     = parseInt(document.getElementById("senderId").value || 0);
-    const senderName   = document.getElementById("senderName").value;
-    const senderAvatar = document.getElementById("senderAvatar").value;
+(() => {
+    const orderId      = parseInt('@orderId');
+    const receiverId   = parseInt('@customerId');
+    const senderId     = parseInt('@adminId');
+    const senderName   = '@adminName';
+    const senderAvatar = '@adminAvatar';
     const chatList     = document.getElementById("chatList");
     const chatForm     = document.getElementById("chatForm");
     const baseUrl      = '@baseUrl';
 
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .withAutomaticReconnect()
+        .build();
+
+    let connectionStarted = false;
+
+    async function connectHub() {
+        if(connectionStarted) return;
+        if(connection.state !== "Disconnected") return;
+
+        try {
+            await connection.start();
+            await connection.invoke("JoinOrderGroup", orderId);
+            connectionStarted = true;
+            console.log("[ADMIN] Connected & Joined group", orderId);
+        } catch(err){
+            console.error("[ADMIN] Connection error:", err);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", connectHub);
+    document.addEventListener("visibilitychange", () => {
+        if(document.visibilityState === "visible") connectHub();
+    });
+    window.addEventListener("beforeunload", () => {
+        if(connection.state === "Connected") connection.stop();
+    });
+    
+    chatForm.addEventListener("submit", async e => {
+        e.preventDefault();
+        if(!connectionStarted){ alert("Connecting..."); return; }
+
+        const input = document.getElementById("messageContent");
+        const content = input.value.trim();
+        if(!content) return;
+
+        const tempId = generateTempId();
+
+        appendMessage({
+            orderId,
+            senderRole: "Admin",
+            senderId,
+            senderName,
+            senderAvatar,
+            content,
+            sentAt: new Date(),
+            TempId: tempId
+        });
+
+        input.value = "";
+
+        try {
+            await connection.invoke("SendMessage", receiverId, content, orderId, tempId);
+        } catch(err){
+            console.error("[ADMIN] Send message error:", err);
+        }
+    });
+
+    connection.on("ReceiveMessage", msg => {
+        const msgOrderId = parseInt(msg.orderId || msg.OrderId || 0);
+        if(msgOrderId !== orderId) return;
+
+        // Xóa bubble tạm thời nếu là tin nhắn admin vừa gửi
+        if(msg.senderRole === "Admin" && parseInt(msg.senderId) === senderId && msg.tempId){
+            const pending = document.querySelector(`li[data-temp-id="${msg.tempId}"]`);
+            if(pending) pending.remove();
+        }
+
+        appendMessage(msg);
+    });
+
+    // Gửi tin nhắn khi nhấn Enter
+    document.getElementById("messageContent").addEventListener("keydown", e => {
+        if(e.key === "Enter" && !e.shiftKey){
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event("submit"));
+        }
+    });
+
+
+    // Tạo tempId cho tin nhắn tạm thời
     function generateTempId() {
         return `temp_${Date.now()}_${Math.random().toString(36).substring(2,9)}`;
     }
 
+    // Lấy URL avatar
     function getAvatarUrl(msg){
-        if (msg.senderAvatar)
+        if(msg.senderAvatar)
             return msg.senderAvatar.startsWith("http") ? msg.senderAvatar : `${baseUrl}${msg.senderAvatar}`;
         return msg.senderRole === "Admin" ? senderAvatar : "/images/default.png";
     }
 
+    // Append tin nhắn vào DOM
     function appendMessage(msg){
         const li = document.createElement("li");
         li.className = msg.senderRole === "Admin" ? "admin" : "user";
 
         const avatarUrl = getAvatarUrl(msg);
         const sentDate = msg.sentAt ? new Date(msg.sentAt) : new Date();
+        const sentAt = sentDate.toLocaleTimeString("vi-VN", { hour:"2-digit", minute:"2-digit" });
 
-        const sentAt = sentDate.toLocaleTimeString("vi-VN", {
-            hour:"2-digit", minute:"2-digit"
-        });
-
-        if (msg.TempId || msg.tempId){
+        if(msg.TempId || msg.tempId){
             li.dataset.tempId = msg.TempId || msg.tempId;
             li.classList.add("chat-message-pending");
         }
@@ -164,101 +240,16 @@
                     <p>${msg.content}</p>
                 </div>
             </div>`;
-
         chatList.appendChild(li);
         chatList.scrollTop = chatList.scrollHeight;
     }
 
-    if (!window.__adminChatConnection){
-        window.__adminChatConnection = new signalR.HubConnectionBuilder()
-            .withUrl("/chatHub")
-            .withAutomaticReconnect()
-            .build();
-    }
+    // Cuộn xuống cuối khi load trang
+    chatList.scrollTop = chatList.scrollHeight;
 
-    const connection = window.__adminChatConnection;
-    let connectionStarted = false;
-
-    async function safeConnect(){
-        if (connectionStarted) return;
-        if (connection.state !== "Disconnected") return;
-
-        try {
-            await connection.start();
-            await connection.invoke("JoinOrderGroup", orderId);
-            connectionStarted = true;
-
-            console.log("[ADMIN] Connected & Joined group", orderId);
-        }
-        catch(err){
-            console.error("[ADMIN] Connection error:", err);
-        }
-    }
-    
-    connection.off("ReceiveMessage");
-
-    connection.on("ReceiveMessage", msg => {
-        const msgOrderId = parseInt(msg.orderId || msg.OrderId || 0);
-        if (msgOrderId !== orderId) return;
-
-        // remove pending
-        if (msg.senderRole === "Admin"
-            && parseInt(msg.senderId) === senderId
-            && msg.tempId)
-        {
-            const pending = document.querySelector(`li[data-temp-id="${msg.tempId}"]`);
-            if (pending) pending.remove();
-        }
-
-        appendMessage(msg);
-    });
-
-    /* auto-connect */
-    document.addEventListener("DOMContentLoaded", safeConnect);
-
-    /* reconnect khi tab quay lại */
-    document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") safeConnect();
-    });
-
-    /* stop khi rời trang */
-    window.addEventListener("beforeunload", () => {
-        if (connection.state === "Connected") connection.stop();
-    });
-
-    chatForm.addEventListener("submit", async e => {
-        e.preventDefault();
-
-        if (!connectionStarted){
-            alert("Connecting...");
-            return;
-        }
-
-        const input = document.getElementById("messageContent");
-        const content = input.value.trim();
-        if (!content) return;
-
-        const tempId = generateTempId();
-
-        appendMessage({
-            orderId,
-            senderRole: "Admin",
-            senderId,
-            senderName,
-            senderAvatar,
-            content,
-            sentAt: new Date(),
-            TempId: tempId
-        });
-
-        await connection.invoke("SendMessage", receiverId, content, orderId, tempId);
-        input.value = "";
-    });
-</script>
-}
-else
-{
-    <script>
+    if(orderId === 0){
         console.warn("[ADMIN] Chat disabled: no order selected.");
-    </script>
-}
+    }
+
+})();
+</script>

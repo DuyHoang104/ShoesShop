@@ -132,114 +132,20 @@
 <script src="~/assets/js/share.js" asp-append-version="true"></script>
 
 <style>
-    .form-check {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 35px;
-    }
-
-    .form-check-input {
-        width: 12px;
-        height: 12px;
-        cursor: pointer;
-    }
-
-    .form-check-input-order {
-        width: 12px;
-        height: 12px;
-        cursor: pointer;
-        font-size: 16px;
-    }
-
-    .form-check-label {
-        margin-left: 5px;
-        color: #fff;
-        font-size: 14px;
-        cursor: pointer;
-    }
-
-    .cod-btn {
-        background-color: #ffc439;
-        border: 2px solid #ffc439;
-        border-radius: 4px;
-        padding: 6px;
-        width: 100%;
-        height: 53px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all .25s ease;
-    }
-
-    .cod-btn img {
-        width: 180px;
-        object-fit: contain;
-    }
-
-    .cod-btn:hover {
-        background-color: #f4b926;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, .15);
-    }
-
-    .vnpay-btn {
-        background-color: #ffc439;
-        border: 2px solid #ffc439;
-        border-radius: 4px;
-        padding: 6px;
-        width: 100%;
-        height: 53px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all .25s ease;
-        margin-top: 15px;
-    }
-
-    .vnpay-btn img {
-        width: 180px;
-        object-fit: contain;
-    }
-
-    .vnpay-btn:hover {
-        background-color: #f4b926;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, .15);
-    }
-
-    #paypal-button-container {
-        width: 100%;
-        margin-top: 15px;
-    }
-
-    .col-lg-8 h3 {
-        color: #fff;
-    }
-
-    keyframes bounce {
-
-        0%,
-        100% {
-            transform: translateY(0);
-        }
-
-        25% {
-            transform: translateY(-8px);
-        }
-
-        50% {
-            transform: translateY(4px);
-        }
-
-        75% {
-            transform: translateY(-4px);
-        }
-    }
-
-    .bounce {
-        animation: bounce .5s ease;
-    }
+.form-check { display: flex; align-items: center; gap: 8px; margin-top: 35px; }
+.form-check-input { width: 12px; height: 12px; cursor: pointer; }
+.form-check-input-order { width: 12px; height: 12px; cursor: pointer; font-size: 16px; }
+.form-check-label { margin-left: 5px; color: #fff; font-size: 14px; cursor: pointer; }
+.cod-btn { background-color: #ffc439; border: 2px solid #ffc439; border-radius: 4px; padding: 6px; width: 100%; height: 53px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .25s ease; }
+.cod-btn img { width: 180px; object-fit: contain; }
+.cod-btn:hover { background-color: #f4b926; box-shadow: 0 3px 6px rgba(0,0,0,.15); }
+.vnpay-btn { background-color: #ffc439; border: 2px solid #ffc439; border-radius: 4px; padding: 6px; width: 100%; height: 53px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .25s ease; margin-top: 15px; }
+.vnpay-btn img { width: 180px; object-fit: contain; }
+.vnpay-btn:hover { background-color: #f4b926; box-shadow: 0 3px 6px rgba(0,0,0,.15); }
+#paypal-button-container { width: 100%; margin-top: 15px; }
+.col-lg-8 h3 { color: #fff; }
+@@keyframes bounce { 0%,100% { transform: translateY(0); } 25% { transform: translateY(-8px); } 50% { transform: translateY(4px); } 75% { transform: translateY(-4px); } }
+.bounce { animation: bounce .5s ease; }
 </style>
 
 <script>
@@ -257,10 +163,8 @@
             $form.append(`<input type="hidden" name="DiscountValue" value="${discountValue}" />`);
         }
 
-        // 🔹 Kiểm tra thông tin nếu KHÔNG tick "SameAddress"
         function validateShippingFields() {
             if ($sameAddress.is(':checked')) {
-                // Nếu tick "Same your address" thì bỏ qua kiểm tra
                 return true;
             }
 
@@ -283,7 +187,6 @@
                 }
             });
 
-            // Kiểm tra số điện thoại (10–11 ký tự, chỉ chứa số)
             const phone = $('#ReceiverPhone').val();
             const phoneRegex = /^[0-9]{10,11}$/;
             if (phone && !phoneRegex.test(phone)) {
@@ -299,7 +202,6 @@
             return isValid;
         }
 
-        // 🔸 Gửi đơn COD
         $('.cod-btn').on('click', function (e) {
             const checkbox = $('#acceptTerms')[0];
             if (!checkbox.checked) {
@@ -317,7 +219,6 @@
             appendFormData();
         });
 
-        // 🔸 Gửi đơn qua VNPAY
         $('.vnpay-btn').on('click', function (e) {
             const checkbox = $('#acceptTerms')[0];
             if (!checkbox.checked) {
@@ -335,7 +236,6 @@
             appendFormData();
         });
 
-        // 🔸 PayPal
         paypal.Buttons({
             style: {
                 layout: 'vertical',

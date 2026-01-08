@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
+using ShoesShop.Domain.Shares.Review.Enums;
 using ShoesShop.Domain.Users.Dtos;
 
 namespace ShoesShop.Domain.Shares.Review.Dtos;
@@ -19,7 +20,7 @@ public class ReviewDto
 
     public CreateReviewDto CreateReview { get; set; } = new CreateReviewDto();
     public List<ProductReviewDto>? ProductReview { get; set; } = [];
-
+    public ReviewStatus Status { get; set; }
     public UserDto?  User { get; set;  }
 }
 

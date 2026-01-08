@@ -4,6 +4,7 @@ using ShoesShop.Domain.Commons.Enums;
 using ShoesShop.Domain.Orders.Dtos.Commands;
 using ShoesShop.Domain.Products.Enums;
 using ShoesShop.Domain.Shares.Image.Dtos;
+using ShoesShop.Domain.Shares.Review.Dtos;
 
 namespace ShoesShop.Web.Product.Model.Admin;
 
@@ -36,6 +37,8 @@ public class ProductAdminDto
     public List<OrderDetailDto> OrderDetails { get; set; } = [];
 
     public List<CartResponse> Carts { get; set; } = [];
+    
+    public List<ReviewDto> Reviews { get; set; } = [];
 
     public List<ImageDto> Images { get; set; } = [];
 

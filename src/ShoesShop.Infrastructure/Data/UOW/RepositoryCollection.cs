@@ -43,6 +43,7 @@ namespace ShoesShop.Infrastructure.Data.UOW
         public IGenericRepository<Message, int> Message => GetRepository<Message, int>();
 
         public IGenericRepository<Image, int> Image => GetRepository<Image, int>();
+        
         public IGenericRepository<Review, int> Review => GetRepository<Review, int>();
 
         public IGenericRepository<TEntity> GetRepository<TEntity>()

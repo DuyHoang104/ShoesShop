@@ -1,0 +1,193 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Options
+@using ShoesShop.Domain.Shares.Review.Dtos
+@using ShoesShop.Domain.Shares.Review.Enums
+@model List<ReviewDto>
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@inject IOptions<CloudinarySettings> CloudinaryConfig
+
+@{
+    ViewData["Title"] = "Reviews";
+    Layout = "~/Shares/Views/Admin/_LayoutAdmin.cshtml";
+}
+
+<link href="~/assets/Admin/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" />
+<link href="~/assets/Admin/css/vendor/responsive.bootstrap5.css" rel="stylesheet" />
+<input type="hidden" name="__RequestVerificationToken" value="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="javascript:void(0);">Arrisd</a></li>
+                        <li class="breadcrumb-item"><a href="javascript:void(0);">Reviews</a></li>
+                        <li class="breadcrumb-item active">Management</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Reviews</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-centered w-100 dt-responsive nowrap" id="reviews-datatable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:20px"><div class="form-check"><input type="checkbox" class="form-check-input" /></div></th>
+                                    <th>User</th>
+                                    <th>Rating</th>
+                                    <th>Comment</th>
+                                    <th>Order</th>
+                                    <th>Status</th>
+                                    <th style="width:85px">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var review in Model)
+                            {
+                                var avatar = review.User?.AvatarUrl;
+                                if (!string.IsNullOrEmpty(avatar) && !avatar.StartsWith("http"))
+                                {
+                                    avatar = $"{CloudinaryConfig.Value.BaseUrl}{avatar}";
+                                }
+
+                                // Dùng review.Status để xác định Active / Hidden
+                                var statusText = review.Status == ReviewStatus.Active ? "Active" : "Hidden";
+                                var badgeClass = statusText == "Active" ? "bg-success" : "bg-secondary";
+                            <tr data-id="@review.Id">
+                                <td><div class="form-check"><input type="checkbox" class="form-check-input" /></div></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="@(avatar ?? "/images/default-avatar.png")" class="rounded-circle me-2" height="40" width="40" />
+                                        <div>
+                                            <div class="fw-semibold">@(review.User?.UserName ?? "Anonymous")</div>
+                                            <small class="text-muted">@review.User?.Email</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= review.Rating) { <i class="mdi mdi-star text-warning"></i> }
+                                        else { <i class="mdi mdi-star-outline text-muted"></i> }
+                                    }
+                                </td>
+                                <td style="max-width:320px">
+                                    @if (string.IsNullOrWhiteSpace(review.Comment))
+                                    {
+                                        <span class="text-muted fst-italic">No comment</span>
+                                    }
+                                    else
+                                    {
+                                        <span title="@review.Comment" class="text-truncate d-inline-block" style="max-width:300px">@review.Comment</span>
+                                    }
+                                </td>
+                                <td>@review.CreateReview.OrderId</td>
+                                <td><span class="badge @badgeClass">@statusText</span></td>
+                                <td class="table-action">
+                                    <a href="/Admin/Reviews/Details/@review.Id" class="action-icon"><i class="mdi mdi-eye"></i></a>
+                                    <a href="javascript:void(0);" class="action-icon edit-category"><i class="mdi mdi-square-edit-outline"></i></a>
+                                    <a href="javascript:void(0);" class="action-icon text-danger delete-review"><i class="mdi mdi-delete"></i></a>
+                                </td>
+                            </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="~/assets/Admin/js/vendor/jquery.dataTables.min.js"></script>
+<script src="~/assets/Admin/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="~/assets/Admin/js/vendor/dataTables.responsive.min.js"></script>
+<script src="~/assets/Admin/js/vendor/responsive.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+$(document).ready(function () {
+    const table = $('#reviews-datatable').DataTable();
+    const token = $('input[name="__RequestVerificationToken"]').val();
+
+    // ================= DELETE =================
+    $('#reviews-datatable').on('click', '.delete-review', function () {
+        const row = $(this).closest("tr");
+        const reviewId = row.data("id");
+
+        Swal.fire({
+            title: "Delete review?",
+            text: "This action cannot be undone",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            confirmButtonText: "Delete"
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+
+            $.ajax({
+                url: `/Admin/Reviews/Delete/${reviewId}`,
+                type: "POST",
+                headers: { "RequestVerificationToken": token },
+                success: function () {
+                    row.fadeOut(300, function () {
+                        table.row(row).remove().draw(false);
+                    });
+                    Swal.fire({ icon: 'success', title: 'Deleted!', timer: 1000, showConfirmButton: false });
+                },
+                error: function () { Swal.fire("Error", "Delete failed.", "error"); }
+            });
+        });
+    });
+
+    // ================= TOGGLE STATUS =================
+    $('#reviews-datatable').on('click', '.edit-category', function () {
+        const row = $(this).closest("tr");
+        const id = row.data('id');
+        const statusBadge = row.find('td:nth-child(6) span.badge');
+
+        const currentStatus = statusBadge.text().trim();
+        const isActive = currentStatus === 'Active';
+        const newStatusValue = isActive ? 20 : 10; // 20=Hidden, 10=Active
+        const swalTitle = isActive ? "Hide this review?" : "Activate this review?";
+
+        Swal.fire({
+            title: swalTitle,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+
+            $.ajax({
+                url: `/Admin/Reviews/UpdateStatus/${id}`,
+                type: 'POST',
+                headers: { "RequestVerificationToken": token },
+                data: { status: newStatusValue },
+                success: function (res) {
+                    // res.status phải trả về 'Active' hoặc 'Hidden'
+                    const statusText = res.status;
+                    const badgeClass = statusText === 'Active' ? 'bg-success' : 'bg-secondary';
+
+                    statusBadge.fadeOut(150, function () {
+                        statusBadge.removeClass('bg-success bg-secondary').addClass(badgeClass).text(statusText).fadeIn(150);
+                    });
+
+                    Swal.fire({ icon: 'success', title: 'Status updated!', timer: 1000, showConfirmButton: false });
+                },
+                error: function () { Swal.fire("Error", "Update failed.", "error"); }
+            });
+        });
+    });
+});
+</script>
+}

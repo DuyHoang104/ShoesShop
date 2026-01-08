@@ -18,7 +18,7 @@
             <div class="page-title-box">
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="javascript: void(0);">Hyper</a></li>
+                        <li class="breadcrumb-item"><a href="javascript: void(0);">Arrisd</a></li>
                         <li class="breadcrumb-item"><a href="javascript: void(0);">eCommerce</a></li>
                         <li class="breadcrumb-item active">Products</li>
                     </ol>
@@ -279,9 +279,9 @@ $(document).ready(function () {
             allCategories.forEach(c => {
                 const isChecked = product.categories.some(pc => pc.id === c.id) ? "checked" : "";
                 html += `<div class="form-check form-check-inline">
-                                                            <input class="form-check-input category-checkbox" type="checkbox" value="${c.id}" ${isChecked}>
-                                                            <label class="form-check-label">${c.name}</label>
-                                                            </div>`;
+                        <input class="form-check-input category-checkbox" type="checkbox" value="${c.id}" ${isChecked}>
+                        <label class="form-check-label">${c.name}</label>
+                        </div>`;
             });
             $("#CategoryList").html(html);
 
@@ -321,7 +321,7 @@ $(document).ready(function () {
             $("#updateProductModal").modal("hide");
             $("#updateProductForm")[0].reset();
             $("#CategoryList").empty();
-            window.location.reload(); // reload bảng để chắc chắn
+            window.location.reload();
         });
     });
 });

@@ -33,7 +33,7 @@ public class ChatHub : Hub
 
         if (role == UserAccountRole.Customer)
         {
-            bool isOwner = await _orderService.GetUserInfoForOrderAsync(senderId, orderId);
+            bool isOwner = await _orderService.CheckUserInfoForOrderAsync(senderId, orderId);
             if (!isOwner)
             {
                 Console.WriteLine($"Access Denied: User {senderId} tried to join not owned order {orderId}");

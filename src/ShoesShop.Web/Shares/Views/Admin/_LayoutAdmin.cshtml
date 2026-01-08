@@ -32,7 +32,7 @@
     <div class="wrapper">
         <div class="leftside-menu">
 
-            <a asp-action="Index" asp-controller="Home" class="logo text-center logo-light">
+            <a asp-action="Index" asp-controller="Home" asp-route-area="Admin" class="logo text-center logo-light">
                 <span class="logo-lg">
                     <img src="~/assets/images/logo.png" alt="" height="75">
                 </span>
@@ -41,7 +41,6 @@
                 </span>
             </a>
 
-            <!-- LOGO -->
             <a href="index.html" class="logo text-center logo-dark">
                 <span class="logo-lg">
                     <img src="~/assets/Admin/images/logo-dark.png" alt="" height="16">
@@ -53,7 +52,6 @@
 
             <div class="h-100" id="leftside-menu-container" data-simplebar="">
 
-                <!--- Sidemenu -->
                 <ul class="side-nav">
 
                     <li class="side-nav-title side-nav-item">Navigation</li>
@@ -103,6 +101,9 @@
                                 </li>
                                 <li>
                                     <a href="/Admin/Categories">Categories</a>
+                                </li>
+                                <li>
+                                    <a href="/Admin/Reviews">Reviews</a>
                                 </li>
                             </ul>
                         </div>
@@ -521,7 +522,7 @@
                 <div class="d-grid mt-4">
                     <button class="btn btn-primary" id="resetBtn">Reset to Default</button>
 
-                    <a href="../../product/hyper-responsive-admin-dashboard-template/index.htm"
+                    <a href="../../product/Arrisd-responsive-admin-dashboard-template/index.htm"
                         class="btn btn-danger mt-3" target="_blank"><i class="mdi mdi-basket me-1"></i> Purchase Now</a>
                 </div>
             </div>

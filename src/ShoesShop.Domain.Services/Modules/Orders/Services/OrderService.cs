@@ -130,7 +130,7 @@ public class OrderService : IOrderService
                     }
 
                     var carts = (await _cartRepository.GetAllAsync(c => c.UserId == userId)).ToList();
-                    if (!carts.Any())
+                    if (carts.Count == 0)
                         throw new InvalidOperationException("Your cart is empty.");
 
                     var order = new Order(
@@ -318,7 +318,7 @@ public class OrderService : IOrderService
         return true;
     }
 
-    public async Task<bool> GetUserInfoForOrderAsync(int userId, int orderId)
+    public async Task<bool> CheckUserInfoForOrderAsync(int userId, int orderId)
     {
         var order = await _orderRepository.GetAsync(o => o.Id == orderId && o.UserId == userId);
         if (order == null)

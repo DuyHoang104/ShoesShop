@@ -11,5 +11,5 @@ public interface IOrderService
     Task<decimal> CalculateOrderTotalAsync(int userId, decimal shippingFee = 0, decimal discount = 0);
     Task<OrderDetailDto> GetOrderDetailByIdAsync(int orderId);
     Task<bool> UpdateOrderStatusAsync(int orderId, OrderStatus newStatus);
-    Task<bool> GetUserInfoForOrderAsync(int userId, int orderId);
+    Task<bool> CheckUserInfoForOrderAsync(int userId, int orderId);
 }

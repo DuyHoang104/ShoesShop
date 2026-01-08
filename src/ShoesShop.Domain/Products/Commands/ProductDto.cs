@@ -5,8 +5,6 @@ using ShoesShop.Domain.Orders.Dtos.Commands;
 using ShoesShop.Domain.Products.Enums;
 using ShoesShop.Domain.Shares.Image.Dtos;
 using ShoesShop.Domain.Shares.Review.Dtos;
-using ShoesShop.Domain.Users.Dtos;
-using ShoesShop.Domain.Users.Entities;
 
 namespace ShoesShop.Domain.Products.Commands;
 

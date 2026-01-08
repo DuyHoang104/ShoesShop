@@ -65,6 +65,7 @@ namespace ShoesShop.Infrastructure.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Comment = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     Rating = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Metadata = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ParentId = table.Column<int>(type: "int", nullable: true),
                     CreateBy = table.Column<int>(type: "int", nullable: false),

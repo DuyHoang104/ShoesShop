@@ -4,9 +4,6 @@
 
 @{
     var counts = ViewData["CategoryCounts"] as Dictionary<int, int> ?? new Dictionary<int, int>();
-    var selectedCategory = Context.Request.Query["categoryId"].ToString();
-    var selectedBrand = Context.Request.Query["brand"].ToString();
-    var selectedColor = Context.Request.Query["color"].ToString();
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ion-rangeslider@2.3.1/css/ion.rangeSlider.min.css"/>
@@ -31,16 +28,14 @@
 @@media (max-width:576px) {#sizeFilterForm { gap:8px; } .size-filter-option { width:38px; height:38px; font-size:14px; }}
 </style>
 
-<!-- Categories Filter -->
 <aside class="left_widgets p_filter_widgets">
     <div class="l_w_title"><h3>Browse Categories</h3></div>
     <div class="widgets_inner">
         <ul class="list">
             @foreach (var category in Model.SelectMany(p => p.Categories).DistinctBy(c => c.Id))
             {
-                var isSelected = selectedCategory == category.Id.ToString();
                 <li>
-                    <a href="@Url.Action("Index","Product", new { categoryId = category.Id })" class="filter-link @(isSelected ? "selected" : "")">@category.Name</a>
+                    <a href="@Url.Action("Index","Product", new { categoryId = category.Id })" class="filter-link">@category.Name</a>
                     <span class="filter-count" style="margin-left:5px;color:red">
                         @(counts.ContainsKey(category.Id) ? counts[category.Id] : 0)
                     </span>
@@ -50,7 +45,6 @@
     </div>
 </aside>
 
-<!-- Brand Filter -->
 <aside class="left_widgets p_filter_widgets">
     <div class="l_w_title"><h3>Brand filters</h3></div>
     <div class="widgets_inner">
@@ -58,9 +52,8 @@
             @foreach (var brand in Model.Where(p => !string.IsNullOrWhiteSpace(p.Brand))
                 .Select(p => p.Brand.Trim()).Distinct())
             {
-                var isSelected = selectedBrand.Equals(brand, StringComparison.OrdinalIgnoreCase);
                 <li>
-                    <a href="@Url.Action("Index","Product", new { brand = brand })" class="filter-link @(isSelected ? "selected" : "")">@brand</a>
+                    <a href="@Url.Action("Index","Product", new { brand = brand })" class="filter-link">@brand</a>
                     <span class="filter-count" style="margin-left:5px;color:red">
                         @Model.Count(p => !string.IsNullOrWhiteSpace(p.Brand) && p.Brand.Trim().Equals(brand, StringComparison.OrdinalIgnoreCase))
                     </span>
@@ -70,7 +63,6 @@
     </div>
 </aside>
 
-<!-- Color Filter -->
 <aside class="left_widgets p_filter_widgets">
     <div class="l_w_title"><h3>Color Filter</h3></div>
     <div class="widgets_inner">
@@ -81,9 +73,8 @@
                 .Distinct()
                 .Take(4))
             {
-                var isSelected = selectedColor.Equals(color, StringComparison.OrdinalIgnoreCase);
                 <li>
-                    <a href="@Url.Action("Index","Product", new { color = color })" class="filter-link @(isSelected ? "selected" : "")">@color</a>
+                    <a href="@Url.Action("Index","Product", new { color = color })" class="filter-link">@color</a>
                     <span class="filter-count" style="margin-left:5px;color:red">
                         @Model.Count(p => !string.IsNullOrWhiteSpace(p.Color) &&
                             p.Color.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim()).Contains(color))
@@ -94,7 +85,6 @@
     </div>
 </aside>
 
-<!-- Size Filter -->
 <aside class="left_widgets p_filter_widgets">
     <div class="l_w_title d-flex justify-content-between align-items-center mb-3" 
          data-bs-toggle="collapse" data-bs-target="#filterSizes" style="cursor: pointer;">
@@ -128,7 +118,6 @@
     </div>
 </aside>
 
-<!-- Price Filter -->
 <aside class="left_widgets p_filter_widgets price_rangs_aside">
     <div class="l_w_title"><h3>Price Filter</h3></div>
     <div class="widgets_inner">
@@ -155,15 +144,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    @* 
-        1. lấy toàn bộ query string hiện tại (phần sau ?)-> gán vào params
-        2. duyệt qua từng thẻ a có class filter-link
-        3. lấy query string từ thẻ a được duyệt (Query String có sẵn khi render ra html) -> linkParams
-        4. duyệt qua từng cặp key/value trong linkParams
-        - nếu params có cặp key/value giống hệt → matched = true
-        5. thêm hoặc xóa class selected cho thẻ a dựa trên biến matched
-    *@
-
     function syncSelectedFilters() {
         const params = new URLSearchParams(window.location.search);
         document.querySelectorAll('.filter-link').forEach(link => {
@@ -178,15 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
             link.classList.toggle('selected', matched);
         });
     }
-    @* 
-       1. gửi Request AJax đến URL được truyền vào
-       2. nhận về HTML từ server
-       3. Tìm thẻ có id product-list
-       4. thay thế nội dung bên trong thẻ product-list bằng HTML nhận được
-       5. Cập nhật số lượng sản phẩm tìm thấy vào thẻ có id productFound
-       6. Cập nhật URL trình duyệt mà không reload trang
-       7. Đồng bộ lại trạng thái các bộ lọc đã chọn
-    *@
+
     function loadAjax(url) {
         fetch(url, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -207,17 +179,7 @@ document.addEventListener('DOMContentLoaded', function () {
             syncSelectedFilters();
         });
     }
-    @* 
-       1, lấy toàn bộ thẻ a có class filter-link
-       2. gán sự kiện click cho từng thẻ a
-         3. ngăn chặn hành vi chuyển trang mặc định
-            4. lấy toàn bộ query string hiện tại (phần sau ?) -> params
-            5. lấy query string từ thẻ a được click (Query String có sẵn khi render ra html) -> clicked
-            6. duyệt qua từng cặp key/value trong clicked
-               - nếu params có cặp key/value giống hệt → xóa cặp key/value khỏi params
-               - nếu params không có cặp key/value giống hệt → thêm cặp key/value vào params
-            7. gọi hàm loadAjax với URL mới được tạo từ pathname và params đã cập nhật
-    *@
+   
     document.querySelectorAll('.filter-link').forEach(link => {
         link.addEventListener('click', e => {
             e.preventDefault();
@@ -234,27 +196,25 @@ document.addEventListener('DOMContentLoaded', function () {
             loadAjax(window.location.pathname + '?' + params.toString());
         });
     });
-
-    @* 
-        1. Lấy thẻ form có id sizeFilterForm
-        2. Duyệt qua từng checkbox có class js-size-filter trong form
-        3. Cập nhật class selected cho label chứa checkbox dựa trên trạng thái checked của checkbox
-        4. Gán sự kiện change cho từng checkbox
-           - Cập nhật class selected cho label chứa checkbox dựa trên trạng thái checked của checkbox
-           - Lấy toàn bộ query string hiện tại (phần sau ?) -> params
-           - Xóa tất cả tham số sizes khỏi params
-           - Duyệt qua tất cả checkbox được chọn và thêm tham số sizes vào params
-           - Gọi hàm loadAjax với URL mới được tạo từ pathname và params đã cập nhật
-    *@
+    
     const sizeForm = document.getElementById('sizeFilterForm');
     if (sizeForm) {
         sizeForm.querySelectorAll('.js-size-filter').forEach(cb => {
+            
+            //Khi load page: nếu checkbox đã check → highlight label bằng class 'selected'
             cb.closest('label').classList.toggle('selected', cb.checked);
-            cb.addEventListener('change', () => {
-                cb.closest('label').classList.toggle('selected', cb.checked);
 
+            cb.addEventListener('change', () => {
+
+                //Toggle class 'selected' trên label tương ứng với trạng thái checkbox
+                cb.closest('label').classList.toggle('selected', cb.checked);
                 const params = new URLSearchParams(window.location.search);
+                // 4c️⃣ Xóa tất cả tham số 'sizes' cũ trong URL
+                // → Đảm bảo URL chỉ chứa các size đang check, không dính size đã uncheck
                 params.delete('sizes');
+
+                //Duyệt tất cả checkbox đang check và thêm vào query string
+                // → URL sẽ chứa tất cả size đang chọn hiện tại
                 sizeForm.querySelectorAll('.js-size-filter:checked')
                     .forEach(i => params.append('sizes', i.value));
 
@@ -263,15 +223,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    @* 
-        Xử lý sự kiện click nút lọc giá
-        1. Lấy thẻ button có id btnPriceFilter
-        2. Gán sự kiện click cho thẻ button
-           - Lấy thẻ form có id priceFilterForm
-           - Lấy toàn bộ query string hiện tại (phần sau ?) -> params
-           - Lấy dữ liệu từ form và cập nhật vào params
-           - Gọi hàm loadAjax với URL mới được tạo từ pathname và params đã cập nhật
-     *@
     const priceBtn = document.getElementById('btnPriceFilter');
     if (priceBtn) {
         priceBtn.addEventListener('click', () => {
@@ -282,20 +233,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    @* 
-        Xử lý sự kiện nhập liệu trong ô tìm kiếm
-        1. Ngăn chặn hành vi submit form mặc định
-        2. Thiết lập bộ đếm thời gian (timer) với độ trễ 400ms
-        3. Mỗi khi người dùng nhập liệu:
-        - Xóa bộ đếm thời gian hiện tại
-        - Thiết lập lại bộ đếm thời gian mới
-        4. Khi bộ đếm thời gian kết thúc (người dùng ngừng nhập liệu trong 400ms):
-        - Lấy toàn bộ query string hiện tại (phần sau ?) -> params
-        - Lấy giá trị tìm kiếm từ ô input, loại bỏ khoảng trắng thừa -> q
-        - Nếu q không rỗng → thêm tham số `query` vào params
-        - Nếu q rỗng → xóa tham số `query` khỏi params
-        - Gọi hàm loadAjax với URL mới được tạo từ pathname và params đã cập nhậ
-    *@
     const searchForm = document.getElementById('searchForm');
     const searchInput = document.getElementById('searchInput');
 
@@ -317,14 +254,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }, delay);
         });
     }
-    @* 
-        Xử lý sự kiện quay lại/tiến tới trang (back/forward)
-        1. Lắng nghe sự kiện popstate trên window
-        2. Khi sự kiện xảy ra, gọi hàm loadAjax với URL hiện tại
-     *@
-    window.addEventListener('popstate', () => {
-        loadAjax(location.pathname + location.search);
-    });
 
     syncSelectedFilters();
 });

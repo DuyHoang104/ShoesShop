@@ -108,49 +108,49 @@
             <p class="card_area">@Model.Description</p>
 
             <form method="post" asp-controller="Cart" asp-action="AddToCart" id="addToCartForm" data-id="@Model.Id">
-            @Html.AntiForgeryToken()
+                @Html.AntiForgeryToken()
 
-            <input type="hidden" name="id" value="@Model.Id" />
-            <!-- ✅ Size options -->
-            <div class="mb-4 mt-4">
-            <h5 class="fw-bold mb-3" style="color: #ffb300;">Available Sizes:</h5>
-            <div class="d-flex flex-wrap justify-content-start gap-4">
-            @{
-                var allSizes = new[] { "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47"};
-                List<string>? availableSizes = (Model.Sizes ?? "")
-                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(s => s.Trim())
-                    .ToList();
-            }
-
-            @foreach (var size in allSizes)
-            {
-                bool isAvailable = availableSizes.Contains(size);
-                <div class="position-relative size-box @(isAvailable ? "available" : "unavailable")" data-size="@size">
-                    <span>@size</span>
-                    @if (!isAvailable)
-                    {
-                        <span class="size-x">×</span>
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div class="mb-4 mt-4">
+                    <h5 class="fw-bold mb-3" style="color: #ffb300;">Available Sizes:</h5>
+                    <div class="d-flex flex-wrap justify-content-start gap-4">
+                    @{
+                        var allSizes = new[] { "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47"};
+                        List<string>? availableSizes = (Model.Sizes ?? "")
+                            .Split(separator: ',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(s => s.Trim())
+                            .ToList();
                     }
-                </div>
-            }
-            </div>
 
-                <input type="hidden" name="size" id="selectedSize" />
-                <div class="card_area d-flex justify-content-between align-items-center">
-                    <div class="product_count">
-                        <span class="inumber-decrement"> <i class="ti-minus"></i></span>
-                        <input class="input-number" type="number"  name="quantity" value="1" min="1" max="@Model.Quantity" required>
-                        <span class="number-increment"> <i class="ti-plus"></i></span>
+                    @foreach (var size in allSizes)
+                    {
+                        bool isAvailable = availableSizes.Contains(size);
+                        <div class="position-relative size-box @(isAvailable ? "available" : "unavailable")" data-size="@size">
+                            <span>@size</span>
+                            @if (!isAvailable)
+                            {
+                                <span class="size-x">×</span>
+                            }
+                        </div>
+                    }
                     </div>
-                    <button type="submit" class="btn_3">Add to cart</button>
-                    <a href="#" class="like_us"><i class="ti-heart"></i></a>
-                </div>
 
-                <div id="sizeError" class="text-danger mt-2" style="display:none;">
-                    Please select a size before adding to cart!
+                    <input type="hidden" name="size" id="selectedSize" />
+
+                    <div class="card_area d-flex justify-content-between align-items-center">
+                        <div class="product_count">
+                            <span class="inumber-decrement"> <i class="ti-minus"></i></span>
+                            <input class="input-number" type="number"  name="quantity" value="1" min="1" max="@Model.Quantity" required>
+                            <span class="number-increment"> <i class="ti-plus"></i></span>
+                        </div>
+                        <button type="submit" class="btn_3">Add to cart</button>
+                        <a href="#" class="like_us"><i class="ti-heart"></i></a>
+                    </div>
+
+                    <div id="sizeError" class="text-danger mt-2" style="display:none;">
+                        Please select a size before adding to cart!
+                    </div>
                 </div>
-            </div>
             </form>
         </div>
     </div>
@@ -373,7 +373,6 @@
             </div>
         </div>
 
-        <!-- ===== IMAGE ZOOM MODAL ===== -->
         <div id="imgZoomModal"
             onclick="closeImgZoom()"
             style="
@@ -419,7 +418,6 @@
 <script src="~/assets/product/js/custom.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@* ==== IMAGE ZOOM STYLES & SCRIPTS ===== *@
 <style>
         keyframes zoomIn {
             from { transform:scale(.85); opacity:0 }
@@ -447,7 +445,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedSizeInput = document.getElementById("selectedSize");
     const sizeBoxes = document.querySelectorAll(".size-box");
 
-    // Restore selected size after login
     const savedSize = sessionStorage.getItem("selectedSize");
     if (savedSize) {
         const box = [...sizeBoxes].find(b => b.dataset.size === savedSize);
@@ -468,18 +465,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 selectedSizeInput.value = "";
                 return;
             }
-
+            //bỏ chọn các size khác, chỉ chọn size hiện tại
             sizeBoxes.forEach(b => b.classList.remove("selected"));
             box.classList.add("selected");
             selectedSizeInput.value = box.dataset.size;
         });
     });
 
-    // Submit handler
     form.addEventListener("submit", async (e) => {
         const size = selectedSizeInput.value;
-
-        // Missing size → Toast
         if (!size) {
             e.preventDefault();
             Swal.fire({
@@ -496,7 +490,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Not logged in → Toast + redirect
         if (!isLoggedIn) {
             e.preventDefault();
 
@@ -522,7 +515,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Confirm add to cart
         e.preventDefault();
 
         const confirmAdd = await Swal.fire({
@@ -545,7 +537,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// Inject custom CSS
 const style = document.createElement("style");
 style.innerHTML = `
 .toast-14 {

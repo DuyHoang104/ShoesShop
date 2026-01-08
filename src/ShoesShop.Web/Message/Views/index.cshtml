@@ -27,15 +27,13 @@
     u = selectedChat?.User;
 }
 
-<!-- Start Content-->
 <div class="container-fluid">
-    <!-- start page title -->
     <div class="row">
         <div class="col-12">
             <div class="page-title-box">
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="javascript: void(0);">Hyper</a></li>
+                        <li class="breadcrumb-item"><a href="javascript: void(0);">Arrisd</a></li>
                         <li class="breadcrumb-item"><a href="javascript: void(0);">Apps</a></li>
                         <li class="breadcrumb-item active">Chat</li>
                     </ol>
@@ -44,10 +42,8 @@
             </div>
         </div>
     </div>
-    <!-- end page title -->
 
     <div class="row">
-        <!-- start chat users-->
         <div class="col-xxl-3 col-xl-6 order-xl-1 d-flex">
             <div class="card flex-fill">
                 <div class="card-body p-0">
@@ -70,8 +66,6 @@
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane show active p-3" id="newpost">
-
-                            <!-- start search box -->
                             <div class="app-search">
                                 <form>
                                     <div class="mb-2 position-relative">
@@ -81,9 +75,6 @@
                                     </div>
                                 </form>
                             </div>
-                            <!-- end search box -->
-
-                            <!-- users -->
                             <div class="row">
                                 <div class="col">
                                     <div data-simplebar="" style="max-height: 550px;">
@@ -121,22 +112,17 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- end users -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- end chat users-->
 
-        <!-- chat area -->
         @await Html.PartialAsync(
         "~/Message/Views/Chat-area.cshtml",
-                ViewData["Messages"] as List<MessageDto>
-                )
-        <!-- end chat area-->
+            ViewData["Messages"] as List<MessageDto>
+        )
 
-        <!-- start user detail -->
         <div class="col-xxl-3 col-xl-6 order-xl-1 order-xxl-2 d-flex">
             <div class="card flex-fill">
                 <div class="card-body">
@@ -187,7 +173,6 @@
                 </div>
             </div>
         </div>
-        <!-- end user detail -->
     </div>
 </div>
 <script>

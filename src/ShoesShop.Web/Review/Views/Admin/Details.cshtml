@@ -1,0 +1,178 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Options
+@using ShoesShop.Domain.Shares.Review.Dtos
+@model ReviewDto
+@inject IOptions<CloudinarySettings> CloudinaryConfig
+
+@{
+    ViewData["Title"] = "Review Details";
+    Layout = "~/Shares/Views/Admin/_LayoutAdmin.cshtml";
+
+    var avatar = Model.User?.AvatarUrl;
+    if (!string.IsNullOrEmpty(avatar) && !avatar.StartsWith("http"))
+    {
+        avatar = $"{CloudinaryConfig.Value.BaseUrl}{avatar}";
+    }
+}
+
+<style>
+.star { color:#f6c343; }
+.review-img {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: zoom-in;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.review-img:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,.35);
+}
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-flex justify-content-between align-items-center">
+                <h4 class="page-title">Review Details</h4>
+                <a asp-action="Index" class="btn btn-light">
+                    <i class="mdi mdi-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body text-center">
+
+                    <img src="@(avatar ?? "/images/default-avatar.png")"
+                         class="rounded-circle mb-2"
+                         style="width:72px;height:72px;object-fit:cover" />
+
+                    <h5 class="mb-0">@Model.User?.UserName</h5>
+                    <small class="text-muted">@Model.User?.Email</small>
+
+                    <hr />
+
+                    <div>
+                        <h3 class="mb-0">@Model.Rating.0</h3>
+                        <div>
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="mdi @(i <= Model.Rating ? "mdi-star" : "mdi-star-outline") star"></i>
+                            }
+                        </div>
+                        <small class="text-muted">Overall Rating</small>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Order Information</h5>
+
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <span class="badge bg-info">
+                                Order #@Model.CreateReview.OrderId
+                            </span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Shipper:</strong>
+                            @Model.CreateReview.ShipperRating ⭐
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Employee:</strong>
+                            @Model.CreateReview.EmployeeRating ⭐
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <h6>Customer Comment</h6>
+                    <p class="mb-0">
+                        @if (string.IsNullOrWhiteSpace(Model.Comment))
+                        {
+                            <span class="text-muted fst-italic">No comment</span>
+                        }
+                        else
+                        {
+                            @Model.Comment
+                        }
+                    </p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+
+                    <h5 class="card-title mb-3">Product Reviews</h5>
+
+                    @if (Model.ProductReview?.Any() == true)
+                    {
+                        foreach (var pr in Model.ProductReview)
+                        {
+                            <div class="border rounded p-3 mb-3">
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong>Product ID: @pr.ProductId</strong>
+                                    <span>
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="mdi @(i <= pr.ProductRating ? "mdi-star" : "mdi-star-outline") star"></i>
+                                        }
+                                    </span>
+                                </div>
+
+                                <p class="mt-2 mb-2">
+                                    @if (string.IsNullOrWhiteSpace(pr.ProductComment))
+                                    {
+                                        <span class="text-muted fst-italic">No comment</span>
+                                    }
+                                    else
+                                    {
+                                        @pr.ProductComment
+                                    }
+                                </p>
+
+                                @if (pr.ImageUrls?.Any() == true)
+                                {
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        @foreach (var img in pr.ImageUrls)
+                                        {
+                                            var fullUrl = img.StartsWith("http")
+                                                ? img
+                                                : img.ToCloudinaryUrl(CloudinaryConfig.Value.BaseUrl);
+
+                                            <img src="@fullUrl"
+                                                 class="review-img"
+                                                 onclick="openImgZoom('@fullUrl')" />
+                                        }
+                                    </div>
+                                }
+
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">No product reviews found.</p>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

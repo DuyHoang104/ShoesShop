@@ -112,7 +112,6 @@ public class ProductController : Controller
         return RedirectToAction("Index", "Product");
     }
 
-
     [HttpGet("Details/{id}")]
     public async Task<IActionResult> Details(int id)
     {
@@ -130,6 +129,7 @@ public class ProductController : Controller
             Description = product.Description,
             Quantity = product.Quantity,
             SaleOff = product.SaleOff,
+            StockStatus = product.StockStatus,
             Status = product.Status,
             Brand = product.Brand,
             Color = product.Color,
@@ -137,7 +137,8 @@ public class ProductController : Controller
             Categories = product.Categories,
             OrderDetails = product.OrderDetails,
             Carts = product.Carts,
-            Images = product.Images
+            Images = product.Images,
+            Reviews = product.Reviews,
         };
 
         return View("~/Product/Views/Admin/apps-ecommerce-products-details.cshtml", productAdminDto);

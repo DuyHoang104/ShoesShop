@@ -23,239 +23,36 @@
 <link rel="stylesheet" href="~/assets/product/css/style.css">
 
 <style>
-    :root {
-        --bg-main: #0e0f13;
-        --bg-card: #161822;
-        --bg-soft: #1f2230;
-        --black: #000;
-        --border-soft: #2b2f40;
-        --text-main: #fff;
-        --text-muted: #9aa0b4;
-        --success: #22c55e;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-    }
-
-    .container {
-        margin-top: 50px;
-    }
-
-    .order-dark {
-        padding: 70px 0;
-    }
-
-    .order-header {
-        text-align: center;
-        margin-bottom: 50px;
-    }
-
-    .order-header h1 {
-        font-size: 32px;
-        font-weight: 800;
-    }
-
-    .order-header p {
-        color: var(--text-muted);
-        font-size: 18px;
-    }
-
-    .dark-card {
-        background: black;
-        border-radius: 18px;
-        padding: 26px;
-        border: 1px solid var(--black);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, .45);
-    }
-
-    .dark-title {
-        font-size: 18px;
-        font-weight: 700;
-        margin-bottom: 18px;
-    }
-
-    .info-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px dashed var(--border-soft);
-    }
-
-    .info-row:last-child {
-        border-bottom: none;
-    }
-
-    .badge-status {
-        padding: 6px 14px;
-        border-radius: 999px;
-        font-size: 13px;
-    }
-
-    .badge-paid {
-        background: rgba(34, 197, 94, .15);
-        color: var(--success);
-    }
-
-    .badge-unpaid {
-        background: rgba(245, 158, 11, .15);
-        color: var(--warning);
-    }
-
-    .order-table {
-        width: 100%;
-        table-layout: fixed;
-        border-collapse: collapse;
-    }
-
-    .order-table th {
-        color: var(--text-muted);
-        font-size: 12px;
-        text-transform: uppercase;
-        padding: 14px 12px;
-        border-bottom: 1px solid var(--border-soft);
-        text-align: left;
-    }
-
-    .order-table td {
-        padding: 18px 12px;
-        font-size: 14px;
-        vertical-align: middle;
-    }
-
-    .order-table th:nth-child(1),
-    .order-table td:nth-child(1) {
-        width: 10%;
-    }
-
-    .order-table th:nth-child(2),
-    .order-table td:nth-child(2) {
-        width: 30%;
-    }
-
-    .order-table th:nth-child(3),
-    .order-table td:nth-child(3) {
-        width: 10%;
-    }
-
-    .order-table th:nth-child(4),
-    .order-table td:nth-child(4) {
-        width: 10%;
-        text-align: center;
-    }
-
-    .order-table th:nth-child(5),
-    .order-table td:nth-child(5),
-    .order-table th:nth-child(6),
-    .order-table td:nth-child(6) {
-        width: 20%;
-        text-align: right;
-    }
-
-    .order-table img {
-        width: 72px;
-        height: 72px;
-        border-radius: 12px;
-        object-fit: cover;
-        border: 1px solid var(--border-soft);
-    }
-
-    .product-name {
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .summary {
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid var(--border-soft);
-    }
-
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-    }
-
-    .summary-total {
-        font-size: 20px;
-        font-weight: 800;
-    }
-
-    .info-row {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px dashed var(--border-soft);
-    }
-
-    .badge-status {
-        display: inline-flex;
-        /* 👈 không cho kéo ngang */
-        align-items: center;
-        justify-content: center;
-        width: fit-content;
-        /* 👈 bao gọn chữ */
-        padding: 6px 14px;
-        border-radius: 999px;
-        font-size: 13px;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-
-
-    .info-row p {
-        margin: 0;
-        color: var(--text-muted);
-        font-size: 14px;
-    }
-
-    /* VALUE WRAPPER */
-    .info-value {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-    }
-
-    .info-row:last-child {
-        border-bottom: none;
-    }
-
-    .info-row p {
-        margin: 0;
-        color: var(--text-muted);
-        font-size: 14px;
-    }
-
-    .info-row span {
-        text-align: right;
-        font-weight: 500;
-        line-height: 1.4;
-        max-height: 42px;
-        overflow: hidden;
-    }
-
-    .badge-status {
-        align-items: center;
-        justify-content: center;
-        width: fit-content;
-        /* 👈 bao gọn chữ */
-        padding: 6px 14px;
-        border-radius: 999px;
-        font-size: 13px;
-        font-weight: 600;
-        white-space: nowrap;
-        text-align: right;
-    }
-
-    media (max-width:768px) {
-
-        .order-table th:nth-child(3),
-        .order-table td:nth-child(3) {
-            display: none;
-        }
-    }
+:root { --bg-main:#0e0f13; --bg-card:#161822; --bg-soft:#1f2230; --black:#000; --border-soft:#2b2f40; --text-main:#fff; --text-muted:#9aa0b4; --success:#22c55e; --warning:#f59e0b; --danger:#ef4444; }
+.container { margin-top:50px; }
+.order-dark { padding:70px 0; }
+.order-header { text-align:center; margin-bottom:50px; }
+.order-header h1 { font-size:32px; font-weight:800; }
+.order-header p { color:var(--text-muted); font-size:18px; }
+.dark-card { background:black; border-radius:18px; padding:26px; border:1px solid var(--black); box-shadow:0 20px 50px rgba(0,0,0,.45); }
+.dark-title { font-size:18px; font-weight:700; margin-bottom:18px; }
+.info-row { display:grid; grid-template-columns:1fr auto; align-items:center; padding:12px 0; border-bottom:1px dashed var(--border-soft); }
+.info-row:last-child { border-bottom:none; }
+.badge-status { display:inline-flex; align-items:center; justify-content:center; width:fit-content; padding:6px 14px; border-radius:999px; font-size:13px; font-weight:600; white-space:nowrap; text-align:right; }
+.badge-paid { background:rgba(34,197,94,.15); color:var(--success); }
+.badge-unpaid { background:rgba(245,158,11,.15); color:var(--warning); }
+.order-table { width:100%; table-layout:fixed; border-collapse:collapse; }
+.order-table th { color:var(--text-muted); font-size:12px; text-transform:uppercase; padding:14px 12px; border-bottom:1px solid var(--border-soft); text-align:left; }
+.order-table td { padding:18px 12px; font-size:14px; vertical-align:middle; }
+.order-table th:nth-child(1), .order-table td:nth-child(1) { width:10%; }
+.order-table th:nth-child(2), .order-table td:nth-child(2) { width:30%; }
+.order-table th:nth-child(3), .order-table td:nth-child(3) { width:10%; }
+.order-table th:nth-child(4), .order-table td:nth-child(4) { width:10%; text-align:center; }
+.order-table th:nth-child(5), .order-table td:nth-child(5), .order-table th:nth-child(6), .order-table td:nth-child(6) { width:20%; text-align:right; }
+.order-table img { width:72px; height:72px; border-radius:12px; object-fit:cover; border:1px solid var(--border-soft); }
+.product-name { font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.summary { margin-top:30px; padding-top:20px; border-top:1px solid var(--border-soft); }
+.summary-row { display:flex; justify-content:space-between; padding:8px 0; }
+.summary-total { font-size:20px; font-weight:800; }
+.info-row p { margin:0; color:var(--text-muted); font-size:14px; }
+.info-value { display:flex; justify-content:flex-end; align-items:center; }
+.info-row span { text-align:right; font-weight:500; line-height:1.4; max-height:42px; overflow:hidden; }
+@@media (max-width:768px) { .order-table th:nth-child(3), .order-table td:nth-child(3) { display:none; } }
 </style>
 
 <section class="breadcrumb breadcrumb_bg">

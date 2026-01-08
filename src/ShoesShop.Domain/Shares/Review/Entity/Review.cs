@@ -1,5 +1,6 @@
 using ShoesShop.Domain.Commons.Entities;
 using ShoesShop.Domain.Shares.Image.Entities;
+using ShoesShop.Domain.Shares.Review.Enums;
 
 namespace ShoesShop.Domain.Shares.Review.Entity;
 
@@ -29,12 +30,27 @@ public class Review : EntityAuditLog<int>
         }
     }
 
+    private ReviewStatus _status;
+    public ReviewStatus Status
+    {
+        get => _status;
+        set
+        {
+            if (!Enum.IsDefined(typeof(ReviewStatus), value))
+            {
+                throw new ArgumentException("Invalid role value.", nameof(value));
+            }
+
+            _status = value;
+        }
+    }
+    
     public object? Metadata { get; set; }
 
     public int? ParentId { get; private set; }
     public Review? Parent { get; private set; }
 
-    private readonly List<Review> _children = new();
+    private readonly List<Review> _children = [];
     public IReadOnlyCollection<Review> Children => _children;
 
     public void AddChild(Review child)
@@ -78,7 +94,7 @@ public class Review : EntityAuditLog<int>
 
         _images.Remove(image);
     }
-
+    
     public Review() { }
 
     public Review(int rating, string comment, object? metadata = null, int? parentId = null)

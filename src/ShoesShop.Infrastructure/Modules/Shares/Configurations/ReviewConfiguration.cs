@@ -27,6 +27,10 @@ namespace ShoesShop.Infrastructure.Modules.Shares.Configurations
                 .WithMany(r => r.Children)
                 .HasForeignKey(r => r.ParentId)
                 .OnDelete(DeleteBehavior.Restrict);
+            
+            builder.Property(x => x.Status)
+                .HasConversion<string>()
+                .IsRequired();
 
             builder.Property(x => x.Metadata)
                 .IsRequired(false)

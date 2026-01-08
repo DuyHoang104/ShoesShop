@@ -3,6 +3,7 @@ using ShoesShop.Domain.Categories.Enums;
 using ShoesShop.Domain.Categories.Services;
 using ShoesShop.Domain.Products.Enums;
 using ShoesShop.Domain.Products.Services;
+using ShoesShop.Domain.Shares.Review.Enums;
 using ShoesShop.Web.Product.Model.User;
 
 namespace ShoesShop.Web.Product.Controllers.User;
@@ -102,11 +103,8 @@ public class ProductController : Controller
     public async Task<IActionResult> Detail(int id)
     {
         var product = await _productService.GetByIdAsync(id);
-
         if (product == null)
-        {
             return View("~/Modules/Users/Home/Views/PageNotFound.cshtml");
-        }
 
         product.Categories = product.Categories
             .Where(c => c.Status == CategoryStatus.Active)

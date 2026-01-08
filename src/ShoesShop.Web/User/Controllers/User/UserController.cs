@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ShoesShop.Crosscutting.Utilities.Attribute;
 using ShoesShop.Domain.Users.Dtos.Commands;
 using ShoesShop.Domain.Users.Enums;
 using ShoesShop.Domain.Users.Services;

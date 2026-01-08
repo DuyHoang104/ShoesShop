@@ -17,6 +17,7 @@ using ShoesShop.Domain.Shares.Review.Dtos;
 using ShoesShop.Domain.Shares.Review.Entity;
 using ShoesShop.Domain.Users.Dtos;
 using ShoesShop.Infrastructure.Data.UOW;
+using ShoesShop.Domain.Shares.Review.Enums;
 
 namespace ShoesShop.Domain.Services.Modules.Products.Services;
 
@@ -118,18 +119,17 @@ public class ProductService : IProductService
         var product = (await _productRepository.GetAllAsync(
             p => p.Id == productId,
             include: q => q.Include(p => p.ProductCategories)
-                        .ThenInclude(pc => pc.Category)
-                        .Include(p => p.Images)
+                            .ThenInclude(pc => pc.Category)
+                            .Include(p => p.Images)
         )).FirstOrDefault();
 
-        if (product == null)
-            return null;
+        if (product == null) return null;
 
-        var reviews = await _reviewRepository.GetAllAsync(
-            r => r.ParentId != null && r.Metadata != null
+        var allReviews = await _reviewRepository.GetAllAsync(
+            r => r.Metadata != null && r.Status == ReviewStatus.Active
         );
 
-        var productReviews = reviews
+        var parsedReviews = allReviews
             .Select(r =>
             {
                 try
@@ -145,51 +145,57 @@ public class ProductService : IProductService
                     if (meta == null || meta.ProductId != productId)
                         return null;
 
-                    return new ProductReviewDto
-                    {
-                        OrderDetailId = meta.OrderDetailId,
-                        ProductId = meta.ProductId,
-                        ProductComment = r.Comment,
-                        ProductRating = r.Rating,
-                        UserId = meta.UserId,
-                        ImageUrls = meta.Images?.Select(i => i.Url).ToList() ?? [],
-                        ImageId = null
-                    };
+                    return new { Review = r, Meta = meta };
                 }
                 catch
                 {
                     return null;
                 }
             })
-            .Where(pr => pr != null)
+            .Where(x => x != null)
             .ToList()!;
 
-        var userId = productReviews.FirstOrDefault()?.UserId;
+        var userIds = parsedReviews.Select(x => x!.Meta.UserId).Distinct().ToList();
+        var users = await _userRepository.GetAllAsync(
+            u => userIds.Contains(u.Id),
+            include: q => q.Include(u => u.Images)
+        );
+        var userDict = users.ToDictionary(u => u.Id);
 
-        var user = userId == null
-            ? null
-            : (await _userRepository.GetAllAsync(
-                u => u.Id == userId.Value,
-                include: q => q.Include(u => u.Images)
-            )).FirstOrDefault();
+        var reviewDtos = parsedReviews.Select(x =>
+        {
+            var r = x!.Review;
+            var meta = x.Meta;
 
-        var userDto = user == null
-            ? new UserDto
+            userDict.TryGetValue(meta.UserId, out var user);
+
+            return new ReviewDto
             {
-                ID = 0,
-                UserName = "Unknown",
-                Email = "Unknown",
-                AvatarUrl = null
-            }
-            : new UserDto
-            {
-                ID = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                AvatarUrl = user.Images?
-                    .OrderByDescending(i => i.Id)
-                    .FirstOrDefault()?.Url
+                Rating = r.Rating,
+                Comment = r.Comment ?? string.Empty,
+                ProductReview =
+                [
+                    new ProductReviewDto
+                    {
+                        OrderDetailId = meta.OrderDetailId,
+                        ProductId = meta.ProductId,
+                        ProductComment = r.Comment,
+                        ProductRating = r.Rating,
+                        UserId = meta.UserId,
+                        ImageUrls = meta.Images?.Select(i => i.Url).ToList() ?? []
+                    }
+                ],
+                User = user == null
+                    ? new UserDto { ID = 0, UserName = "Unknown", Email = "Unknown", AvatarUrl = null }
+                    : new UserDto
+                    {
+                        ID = user.Id,
+                        UserName = user.UserName,
+                        Email = user.Email,
+                        AvatarUrl = user.Images?.OrderByDescending(i => i.Id).FirstOrDefault()?.Url
+                    }
             };
+        }).ToList();
 
         return new ProductDto
         {
@@ -203,28 +209,14 @@ public class ProductService : IProductService
             Color = product.Color,
             Status = product.Status,
             Sizes = product.Sizes,
-            Categories = product.ProductCategories?
-                .Select(pc => new CategoryDto
-                {
-                    Id = pc.Category.Id,
-                    Name = pc.Category.Name,
-                    Status = pc.Category.Status
-                }).ToList() ?? [],
-
-            Images = product.Images?
-                .Select(i => new ImageDto
-                {
-                    Id = i.Id,
-                    Url = i.Url
-                }).ToList() ?? [],
-
-            Reviews = productReviews.Select(pr => new ReviewDto
+            Categories = product.ProductCategories?.Select(pc => new CategoryDto
             {
-                Rating = pr.ProductRating,
-                Comment = pr.ProductComment ?? string.Empty,
-                ProductReview = [pr],
-                User = userDto
-            }).ToList()
+                Id = pc.Category.Id,
+                Name = pc.Category.Name,
+                Status = pc.Category.Status
+            }).ToList() ?? new List<CategoryDto>(),
+            Images = product.Images?.Select(i => new ImageDto { Id = i.Id, Url = i.Url }).ToList() ?? [],
+            Reviews = reviewDtos
         };
     }
 

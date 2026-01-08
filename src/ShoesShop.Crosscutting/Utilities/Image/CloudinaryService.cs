@@ -33,8 +33,9 @@ public class CloudinaryService
         if (file == null || file.Length == 0)
             return null;
 
+        // đọc nội dung của file vào một stream
         await using var stream = file.OpenReadStream();
-
+        // thiết lập các tham số upload
         var uploadParams = new ImageUploadParams
         {
             File = new FileDescription(file.FileName, stream),
@@ -45,10 +46,11 @@ public class CloudinaryService
 
         if (uploadResult.StatusCode != System.Net.HttpStatusCode.OK)
             return null;
-
+        // lấy URL đầy đủ của hình ảnh đã tải lên
         var fullUrl = uploadResult.SecureUrl?.ToString();
-
+        //Xác định vị trí marker /image/upload/ trong URL
         const string marker = "/image/upload/";
+        // tạo URL tương đối bằng cách cắt bỏ phần trước marker
         var index = fullUrl?.IndexOf(marker, StringComparison.Ordinal) ?? -1;
         var relativeUrl = index >= 0
             ? fullUrl.Substring(index + marker.Length)

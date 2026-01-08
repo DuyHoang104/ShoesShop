@@ -7,7 +7,7 @@ using ShoesShop.Domain.Shares.Review.Services;
 using ShoesShop.Web.Review.Dtos;
 using Microsoft.AspNetCore.Authorization;
 
-namespace ShoesShop.Web.Review.Controllers;
+namespace ShoesShop.Web.Review.Controllers.User;
 
 [Route("User/Review")]
 [Authorize(AuthenticationSchemes = "UserScheme", Roles = "Customer")]
@@ -64,7 +64,7 @@ public class ReviewController : Controller
             }).ToList()
         };
 
-        return View("~/Review/Views/CreateReview.cshtml", model);
+        return View("~/Review/Views/User/CreateReview.cshtml", model);
     }
 
     [HttpPost]

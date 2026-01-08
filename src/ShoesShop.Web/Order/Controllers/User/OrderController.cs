@@ -242,7 +242,7 @@ public class OrderController : Controller
     {
         var userId = GetCurrentUserId();
         if (userId == 0) return Unauthorized();
-        var orderUser = await _orderService.GetUserInfoForOrderAsync(userId, orderId);
+        var orderUser = await _orderService.CheckUserInfoForOrderAsync(userId, orderId);
 
         if (!orderUser)
         {
@@ -310,7 +310,7 @@ public class OrderController : Controller
     {
         var userId = GetCurrentUserId();
         if (userId == 0) return Unauthorized();
-        var userInfo = await _orderService.GetUserInfoForOrderAsync(userId, orderId);
+        var userInfo = await _orderService.CheckUserInfoForOrderAsync(userId, orderId);
 
         if (!userInfo)
         {

@@ -49,11 +49,9 @@ public class ChatService : IChatService
         string defaultAvatar;
         string defaultName;
 
-        // 1️⃣ Lấy user/admin
         var sender = await _userRepository.GetByIdAsync(senderId)
             ?? throw new InvalidOperationException($"User {senderId} không tồn tại");
 
-        // 2️⃣ Xác định role + default
         if (senderRole.StartsWith("Admin", StringComparison.OrdinalIgnoreCase))
         {
             defaultName = "Admin";
@@ -65,10 +63,8 @@ public class ChatService : IChatService
             defaultAvatar = "/images/default.png";
         }
 
-        // 3️⃣ Name
         senderName ??= sender.UserName ?? defaultName;
 
-        // 4️⃣ Avatar (LẤY TỪ IMAGE)
         if (string.IsNullOrWhiteSpace(senderAvatar))
         {
             var avatarImage = await _imageUserRepository
@@ -79,11 +75,9 @@ public class ChatService : IChatService
             senderAvatar = avatarImage?.Url ?? defaultAvatar;
         }
 
-        // 5️⃣ Order
         var order = await _orderRepository.GetByIdAsync(orderId)
             ?? throw new InvalidOperationException($"Order {orderId} không tồn tại");
 
-        // 6️⃣ Create message
         var msg = new Message(
             senderId,
             receiverId,
@@ -114,7 +108,6 @@ public class ChatService : IChatService
 
     public async Task<List<OrderDto>> GetAllOrdersFromMessagesAsync()
     {
-        // 1️⃣ Lấy orderId từ messages
         var messages = await _messageRepository.GetAllAsync(
             predicate: m => m.OrderId != null
         );
@@ -127,7 +120,6 @@ public class ChatService : IChatService
         if (orderIds.Count == 0)
             return [];
 
-        // 2️⃣ Lấy orders (KHÔNG include Images)
         var orders = await _orderRepository.GetAllAsync(
             predicate: o => orderIds.Contains(o.Id),
             include: q => q
@@ -137,7 +129,6 @@ public class ChatService : IChatService
                     .ThenInclude(u => u.Addresses)
         );
 
-        // 3️⃣ Gom productIds & userIds
         var productIds = orders
             .SelectMany(o => o.OrderDetails)
             .Select(od => od.Product.Id)
@@ -149,13 +140,11 @@ public class ChatService : IChatService
             .Distinct()
             .ToList();
 
-        // 4️⃣ Load images 1 lần
         var imagesUser = new List<ImageUser>();
         imagesUser.AddRange(await _imageUserRepository.GetAllAsync(x => userIds.Contains(x.OwnerId)));
         var imagesProduct = new List<ImageProduct>();
         imagesProduct.AddRange(await _imageProductRepository.GetAllAsync(x => productIds.Contains(x.OwnerId)));
 
-        // 5️⃣ Map DTO
         return orders.Select(order =>
         {
             decimal total = order.OrderDetails.Sum(od => od.Subtotal);
@@ -246,7 +235,6 @@ public class ChatService : IChatService
         var admin = await _userRepository.GetByIdAsync(adminId)
             ?? throw new Exception("Admin not found");
 
-        // Lấy avatar từ bảng Image
         var avatar = await _imageUserRepository.GetAsync(i =>
             i.OwnerType == OwnerType.User &&
             i.OwnerId == admin.Id

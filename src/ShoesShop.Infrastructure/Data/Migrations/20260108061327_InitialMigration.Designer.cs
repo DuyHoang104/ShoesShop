@@ -12,7 +12,7 @@ using ShoesShop.Infrastructure.Data.Databases.Context;
 namespace ShoesShop.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ShoesShopDBContext))]
-    [Migration("20251230150728_InitialMigration")]
+    [Migration("20260108061327_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -488,6 +488,10 @@ namespace ShoesShop.Infrastructure.Data.Migrations
 
                     b.Property<int>("Rating")
                         .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
